@@ -1,0 +1,404 @@
+/*
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+*/
+
+body {
+    margin: auto;
+    padding: 0;
+    background: #333333;
+    text-align: justify;
+    font-family: Verdana,sans-serif, Arial, Helvetica;
+    font-size: 12px;
+    color: #000000;
+    width: 998px;
+    
+}
+
+h1, h2, h3 {
+    margin-top: 0;
+}
+
+p {
+    margin: 0;
+}
+
+a {
+    color: #333333;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+    color: #ff6600;
+}
+
+a img {
+    border: 1px dashed #aaaaaa;
+}
+
+
+/* Header */
+
+#logo {
+    width: 98%;
+    height: 45px;
+    margin: 0 auto;
+}
+
+#logo h1, #logo p {
+    margin: 0;
+    color: #FFFFFF;
+}
+
+#logo h1 {
+    float: left;
+    padding-top: 10px;
+}
+
+#subtitle {
+	font-size : 12px;
+	color: #cccccc;
+	float: left;
+	margin-top: 22px;
+	margin-left: 10px;
+}
+
+#admin {
+    float: right;
+    padding-top: 20px;
+    padding-right: 20px;
+    font-size: 1.2em;
+}
+
+#logo a {
+    text-decoration: none;
+    color: #FFFFFF;
+}
+/* Menu */
+#menu {
+    width: 98%;
+    height: 32px;
+    margin: 0 auto;
+    background: #c6c6c6;
+}
+
+#menu ul {
+    margin: 0;
+    padding: 0px 20px 0 20px;
+    list-style: none;
+}
+
+#menu li {
+    display: block;
+    float: left;
+    padding: 8px 0px 0 0px;
+}
+
+#menu a {
+    text-decoration: none;
+    font-weight: bold;
+    color: #333333;
+}
+
+#menu a:hover {
+    text-decoration: underline;
+    color: #ff6600;
+}
+
+/* Navigation */
+
+#navigation {
+    margin: 0 auto;
+    background: #c6c6c6;
+    float: left;
+}
+
+/* Command Bar */
+#commandbar {
+    margin: 0 auto;
+    background: #c6c6c6;
+    float: right;
+}
+
+
+/* Page */
+#page {
+    width: 98%;
+    margin: 0 auto;
+    background: #FFFFFF;
+}
+#error {
+	color: red;
+}
+#content {
+    width: 98%;
+    float: left;
+    margin:20px;
+}
+
+#content li {
+   width: 205px;
+   height: 240px;
+   float: left;
+   margin: 5px;
+   list-style-type: none;
+   background: transparent url(/static/images/album_bg2.gif) no-repeat scroll 0 0;
+}
+
+/* Album */
+#album {
+    width: 190px;
+    padding-top: 10px;
+    text-align: center;
+    font-weight : bold;
+}
+#cover {
+    width: 190px;
+}
+#album img {
+    max-width: 160px;
+    max-height: 120px;
+}
+#description {
+    font-weight: normal;
+    font-style: italic;
+}
+
+#desp_admin {
+	cursor: hand;
+	width:100%;
+	text-align: left;
+	border: 1px solid #cccccc;
+	margin-bottom:10px;
+}
+#despeditor {
+	width:100%;
+	text-align: left;
+	border: 1px solid #cccccc;
+}
+#despcontent {
+	width: 98%;
+	margin: 5px;
+}
+
+/* Thumb */
+#thumb {
+    width: 200px;
+    height: 180px;
+    padding: 5px;
+    text-align: center;
+    float: left;
+}
+#thumb img{
+    max-width: 200px;
+    max-height: 160px;
+}
+
+/* Photo */
+#photo {
+    width: 700px;
+    padding: 5px;
+    font-weight : bold;
+    float: left;
+    text-align: center;
+}
+#photo img{
+    max-width: 695px;
+    max-height: 800px;
+}
+
+/* Photo Nav */
+#slider {
+float: right;
+}
+
+/* Photo Nav */
+#photo_nav {
+    width:200px;
+    float: top;
+    border: 2px solid #cccccc;
+    margin: 5px;
+    padding: 5px;
+    text-align: center;
+}
+#photo_nav img {
+    max-width: 60px;
+    max-height: 60px;
+}
+#photo_nav .selected{
+    max-width: 60px;
+    border: 2px solid blue;
+}
+#photo_nav a {
+    color: #ff6600;
+}
+
+/* Informathon */
+#information {
+    width:220px;
+    float: top;
+    text-align: left;
+}
+#filename {
+	width: 140px;
+	float: left;
+	overflow: wrap;
+}
+
+/* Comment */
+#comment {
+	-moz-border-radius-bottomleft:3px;
+	-moz-border-radius-bottomright:3px;
+	-moz-border-radius-topleft:3px;
+	-moz-border-radius-topright:3px;
+    width: 700px;
+    float: left;
+    text-align: left;
+    padding: 10px;
+    border: 1px solid #cccccc;
+    overflow:hidden;
+}
+#addcomment {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ff6600;
+}
+#comment_content {
+overflow-x:hidden;
+overflow-y:auto;
+word-wrap:break-word;
+width: 680px;
+margin: 10px 0px;
+}
+#comment_entry {
+border:1px dotted #60A0C0;
+padding: 5px;
+background-color: #cccccc;
+}
+#comment_entry h3 {
+margin: 5px;
+}
+#comment_entry p {
+margin:0;
+padding:0;
+color: gary;
+}
+
+/* Pager */
+#pager {
+    float: right;
+    margin: 5px 20px 5px 5px;
+    background: #CDEB8B;
+    padding: 0px 10px 0px 10px;
+}
+#pager .alignleft
+{
+    float: left;
+}
+#pager .aligncenter
+{
+    float: left;
+    margin-left: 10px;
+    margin-right: 10px;
+    color: #ff6600;
+}
+#pager .alignright
+{
+    float: right;
+}
+
+
+/* Footer */
+#footer {
+    width: 98%;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+#footer p {
+    margin: 0;
+    text-align: center;
+    font-size: smaller;
+    color: #666666;
+}
+#footer a {
+    color: #ff6600;
+}
+
+
+/* Admin */
+#admin_table {
+border-collapse : collapse;
+background-color:#EAF3FA;
+border: 1px solid #c6d9e9;
+margin-left: 1px;
+float: left;
+}
+#admin_table tr {
+border: 1px solid #c6d9e9;
+}
+#admin_table th {
+text-align : right;
+width : 150px;
+padding : 6px;
+}
+#admin_table td {
+padding-right : 10px;
+}
+#settings_logo {
+float: right;
+color: #CCCCCC;
+font-size: 40px;
+font-weight: bold;
+font-style: italic;
+margin: 20px;
+}
+
+/* Album Manage */
+#albumlist {
+float: left;
+width: 200px;
+height: 400px;
+padding: 5px;
+padding-left: 20px;
+background-color:#EAF3FA;
+border: 1px solid #60a0c0;
+}
+#albumlist p {
+margin-top: 10px;
+margin-bottom: 5px;
+color: #ff6600;
+font-weight: bold;
+}
+#albumselect {
+width: 180px;
+overflow: scroll;
+}
+#albuminfo {
+width:200px;
+margin-top: 10px;
+}
+#albumlist ul{
+    margin: 0px;
+    padding: 0px;
+    list-style: none;
+}
+#albumlist li {
+    display: block;
+    float: top;
+    margin-top: 2px;
+    margin-left: 5px;
+}
+#createalbum {
+border: 1px solid #60a0c0;
+background-color:#cccccc;
+}
+
+#albumsettings {
+float: left;
+padding: 5px;
+border: 1px solid #60a0c0;
+width: 688px;
+height: 400px;
+}
