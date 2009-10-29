@@ -1,0 +1,25 @@
+{%if pager.page_count %}
+<div id="pager">
+<div class="alignleft">	
+    {% if pager.prev %}
+	      <a href="?page=1">最前</a>
+		  {% for i in pager.lead %}
+		  <a href="?page={{i}}">{{i}}</a>
+		  {% endfor %}
+		  &laquo; <a href="?page={{ pager.prev}}">上一页</a>
+	 {% else %} 
+	    &nbsp;  
+	 {% endif %}
+</div>
+<div class="aligncenter">{{pager.page_index}}/{{pager.page_count}}</div>
+<div class="alignright">
+	{% if pager.next %}
+		    <a href="?page={{ pager.next }}">下一页 &raquo;</a>
+			{% for i in pager.follow %}
+		    <a href="?page={{i}}">{{i}}</a>
+			{% endfor %}
+			<a href="?page={{pager.last}}">最后</a>
+	{% endif %}
+</div>
+</div>
+{% endif %}

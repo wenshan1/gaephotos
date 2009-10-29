@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block head_ex %} 
+<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery.blockUI.js"></script>
+<script type="text/javascript">
+
+$(document).ready(function() {
+		var bind_delete = function()
+		{
+			$(".deletecoment").click(function() {
+			var commentid = $(this).attr('name').replace('delete','');
+			$.getJSON("{{gallery_settings.baseurl}}/admin/ajaxaction/?action=deletecomment",
+                    { 'commentid': commentid},
+                  	  function(json){ 
+	                  		if(json.result == 'ok')
+	                  		{
+	                  			buildcomments(json.comments);
+	                  		}
+	                  		else
+	                  		{
+	                  			alert('error: '+json.msg);
+	                  		}
+						});	
+			return false;
+			});
+		};
+		bind_delete();
+		
+{% if users.is_current_user_admin %}
+		
+		$("#desp_admin").click(function() {
+			$("#desp_admin").hide();
+			$("#despcontent").html(($("#desp_admin").html().replace(/(^\s*)|(\s*$)/g, "")));
+			$("#despeditor").show();	    
+        }); 
+        $("#despcancel").click(function() {
+			$("#desp_admin").show();
+			$("#despeditor").hide();	    
+        });
+        $("#despsubmit").click(function() {
+        	var old_desp = $("#desp_admin").html().replace(/(^\s*)|(\s*$)/g, "");
+			$("#desp_admin").show();
+			$("#despeditor").hide();
+			$("#desp_admin").html("正在保存图片说明...")
+			$.getJSON("{{gallery_settings.baseurl}}/admin/ajaxaction/?action=savephotodesp",
+                    { 'photoid': {{photo.id}},
+                      'description': $("#despcontent").val()},
+                  	  function(json){ 
+	                  		if(json.result == 'ok')
+	                  		{
+	                  			$("#desp_admin").html(json.description);
+	                  		}
+	                  		else
+	                  		{
+	                  			alert('error: '+json.msg);
+	                  			$("#desp_admin").html(old_desp);
+	                  		}
+						});	    
+        });
+{% endif %}  
+
+		var buildcomments  = function(comments) {
+			$("#comment_container").html('');
+			$.each( comments, function(i,comment){
+	        	var comment_div = $('<div id="comment_entry" name="comment'+comment.id+'"></div>');
+	                  				
+	       		var p = $('<p>'+(i+1)+'. '+comment.author+' 发表于 '+ comment.date + '</p>');
+	       		if(comment.admin)
+	       		{
+	       		  var ins = $('<ins class="deletecoment" name="delete'+comment.id+'">删除</ins>');
+	       		  p.append(ins);
+	       		}
+				comment_div.append(p);
+				var h3 = $('<h3> <p>'+ comment.content +'</p></h3>');
+				comment_div.append(h3);
+				$("#comment_container").append(comment_div);
+			});
+			bind_delete();
+		};
+		     
+        $("#addcomment").click(function() {
+			$("#addcomment2").show();
+		});
+        
+        $("#submitcomment").click( function() {
+        	var comment = $("#comment_content").val().replace(/(^\s*)|(\s*$)/g, "");
+        	if(comment.length <=0 )
+        	{
+        		alert("请输入评论!");
+        		return false;
+        	}
+        	if(comment.length > 500 )
+        	{
+        		alert("评论不能多于500字!");
+        		return false;
+        	}
+        	var author = $("#comment_author").val().replace(/(^\s*)|(\s*$)/g, "");
+        	if(author.length <= 0)
+        	{
+        		alert("请输入名字");
+        		return false;
+        	}
+        	$.blockUI({message: '<h1>正在提交评论...</h1>', 
+		                css: { border: '1px solid #60a0c0',width:"500px" } 
+		           	});	
+		    $.getJSON("{{gallery_settings.baseurl}}/admin/ajaxaction/?action=addcomment",
+                    { 'photoid': {{photo.id}},
+                      'author': $("#comment_author").val(),
+                      'comment_content' :  $("#comment_content").val() },
+                  	  function(json){ 
+                  	  		$.unblockUI();
+	                  		if(json.result == 'ok')
+	                  		{
+	                  			buildcomments(json.comments);
+	                  		}
+	                  		else
+	                  		{
+	                  			alert('error: '+json.msg);
+	                  		}
+						});
+			return false;
+        });	
+}); 
+</script>
+{% endblock %}
+
+{% block commandbar %}
+		<li>|</li>
+        <li><a href="/showslider/{{album.name}}">查看幻灯片</a></a></li>
+        {% if users.is_current_user_admin %}
+        <li>|</li>
+        <li><a href="/admin/delphoto/{{photo.id}}">删除照片</a></li> 
+        {% endif %}
+{% endblock %}
+   
+{% block page %}
+<div id="page">
+        <!-- start content -->
+        <div id="content">
+             <div id="photo">
+                <a href="/showimage/{{photo.id}}" target="_blank"><img src="/showimage/{{photo.id}}"/></a>
+                <div id="description">
+                	{% if users.is_current_user_admin %}
+                		<div id="desp_admin">
+                	    {% if photo.description %}
+                	    	{{photo.description}}
+                	    {% else %}
+                	    	添加说明
+                	    {% endif %}
+                	    </div>
+                	    <div id="despeditor" style="display: none;">
+							<textarea id="despcontent" rows="2">{{photo.description}}</textarea>
+							<div>
+							<input type="button" value="保存" name="保存" id="despsubmit"/>
+							<input type="button" value="取消" name="取消" id="despcancel"/>
+							</div>
+						</div> 
+                	{% else %}
+                	{{photo.description|linebreaks}}
+                	{% endif %}
+				</div>
+             </div>
+             <div id="slider">
+	             <div id="photo_nav">
+	             	<div>
+	             	 {% if prevphoto %}
+		             <a href="/{{album.name}}/{{prevphoto.name}}"><img src="/thumb/{{prevphoto.id}}.png"/></a>
+		             {% endif %}
+	             	 <img src="/thumb/{{photo.id}}.png" class="selected"/>
+	             	 {% if nextphoto %}
+		             <a href="/{{album.name}}/{{nextphoto.name}}"><img src="/thumb/{{nextphoto.id}}.png"/></a>
+		             {% endif %}
+		            </div>
+		            <div> 
+	             	 {% if prevphoto %}
+		             <a href="/{{album.name}}/{{prevphoto.name}}">上一张</a> 
+		             {% endif %} 
+		             {{current}}/{{total}}  
+		             {% if nextphoto %}
+		             <a href="/{{album.name}}/{{nextphoto.name}}">下一张</a>
+		             {% endif %} 
+		            </div> 
+	             </div>
+	             <div id="information">
+		             <table>
+		             <tr><td>文件名:</td><td><div id="filename">{{photo.name}}</div></td></tr>
+		             <tr><td>添加者:</td><td>{{photo.owner}}</td></tr>
+		             <tr><td>类型:</td><td>{{photo.contenttype}}</td></tr>
+		             <tr><td>尺寸:</td><td>{{photo.width}}x{{photo.height}}</td></tr>
+		             <tr><td>大小:</td><td>{{photo.size|filesizeformat}}</td></tr>
+		             <tr><td>修改时间:</td><td>{{photo.updatedate|date:"Y-m-d H:i"}} GMT</td></tr>
+		             <tr><td>图片网址:</td><td><input value="{{gallery_settings.baseurl}}/showimage/{{photo.id}}" type="text" /></td></tr>
+		             </table>
+	             </div>
+             </div>
+             <div id="comment">
+             <form method="post" id="comment_form">
+             <div id="addcomment">点我添加评论(最多500字):</div>
+             <div id="addcomment2" style="display:none;">
+             <div>名字: <input name="comment_author" id="comment_author" value="{{users.get_current_user.nickname}}" type="text" /> 
+             <button id="submitcomment">提交</button></div>
+             <div><textarea name="comment_content" id="comment_content" rows="4" maxlength="500"></textarea></div>
+             </div>
+             </form>
+             <div id="comment_container">
+             {% for comment in photo.Comments %}
+             	<div id="comment_entry" name="comment{{comment.id}}">
+                	<p>{{forloop.counter}}.  {{comment.author}} 发表于 {{comment.date|date:"Y-m-d H:i"}} GMT 
+                	{% if users.is_current_user_admin %} <ins name="delete{{comment.id}}" class="deletecoment">删除</ins> {%endif%}</p>
+        			<h3> {{comment.content|linebreaks}}</h3>
+        		</div>
+             {% endfor %}
+             </div>
+             </div>
+         </div>
+        <!-- end content -->
+    <div style="clear: both;">&nbsp;</div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load ccfilters %}
+
+{% block commandbar %}
+{% endblock %}
+  
+{% block page %}
+<div id="page">
+        {% include 'pager.html' %}
+        <!-- start content -->
+        <div id="content">
+        {% for album in albums %}
+         <li><div id="album">
+            <div><a href="/{{album.name}}">{{album.name|truncate_chinese_words:20}}({{album.photoCount}})</a>
+            {% if not album.public %} (不公开) {% endif %}
+            </div>
+            <div>{{album.updatedate|date:"Y-m-d"}}</div>
+            <div id="cover"><a href="/{{album.name}}"><img src="/thumb/{{album.coverPhotoID}}.png"/></a></div>
+            <div id="description">{{album.description|truncate_chinese_words:30}}</div>
+         </div> </li>
+         {% endfor %}
+         </div>
+        <!-- end content -->
+        {% include 'pager.html' %}
+    <div style="clear: both;">&nbsp;</div>
+</div>
+{% endblock %}

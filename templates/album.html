@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load ccfilters %}
+
+{% block commandbar %}
+        <li>|</li>
+        <li><a href="/showslider/{{album.name}}">查看幻灯片</a></a></li>
+{% endblock %}
+   
+{% block page %}
+<div id="page">
+        {% include 'pager.html' %}
+        <!-- start content -->
+        <div id="content">
+        {% for photo in photos %}
+         <div id="thumb">
+            <a href="/{{album.name}}/{{photo.name}}"><img src="/thumb/{{photo.id}}.png"/></a>
+            <div id="description">{{photo.description|truncate_chinese_words:30}}</div>
+         </div>
+         {% endfor %}
+         </div>
+        <!-- end content -->
+        {% include 'pager.html' %}
+    <div style="clear: both;">&nbsp;</div>
+</div>
+{% endblock %}
