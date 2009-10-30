@@ -249,7 +249,8 @@ def ajaxAction(request):
             album = id and Album.GetAlbumByID(id)
             if album:
                 albumname = ccEscape(request.GET.get('albumname',None))
-                description = ccEscape(request.GET.get('description',None))
+                description = ccEscape(request.GET.get('description',None))  
+                coverphotoid = long(request.GET.get('coverphotoid',0))
                 public = request.GET.get("public")
                 if public == "true":
                     public = True
@@ -260,6 +261,9 @@ def ajaxAction(request):
                 album.description = description
                 album.public = public
                 album.save()
+                if coverphotoid:
+                    album.SetCoverPhoto(coverphotoid)
+                    
                 return returnjson({"result":"ok",
                                    "album":Album2Dict(album),
                                    }, resp)
