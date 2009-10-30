@@ -23,9 +23,9 @@ showalbum = function(album){
 		   $("#"+album.id).html(album.name+"(不公开)");
 		}
 		$("#cover_img").attr('src','{{gallery_settings.baseurl}}/thumb/'+album.coverphotoid+'.png');
-		buildCoverList(album.photoslist);
+		buildCoverList(album.photoslist, album.coverphotoid);
 }; 
-var buildCoverList  = function(coverphtotlist) {
+var buildCoverList  = function(coverphtotlist, coverphotoid) {
 	$('#coverphoto_select').html('');
 	
     $.each( coverphtotlist , function(i,photoid){                           
@@ -33,14 +33,18 @@ var buildCoverList  = function(coverphtotlist) {
         var img = $('<img src="{{gallery_settings.baseurl}}/thumb/'+photoid+'.png"/>');
         option.append(photoid);
         option.append(img);
+        if(coverphotoid == photoid)
+        {
+        	option.attr('selected',true);
+        }
         $('#coverphoto_select').append(option);
     });
     $("#coverphoto_select").find("option").click(function(){
     	$("#cover_img").attr('src','{{gallery_settings.baseurl}}/thumb/'+$(this).val()+'.png');
     });
     $("#coverphoto_select").keyup(function(){
-    	var t=$(this).children("[selected]").val()
-    	$("#cover_img").attr('src','{{gallery_settings.baseurl}}/thumb/'+t+'.png');
+    	var photoid=$(this).children("[selected]").val();
+    	$("#cover_img").attr('src','{{gallery_settings.baseurl}}/thumb/'+photoid+'.png');
     });
 };
 $(document).ready(function() {
@@ -74,7 +78,8 @@ $(document).ready(function() {
                   $.getJSON("{{gallery_settings.baseurl}}/admin/ajaxaction/?action=savealbum",
                     { 'albumid': $('#albumid').val(),'albumname': $('#name').val(), 
                     'description': $('#description').val(), 
-                    'public': $("#public").attr('checked')},
+                    'public': $("#public").attr('checked'),
+                    'coverphotoid': $("#coverphoto_select").children("[selected]").val()},
                   	function(json){ 
 	                  	 $("#page").unblock();
 	                  	 if (json.result=='ok') {
