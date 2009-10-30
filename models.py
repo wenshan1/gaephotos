@@ -58,6 +58,7 @@ class Album(CCPhotoModel):
     createdate = db.DateTimeProperty(auto_now_add=True)
     updatedate = db.DateTimeProperty(auto_now=True)
     photoslist = db.ListProperty(long)
+    coverphotoid = db.IntegerProperty()
         
     @staticmethod
     def GetAlbumByID(id):
@@ -87,9 +88,15 @@ class Album(CCPhotoModel):
     
     @property
     def coverPhotoID(self):
+        if self.coverphotoid:
+            return self.coverphotoid
         if self.photoslist:
             return self.photoslist[0]
         return None
+    
+    def SetCoverPhoto(self,photoid):
+        self.coverphotoid = photoid
+        self.put()
     
     def GetPhotos(self):
         photos = Photo.all().filter("album =", self).order("-updatedate")

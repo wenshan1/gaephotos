@@ -28,7 +28,22 @@ $(document).ready(function() {
 		bind_delete();
 		
 {% if users.is_current_user_admin %}
-		
+		$("#setcover").click(function() {
+			$.getJSON("{{gallery_settings.baseurl}}/admin/ajaxaction/?action=savephotodesp",
+                    { 'photoid': {{photo.id}},
+                      'albumid': {{photo.album.id}}},
+                      function(json){ 
+                            if(json.result == 'ok')
+                            {
+                                alert('设置封面成功');
+                            }
+                            else
+                            {
+                                alert('error: '+json.msg);
+                            }
+                        });     
+		});
+		 
 		$("#desp_admin").click(function() {
 			$("#desp_admin").hide();
 			$("#despcontent").html(($("#desp_admin").html().replace(/(^\s*)|(\s*$)/g, "")));
@@ -131,6 +146,8 @@ $(document).ready(function() {
         {% if users.is_current_user_admin %}
         <li>|</li>
         <li><a href="/admin/delphoto/{{photo.id}}">删除照片</a></li> 
+        <li>|</li>
+        <li><a id="setcover">设为相册封面</a></li> 
         {% endif %}
 {% endblock %}
    
