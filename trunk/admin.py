@@ -215,9 +215,25 @@ def ajaxAction(request):
             return returnjson({"result":"error",
                            "msg":ccEscape("你没有权限")}, resp)
         
+        if action == "setcoverphoto":
+            albumid = long(request.GET.get('albumid',0))
+            album = albumid and Album.get_by_id(albumid)
+            if album:
+                id = long(request.GET.get('photoid',0))
+                photo = id and Photo.GetPhotoByID(id)
+                if photo:
+                    album.SetCoverPhoto(photo.id)
+                    return returnjson({"result":"ok",
+                                       }, resp)
+                else:
+                    return returnjson({"result":"error",
+                                       "msg":ccEscape("没有这张相片"),
+                                       }, resp)
+            else:
+                return returnjson({"result":"error",
+                                   "msg":ccEscape("没有这个相册")}, resp)
         
-        
-        if action == "getalbum":
+        elif action == "getalbum":
             albumname = ccEscape(request.GET.get('albumname',None))
             album = albumname and Album.GetAlbumByName(albumname)
             if album:

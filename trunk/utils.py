@@ -33,7 +33,8 @@ def Album2Dict(album):
             "public":album.public,
             "createdate":format_date(album.createdate),
             "updatedate":format_date(album.updatedate),
-            "photoslist":album.photoslist, }
+            "photoslist":album.photoslist, 
+            "coverphotoid": album.coverPhotoID,}
     
 def buildComments(comments):
     li = []
