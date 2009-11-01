@@ -1,3 +1,5 @@
+{% load cctags %}
+
 /* Demo Note:  This demo uses a FileProgress class that handles the UI for displaying the file name and percent complete.
 The FileProgress class is not part of SWFUpload.
 */
@@ -16,13 +18,13 @@ function fileDialogStart() {
 	var container=document.getElementById("upload_thumbs_container");
 	container.innerHTML = "";
 	var container=document.getElementById("fsUploadProgress");
-	container.innerHTML = '<span class="legend">上传图片队列</span>';
+	container.innerHTML = '<span class="legend">{% translate "Photos Queue" %}</span>';
 }   
    
 function fileQueued(file) {
 	try {
 		var progress = new FileProgress(file, this.customSettings.progressTarget);
-		progress.setStatus("Pending...");
+		progress.setStatus("{% translate 'Pending...' %}");
 		progress.toggleCancel(true, this);
 
 	} catch (ex) {
@@ -84,7 +86,7 @@ function fileDialogComplete(numFilesSelected, numFilesQueued) {
 				albumselect.disabled = true;
 				this.addPostParam("albumname",albumname);
 				var status = document.getElementById("divStatus");
-				status.innerHTML = "正在上传照片到相册 [" + albumname + "] 0/" + numFilesSelected;
+				status.innerHTML = "{% translate 'Photos are uploading to album' %} [" + albumname + "] 0/" + numFilesSelected;
 				successcount = 0;
 				
 				this.startUpload();
@@ -103,7 +105,7 @@ function uploadStart(file) {
 		we can do is say we are uploading.
 		 */
 		var progress = new FileProgress(file, this.customSettings.progressTarget);
-		progress.setStatus("Uploading...");
+		progress.setStatus("{% translate 'Uploading...' %}");
 		progress.toggleCancel(true, this);
 	}
 	catch (ex) {}
@@ -117,7 +119,7 @@ function uploadProgress(file, bytesLoaded, bytesTotal) {
 
 		var progress = new FileProgress(file, this.customSettings.progressTarget);
 		progress.setProgress(percent);
-		progress.setStatus("Uploading...");
+		progress.setStatus("{% translate 'Uploading...' %}");
 	} catch (ex) {
 		this.debug(ex);
 	}
@@ -140,7 +142,7 @@ function uploadSuccess(file, serverData) {
 			}
 			successcount++;
 			var status = document.getElementById("divStatus");
-			status.innerHTML = "正在上传照片到相册 [" + albumname + "] " +
+			status.innerHTML = "{% translate 'Photos are uploading to album' %} [" + albumname + "] " +
 				successcount + "/" + numFiles;
 		}
 		else
@@ -154,7 +156,7 @@ function uploadSuccess(file, serverData) {
 		this.debug(ex);
 		progress.setError();
 		progress.toggleCancel(false);
-		progress.setStatus("上传错误");
+		progress.setStatus("{% translate 'Upload Failed' %}");
 	}
 }
 
@@ -235,6 +237,6 @@ function queueComplete(numFilesUploaded) {
 	var status = document.getElementById("divStatus");
 	var albumselect = document.getElementById("albumsSelect");
 	albumname = albumselect.value;
-	status.innerHTML = '已经上传 ' + successcount + ' 张照片' + '到相册 <a target="_blank" href="/' + albumname + '">' + albumname + '</a>';
+	status.innerHTML = successcount + ' {% translate "张照片已经上传到相册" %} <a target="_blank" href="/' + albumname + '">' + albumname + '</a>';
 	albumselect.disabled = false;
 }

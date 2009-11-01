@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% load ccfilters %}
+{% load cctags %}
 
 {% block commandbar %}
         <li>|</li>
-        <li><a href="/showslider/{{album.name}}">查看幻灯片</a></a></li>
+        <li><a href="/showslider/{{album.name}}">{% translate "Slide Show" %}</a></a></li>
 {% endblock %}
    
 {% block page %}

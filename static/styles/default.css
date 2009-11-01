@@ -135,7 +135,7 @@ a img {
 #content {
     width: 98%;
     float: left;
-    margin:20px;
+    margin:10px;
 }
 
 #content li {
@@ -212,6 +212,7 @@ a img {
 /* Photo Nav */
 #slider {
 float: right;
+width: 240px;
 }
 
 /* Photo Nav */
@@ -383,6 +384,7 @@ margin-top: 10px;
     margin: 0px;
     padding: 0px;
     list-style: none;
+    text-align: left;
 }
 #albumlist li {
     display: block;

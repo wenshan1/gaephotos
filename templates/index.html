@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load ccfilters %}
+{% load cctags %}
 
 {% block commandbar %}
 {% endblock %}
@@ -12,7 +13,7 @@
         {% for album in albums %}
          <li><div id="album">
             <div><a href="/{{album.name}}">{{album.name|truncate_chinese_words:20}}({{album.photoCount}})</a>
-            {% if not album.public %} (不公开) {% endif %}
+            {% if not album.public %} ({% translate "private" %}) {% endif %}
             </div>
             <div>{{album.updatedate|date:"Y-m-d"}}</div>
             <div id="cover"><a href="/{{album.name}}"><img src="/thumb/{{album.coverPhotoID}}.png"/></a></div>

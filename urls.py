@@ -9,6 +9,7 @@ urlpatterns = patterns('views',
 )
 
 urlpatterns += patterns('admin',
+    (r'^localjavascript/(?P<scriptname>[\S]+?).js','localjavascript'),
     (r'^login/$', 'login'),
     (r'^logout/$', 'logout'),
     (r'^admin/uploadphoto/$', 'swfuploadphoto'),

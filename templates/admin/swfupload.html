@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% load cctags %}
 
 {% block ex_navigation %} 
 <li>&gt;&gt;</li>
-<li><a href="/admin/uploadphoto">上传照片</a> </li>
+<li><a href="/admin/uploadphoto">{% translate "Add Photos" %}</a> </li>
 {% endblock %}
 
 {% block commandbar %}
@@ -14,7 +15,7 @@
 <script type="text/javascript" src="/static/swfupload/swfupload.js"></script>
 <script type="text/javascript" src="/static/swfupload/swfupload.queue.js"></script>
 <script type="text/javascript" src="/static/swfupload/fileprogress.js"></script>
-<script type="text/javascript" src="/static/swfupload/handlers.js"></script>
+<script type="text/javascript" src="/localjavascript/handlers.js"></script>
 <script type="text/javascript">
 		var swfu;
 
@@ -39,7 +40,7 @@
 				button_width: "120",
 				button_height: "29",
 				button_placeholder_id: "spanButtonPlaceHolder",
-				button_text: '<span class="size12">选择相片上传</span>',
+				button_text: '<span class="size12">{% translate "Select Photos" %}</span>',
 				button_text_style: ".size16 { font-size: 12; }",
 				button_text_left_padding: 20,
 				button_text_top_padding: 5,
@@ -66,28 +67,28 @@
 	<form id="form1" action="" method="post" enctype="multipart/form-data">
 		<p></p>
 		{% if albums.count %}
-			<div id="div_selectphoto">请选择相册先: <select id="albumsSelect">
+			<div id="div_selectphoto">{% translate "Select Album" %}: <select id="albumsSelect">
 	        {% for album in albums %}
-		    <option value="{{album.name}}">{{album.name}}{% if not album.public %}(不公开){% endif %}</option>
+		    <option value="{{album.name}}">{{album.name}}{% if not album.public %}({% translate "private" %}){% endif %}</option>
 		    {% endfor %}
 	  		</select>
 	  		</div>
 			<div id="div_button">
 				<span id="spanButtonPlaceHolder"></span>
-				<input id="btnCancel" type="button" value="全部取消" onclick="swfu.cancelQueue();" disabled="disabled" style="margin-left: 2px; font-size: 8pt; height: 29px;" />
+				<input id="btnCancel" type="button" value="{% translate 'Cancel All' %}" onclick="swfu.cancelQueue();" disabled="disabled" style="margin-left: 2px; font-size: 8pt; height: 29px;" />
 			</div>
 			<div id="divStatus"></div>
 			<div style="clear: both;">&nbsp;</div>
 			<div class="fieldset flash" id="fsUploadProgress">
-			<span class="legend">上传图片队列</span>
+			<span class="legend">{% translate 'Photos Queue' %}</span>
 			</div>
 			<div id="upload_thumbs" class="fieldset flash">
-			<span class="legend">缩略图</span>
+			<span class="legend">{% translate 'Thumbs' %}</span>
 			<div id="upload_thumbs_container"></div>
 			</div>
 			
   		{% else %}
-  			<a href="/admin/album">请新建相册先</a>
+  			<a href="/admin/album">{% translate 'Create Album' %}</a>
   		{% endif %}
   		<div style="clear: both;">&nbsp;</div>
 	</form>
