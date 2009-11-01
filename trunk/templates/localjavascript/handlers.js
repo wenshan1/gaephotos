@@ -237,6 +237,6 @@ function queueComplete(numFilesUploaded) {
 	var status = document.getElementById("divStatus");
 	var albumselect = document.getElementById("albumsSelect");
 	albumname = albumselect.value;
-	status.innerHTML = successcount + ' {% translate "张照片已经上传到相册" %} <a target="_blank" href="/' + albumname + '">' + albumname + '</a>';
+	status.innerHTML = successcount + ' {% translate "Photos are uploaded to album" %} <a target="_blank" href="/' + albumname + '">' + albumname + '</a>';
 	albumselect.disabled = false;
 }
