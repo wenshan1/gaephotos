@@ -13,6 +13,7 @@ from django.utils.html import escape
 from django.utils import text,simplejson
 from django.shortcuts import render_to_response
 
+from cc_addons.language import translate 
 from settings import *
 from models import *
 from utils import *
@@ -24,7 +25,7 @@ def logout(request):
     return HttpResponseRedirect(users.create_logout_url(request.META.get("HTTP_REFERER","/")))
 
 def adminerror(request):
-    return returnerror("404 查无此人,地址不存在")
+    return returnerror(translate("Room 404, nobody living here"))
   
 def savephoto2DB(binary,album,filename, description, contenttype, owner):
     img = images.Image(binary)
@@ -52,6 +53,10 @@ def savephoto2DB(binary,album,filename, description, contenttype, owner):
         pass
     return photo
 
+
+def localjavascript(request, scriptname):
+    return render_to_javasript('localjavascript/%s.js'%scriptname,{})
+
 #@requires_site_admin 
 # FIXME: swfupload can not pass users cookie in firefox, so the
 # is_current_user_admin return False in the swfupload request always  
@@ -65,14 +70,14 @@ def swfuploadphoto(request):
                 
                 filedata = request.FILES.get("Filedata",None)
                 if not filedata:
-                    return returnjson({"result":ccEscape("没有文件")}, resp)
+                    return returnjson({"result":ccEscape(translate("no upload file"))}, resp)
                 
                 img_binary = filedata["content"]
                 if not img_binary:
-                    return returnjson({"result":ccEscape("没有图片数据")}, resp)
+                    return returnjson({"result":ccEscape(translate("no image data"))}, resp)
                 
                 if len(img_binary) > 1024*1024:
-                    return returnjson({"result":ccEscape("文件大小超过 1M 限制")}, resp)
+                    return returnjson({"result":ccEscape(translate("file size exceed 1M"))}, resp)
                 
                 filename = request.POST.get("Filename")
                 if filename != filedata['filename']:
@@ -89,16 +94,16 @@ def swfuploadphoto(request):
                 
                 contenttype = getImageType(img_binary)
                 if contenttype.find('image')==-1:
-                    return returnjson({"result":ccEscape("不支持的文件格式")}, resp)
+                    return returnjson({"result":ccEscape(translate("unsupported file type"))}, resp)
                 
                 album = Album.GetAlbumByName(albumname)
                 if not album:
-                    return returnjson({"result":ccEscape("找不到相册 %s"%albumname)}, resp)
+                    return returnjson({"result":ccEscape("%s %s"%(translate("Album does not exist"),albumname))}, resp)
                 
                 
                 photo = savephoto2DB(img_binary,album,filename, description, contenttype, owner)
                 if not photo:
-                    return returnjson({"result":ccEscape("数据库错误")}, resp)
+                    return returnjson({"result":ccEscape(translate("Database error"))}, resp)
                 logging.info('%s saved to DB'%filename)
                 
                 res = {}
@@ -109,7 +114,7 @@ def swfuploadphoto(request):
         if checkAuthorization():
             albums = Album.all()
         else:
-            return returnerror("你没有上传权限")
+            return returnerror(translate("You are not authorized to upload"))
         
         content = {
                    "albums": albums,
@@ -131,7 +136,7 @@ def delphoto(request, photoid):
         else:
             return HttpResponseRedirect(str(u"/%s"%(photo.album.name)))
         
-    return returnerror("照片不存在")
+    return returnerror(translate("Photo does not exist"))
 
 def defaultSettings():
     global gallery_settings
@@ -165,7 +170,7 @@ def settings(request):
         elif default:
             defaultSettings()
         elif clear:
-            logging.info("清空数据")
+            logging.info("clean all data")
             for comment in Comment.all():
                 comment.delete()
             for photo in Photo.all():
@@ -197,10 +202,10 @@ def ajaxAction(request):
                 photo = Photo.get_by_id(photoid)
                 if not photo:
                     return returnjson({"result":"error",
-                           "msg":ccEscape("没有这张照片")}, resp)
+                           "msg":ccEscape(translate("Photo does not exist"))}, resp)
                 if not photo.album.public and not checkAuthorization():
                     return returnjson({"result":"error",
-                           "msg":ccEscape("你没有权限访问这张照片")}, resp)
+                           "msg":ccEscape(translate("You are not authorized to access this photo"))}, resp)
                 
                 photo.AddComment(author, comment_content)
                 logging.info( buildComments(photo.GetComments()) )
@@ -209,11 +214,11 @@ def ajaxAction(request):
         
             else:
                 return returnjson({"result":"error",
-                           "msg":ccEscape("请填写名字和评论内容")}, resp)
+                           "msg":ccEscape(translate("Pls input name and content"))}, resp)
         
         if not checkAuthorization():
             return returnjson({"result":"error",
-                           "msg":ccEscape("你没有权限")}, resp)
+                           "msg":ccEscape(translate("You are not authorized"))}, resp)
         
         if action == "setcoverphoto":
             albumid = long(request.GET.get('albumid',0))
@@ -227,11 +232,11 @@ def ajaxAction(request):
                                        }, resp)
                 else:
                     return returnjson({"result":"error",
-                                       "msg":ccEscape("没有这张相片"),
+                                       "msg":ccEscape(translate("Photo does not exist")),
                                        }, resp)
             else:
                 return returnjson({"result":"error",
-                                   "msg":ccEscape("没有这个相册")}, resp)
+                                   "msg":ccEscape(translate("Album does not exist"))}, resp)
         
         elif action == "getalbum":
             albumname = ccEscape(request.GET.get('albumname',None))
@@ -242,7 +247,7 @@ def ajaxAction(request):
                                    }, resp)
             else:
                 return returnjson({"result":"error",
-                                   "msg":ccEscape("没有这个相册")}, resp)
+                                   "msg":ccEscape(translate("Album does not exist"))}, resp)
                 
         elif action == "savealbum":
             id = long(request.GET.get('albumid',0))
@@ -269,7 +274,7 @@ def ajaxAction(request):
                                    }, resp)
             else:
                 return returnjson({"result":"error",
-                                   "msg":ccEscape("没有这个相册")}, resp)
+                                   "msg":ccEscape(translate("Album does not exist"))}, resp)
                 
         elif action == "clearalbum":
             id = long(request.GET.get('albumid',0))
@@ -283,7 +288,7 @@ def ajaxAction(request):
                                    }, resp)
             else:
                 return returnjson({"result":"error",
-                                   "msg":ccEscape("没有这个相册")}, resp)
+                                   "msg":ccEscape(translate("Album does not exist"))}, resp)
                 
         elif action == "deletealbum":
             id = long(request.GET.get('albumid',0))
@@ -300,7 +305,7 @@ def ajaxAction(request):
                                    }, resp)
             else:
                 return returnjson({"result":"error",
-                                   "msg":ccEscape("没有这个相册")}, resp)
+                                   "msg":ccEscape(translate("Album does not exist"))}, resp)
                 
         elif action == "savephotodesp":
             id = long(request.GET.get('photoid',0))
@@ -314,7 +319,7 @@ def ajaxAction(request):
                                    }, resp)
             else:
                 return returnjson({"result":"error",
-                                   "msg":ccEscape("没有这张照片")}, resp)
+                                   "msg":ccEscape(translate("Photo does not exist"))}, resp)
                 
         elif action == "deletecomment":
             id = long(request.GET.get('commentid',0))
@@ -330,7 +335,7 @@ def ajaxAction(request):
                          "comments": buildComments(photo.GetComments())}, resp)
             else:
                 return returnjson({"result":"error",
-                                   "msg":ccEscape("没有这条评论")}, resp)
+                                   "msg":ccEscape(translate("Comment does not exist"))}, resp)
             
         return returnjson({"result":"error",
                            "msg":ccEscape("no action")}, resp)
@@ -353,7 +358,7 @@ def albummanage(request):
             new_description = ccEscape(request.POST.get("new_description"))
             
             if Album.CheckAlbumExist(new_name):
-                return returnerror("同名的相册已存在")
+                return returnerror(translate("Album exist with this name"))
             
             album = Album()
             album.name = new_name

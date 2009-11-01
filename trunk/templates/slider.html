@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load ccfilters %}
+{% load cctags %}
 
 {% block head_ex %} 
 <!--link rel="stylesheet" href="/static/galleriffic/css/basic.css" type="text/css" /-->
@@ -40,12 +41,12 @@ $(document).ready(function() {
 					loadingContainerSel:       '#loading',
 					renderSSControls:          true,
 					renderNavControls:         true,
-					playLinkText:              'Play Slideshow',
-					pauseLinkText:             'Pause Slideshow',
-					prevLinkText:              '&lsaquo; Previous Photo',
-					nextLinkText:              'Next Photo &rsaquo;',
-					nextPageLinkText:          'Next &rsaquo;',
-					prevPageLinkText:          '&lsaquo; Prev',
+					playLinkText:              '{% translate "Play Slideshow" %}',
+					pauseLinkText:             '{% translate "Pause Slideshow" %}',
+					prevLinkText:              '&lsaquo; {% translate "Prev photo" %}',
+					nextLinkText:              '{% translate "Next photo" %} &rsaquo;',
+					nextPageLinkText:          '{% translate "Next Page" %} &rsaquo;',
+					prevPageLinkText:          '&lsaquo; {% translate "Prev Page" %}',
 					enableHistory:             true,
 					autoStart:                 false,
 					syncTransitions:           true,
@@ -55,7 +56,7 @@ $(document).ready(function() {
 							.eq(prevIndex).fadeTo('fast', onMouseOutOpacity).end()
 							.eq(nextIndex).fadeTo('fast', 1.0);
 
-						$('#page').find('div.photo-index').html('Photo '+ (nextIndex+1) +' of '+ this.data.length);
+						$('#page').find('div.photo-index').html('{% translate "Photo" %} '+ (nextIndex+1) +'/'+ this.data.length);
 					},onPageTransitionOut:       function(callback) {
 						$('#thumbs ul.thumbs').fadeTo('fast', 0.0, callback);
 					},
@@ -131,7 +132,7 @@ $(document).ready(function() {
         
 {% block ex_navigation %} 
 <li>&gt;&gt;</li>
-<li><a href="">查看幻灯片</a></li>
+<li><a href="">{% translate "Slide Show" %}</a></li>
 {% endblock %}
         
 {% block commandbar %}
@@ -145,7 +146,7 @@ $(document).ready(function() {
             <div class="navigation-container">
             	<div id="thumbs" class="navigation">
             		<div style="clear: both;"></div>
-            		<a class="pageLink prev" style="visibility: hidden;" href="#" title="Previous Page"></a>
+            		<a class="pageLink prev" style="visibility: hidden;" href="#" title="{% translate 'Prev Page' %}"></a>
             		<ul class="thumbs noscript">
 						{% for photo in photos %}
           				<li>
@@ -158,7 +159,7 @@ $(document).ready(function() {
           				</li>
             			{% endfor %}
 					</ul>
-					<a class="pageLink next" style="visibility: hidden;" href="#" title="Next Page"></a>
+					<a class="pageLink next" style="visibility: hidden;" href="#" title="{% translate 'Next Page' %}"></a>
             	</div>
             	
             </div>

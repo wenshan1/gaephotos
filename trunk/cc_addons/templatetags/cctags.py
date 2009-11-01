@@ -4,6 +4,8 @@ from django import template
 from django.template import Node,NodeList,resolve_variable
 from django.template import TemplateSyntaxError,VariableDoesNotExist
 
+from translate import do_translate
+
 register = template.Library()
 
 class IfCmpNode(Node):
@@ -83,3 +85,7 @@ def iflt(parser, token):
 @register.tag
 def ifle(parser, token):
     return do_ifcompare(parser, token, OPERATOR_LE)
+
+@register.tag
+def translate(parser, token):
+    return do_translate(parser, token)

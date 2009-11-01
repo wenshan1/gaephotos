@@ -12,7 +12,10 @@ from google.appengine.api import memcache
 from django.shortcuts import render_to_response
 from django.utils import simplejson
 from django.utils.html import escape
+from django.template import loader
+from django.http import HttpResponse
 
+from cc_addons.language import translate 
 from models import *
    
 def unescape(html):
@@ -23,6 +26,12 @@ def format_date(dt):
 
 def ccEscape(str):
     return unicode(escape(str),'utf-8').strip()
+
+def render_to_javasript(*args, **kwargs):
+    resp = HttpResponse()
+    resp.headers['Content-Type'] = "text/javascript"
+    resp.write(loader.render_to_string(*args, **kwargs))
+    return resp
 
 def Album2Dict(album):
     if not album:
@@ -110,7 +119,7 @@ def requires_site_admin(method):
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         if not users.is_current_user_admin():
-            return returnerror("你没有权限")
+            return returnerror(translate("You are not authorized"))
         else:
             return method(self, *args, **kwargs)
     return wrapper        

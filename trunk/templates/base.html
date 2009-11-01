@@ -1,3 +1,5 @@
+{% load cctags %}
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <!--
 Design by Free CSS Templates
@@ -25,20 +27,21 @@ Released   : 20071001
     <h1><a href="{{gallery_settings.baseurl}}">{{gallery_settings.title}}</a></h1> 
     <div id="subtitle"> {{gallery_settings.description}}</div>
     <div id="admin">
+            <a href="/?lang=zh-cn">中文版</a> | <a href="/?lang=en-us">English Version</a> | 
     		{% if users.is_current_user_admin %}
-            <a href="/admin/settings">Admin</a> | 
+            <a href="/admin/settings">{% translate "Admin" %}</a> | 
             {% endif %}
             {% if users.get_current_user %}
-            <a href="/logout">Logout</a>
+            <a href="/logout">{% translate "Logout" %}</a>
             {% else %}
-            <a href="/login">Login</a>
+            <a href="/login">{% translate "Login" %}</a>
             {% endif %}
     </div>
 </div>
 <div id="menu">
    <div id="navigation">
        <ul>
-        <li><a href="{{gallery_settings.baseurl}}">全部相册</a></li> 
+        <li><a href="{{gallery_settings.baseurl}}">{% translate "All Albums" %}</a></li> 
         {% if album %}
         <li>&gt;&gt;</li>
         <li><a href="{{gallery_settings.baseurl}}/{{album.name}}">{{album.name}}</a> </li>
@@ -55,9 +58,9 @@ Released   : 20071001
    <div id="commandbar">
        <ul>
        {% if users.is_current_user_admin %}
-        <li><a href="/admin/uploadphoto">添加照片</a></li> 
+        <li><a href="/admin/uploadphoto">{% translate "Add Photos" %}</a></li> 
         <li>|</li>
-        <li><a href="/admin/album">相册管理</a></li>
+        <li><a href="/admin/album">{% translate "Albums Manage" %}</a></li>
        {% endif %}
         {% block commandbar %} 
         {% endblock %}
