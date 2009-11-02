@@ -118,14 +118,32 @@ class CCPager(object):
 def requires_site_admin(method):
     @wraps(method)
     def wrapper(self, *args, **kwargs):
-        if not users.is_current_user_admin():
+        if not checkAuthorization():
             return returnerror(translate("You are not authorized"))
         else:
             return method(self, *args, **kwargs)
     return wrapper        
         
 def checkAuthorization():
-    return users.is_current_user_admin()        
+    user = users.get_current_user()
+    if not user:
+        return False
+    
+    email = user.email()
+    adminlist = gallery_settings.adminlist.split(";")
+    try:
+        adminlist.remove("")
+    except:
+        pass
+    
+    for admin in adminlist:
+        if admin == email:
+            return True
+    
+    if users.is_current_user_admin():
+        return True
+    
+    return False
         
 
 def returnerror(msg):
@@ -143,7 +161,8 @@ def render_to_response_with_users_and_settings(templatefile, content):
     if not gallery_settings:
         InitGallery()
     
-    gallery_settings.baseurl = "http://"+os.environ["HTTP_HOST"]    
+    gallery_settings.baseurl = "http://"+os.environ["HTTP_HOST"]
+    users.is_admin = checkAuthorization()    
     content["users"] = users
     content["gallery_settings"] = gallery_settings
     return render_to_response(templatefile, content) 

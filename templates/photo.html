@@ -28,7 +28,7 @@ $(document).ready(function() {
 		};
 		bind_delete();
 		
-{% if users.is_current_user_admin %}
+{% if users.is_admin %}
 		$("#setcover").click(function() {
 			$.getJSON("{{gallery_settings.baseurl}}/admin/ajaxaction/?action=savephotodesp",
                     { 'photoid': {{photo.id}},
@@ -144,7 +144,7 @@ $(document).ready(function() {
 {% block commandbar %}
 		<li>|</li>
         <li><a href="/showslider/{{album.name}}">{% translate "Slide Show" %}</a></a></li>
-        {% if users.is_current_user_admin %}
+        {% if users.is_admin %}
         <li>|</li>
         <li><a href="/admin/delphoto/{{photo.id}}">{% translate "Delete this photo" %}</a></li> 
         <li>|</li>
@@ -159,7 +159,7 @@ $(document).ready(function() {
              <div id="photo">
                 <a href="/showimage/{{photo.id}}" target="_blank"><img src="/showimage/{{photo.id}}"/></a>
                 <div id="description">
-                	{% if users.is_current_user_admin %}
+                	{% if users.is_admin %}
                 		<div id="desp_admin">
                 	    {% if photo.description %}
                 	    	{{photo.description}}
@@ -225,7 +225,7 @@ $(document).ready(function() {
              {% for comment in photo.Comments %}
              	<div id="comment_entry" name="comment{{comment.id}}">
                 	<p>{{forloop.counter}}.  {{comment.author}} {% translate 'posted on' %} {{comment.date|date:"Y-m-d H:i"}} GMT 
-                	{% if users.is_current_user_admin %} <ins name="delete{{comment.id}}" class="deletecoment"> {% translate 'Delete' %}</ins> {%endif%}</p>
+                	{% if users.is_admin %} <ins name="delete{{comment.id}}" class="deletecoment"> {% translate 'Delete' %}</ins> {%endif%}</p>
         			<h3> {{comment.content|linebreaks}}</h3>
         		</div>
              {% endfor %}
