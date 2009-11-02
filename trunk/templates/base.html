@@ -28,7 +28,7 @@ Released   : 20071001
     <div id="subtitle"> {{gallery_settings.description}}</div>
     <div id="admin">
             <a href="/?lang=zh-cn">中文版</a> | <a href="/?lang=en-us">English Version</a> | 
-    		{% if users.is_current_user_admin %}
+    		{% if users.is_admin %}
             <a href="/admin/settings">{% translate "Admin" %}</a> | 
             {% endif %}
             {% if users.get_current_user %}
@@ -57,7 +57,7 @@ Released   : 20071001
    
    <div id="commandbar">
        <ul>
-       {% if users.is_current_user_admin %}
+       {% if users.is_admin %}
         <li><a href="/admin/uploadphoto">{% translate "Add Photos" %}</a></li> 
         <li>|</li>
         <li><a href="/admin/album">{% translate "Albums Manage" %}</a></li>

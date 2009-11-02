@@ -45,6 +45,11 @@ $(document).ready(function() {
             </td>
        </tr>
        <tr>
+            <th scope="row">{% translate "Admins" %}:</th>
+            <td><textarea id="adminlist" name="adminlist" wrap="soft" rows="3" cols="25">{{gallery_settings.adminlist}}</textarea>
+            </td>
+       </tr>
+       <tr>
             <th scope="row">{% translate "Cache Stats" %}:</th>
             <td>hits: {{cachestats.hits}}  | misses: {{cachestats.misses}}  | 
             	items: {{cachestats.items}}  | byte_hits/bytes: {{cachestats.byte_hits}}/{{cachestats.bytes}}  

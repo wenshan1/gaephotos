@@ -17,6 +17,7 @@ class GallerySettings(db.Model):
     description = db.StringProperty(multiline=True)
     albums_per_page = db.IntegerProperty(default=8)
     thumbs_per_page = db.IntegerProperty(default=12)    
+    adminlist = db.StringProperty(default="")
     
     def save(self):
         self.put()

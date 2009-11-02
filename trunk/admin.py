@@ -158,6 +158,7 @@ def settings(request):
         description = ccEscape(request.POST.get("description"))
         albums_per_page = int(request.POST.get("albums_per_page"))
         thumbs_per_page = int(request.POST.get("thumbs_per_page"))
+        adminlist = ccEscape(request.POST.get("adminlist"))
         save = (request.POST.get("save"))
         default = (request.POST.get("default"))
         clear = (request.POST.get("clear"))
@@ -168,6 +169,7 @@ def settings(request):
             gallery_settings.description = description
             gallery_settings.albums_per_page = albums_per_page
             gallery_settings.thumbs_per_page = thumbs_per_page
+            gallery_settings.adminlist = adminlist
             gallery_settings.save()
         elif default:
             defaultSettings()
