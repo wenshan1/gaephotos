@@ -34,7 +34,7 @@ def index(request):
     lang = request.GET.get("lang")
     if lang:
         save_current_lang(lang)
-        return HttpResponseRedirect("/")
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER','/'))
          
     if checkAuthorization():
         albums = Album.all()
