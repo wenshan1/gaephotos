@@ -83,6 +83,8 @@ def swfuploadphoto(request):
                 if filename != filedata['filename']:
                     return returnjson({"result":ccEscape("POST filename %s != FILES filename %s" %(filename, filedata['filename'])) }, resp)
                 
+                if filename.find(" ") != -1:
+                    return returnjson({"result":ccEscape(translate("filename can not contain space"))}, resp)
                 filename = ccEscape(filename)               
                 albumname = ccEscape(request.POST.get("albumname"))
                 description = ccEscape(request.POST.get("description",""))
@@ -132,9 +134,9 @@ def delphoto(request, photoid):
         photo2 = Photo.GetPhotoByID(photoslist[index])
         photo.Delete()
         if photo2:
-            return HttpResponseRedirect(str(u"/%s/%s"%(photo.album.name, photo2.name)))
+            return HttpResponseRedirect((u"/%s/%s"%(photo.album.name, photo2.name)).encode("utf-8"))
         else:
-            return HttpResponseRedirect(str(u"/%s"%(photo.album.name)))
+            return HttpResponseRedirect((u"/%s"%(photo.album.name)).encode("utf-8"))
         
     return returnerror(translate("Photo does not exist"))
 

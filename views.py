@@ -37,9 +37,15 @@ def index(request):
         return HttpResponseRedirect(request.META.get('HTTP_REFERER','/'))
          
     if checkAuthorization():
-        albums = Album.all()
+        try:
+            albums = Album.all().order("-updatedate")
+        except:
+            albums = Album.all()
     else:
-        albums = Album.GetPublicAlbums()
+        try:
+            albums = Album.GetPublicAlbums().order("-updatedate")
+        except:
+            albums = Album.GetPublicAlbums()
         
     entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
     
@@ -89,7 +95,7 @@ def photo(request, albumname, photoname):
         author = ccEscape(request.POST.get("comment_author"))
         content = ccEscape(request.POST.get("comment_content"))
         photo.AddComment(author, content)
-        return HttpResponseRedirect("/%s/%s"%(albumname,photoname ))
+        return HttpResponseRedirect((u"/%s/%s"%(albumname,photoname )).encode("utf-8"))
         
     current = album.photoslist.index(photo.id)
     total = album.photoCount
