@@ -2,6 +2,7 @@ from django.conf.urls.defaults import *
 
 urlpatterns = patterns('views',
     (r'^$', 'index'),
+    (r'^search/$', 'search'),
     (r'^showalbum/(?P<albumname>[\S\s]+?)/$', ''),
     (r'^thumb/(?P<photoid>[\S]+?)\.png$', 'showthumb'),
     (r'^showimage/(?P<photoid>[\S]+?)/$', 'showimage'),
