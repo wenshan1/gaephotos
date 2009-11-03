@@ -35,20 +35,23 @@ def index(request):
     if lang:
         save_current_lang(lang)
         return HttpResponseRedirect(request.META.get('HTTP_REFERER','/'))
+    
          
     if checkAuthorization():
         try:
             albums = Album.all().order("-updatedate")
+            entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
         except:
             albums = Album.all()
+            entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
     else:
         try:
             albums = Album.GetPublicAlbums().order("-updatedate")
+            entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
         except:
             albums = Album.GetPublicAlbums()
+            entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
         
-    entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
-    
     content = {"albums":entries,
                "pager": pager}
     return render_to_response_with_users_and_settings("index.html", content)

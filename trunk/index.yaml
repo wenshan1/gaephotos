@@ -10,27 +10,29 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-# Unused in query history -- copied from input.
+- kind: Album
+  properties:
+  - name: public
+  - name: updatedate
+    direction: desc
+
 - kind: Comment
   properties:
   - name: photo
   - name: date
 
-# Unused in query history -- copied from input.
 - kind: Comment
   properties:
   - name: photo
   - name: date
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Photo
   properties:
   - name: album
   - name: name
   - name: updatedate
 
-# Unused in query history -- copied from input.
 - kind: Photo
   properties:
   - name: album
@@ -38,13 +40,11 @@ indexes:
   - name: updatedate
     direction: desc
 
-# Unused in query history -- copied from input.
 - kind: Photo
   properties:
   - name: album
   - name: updatedate
 
-# Used 124 times in query history.
 - kind: Photo
   properties:
   - name: album
