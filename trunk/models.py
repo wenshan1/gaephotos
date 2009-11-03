@@ -83,6 +83,21 @@ class Album(CCPhotoModel):
         albums = Album.all().filter("public =", public)
         return albums
     
+    @staticmethod
+    def SearchAlbums(searchword):
+        res = []
+        if type(searchword) != unicode:
+            searchword = unicode(searchword,'mbcs')
+        searchword = searchword.lower()
+        for album in Album.all():
+            if album.name.lower().find(searchword) != -1:
+                res.append(album)
+                continue
+            if album.description.lower().find(searchword) != -1:
+                res.append(album)
+                
+        return res
+    
     @property
     def photoCount(self):
         return len(self.photoslist)
@@ -138,6 +153,27 @@ class Photo(CCPhotoModel):
     def GetPhotoByID(id):
         photo = Photo.get_by_id(id)
         return photo
+    
+    @staticmethod
+    def GetPhotoByName(name):
+        q = db.GqlQuery("SELECT * FROM Photo Where name=:1", name)
+        li = q.fetch(1)
+        return li and li[0]
+    
+    @staticmethod
+    def SearchPhotos(searchword):
+        res = []
+        if type(searchword) != unicode:
+            searchword = unicode(searchword,'mbcs')
+        searchword = searchword.lower()
+        for photo in Photo.all():
+            if photo.name.lower().find(searchword) != -1:
+                res.append(photo)
+                continue
+            if photo.description.lower().find(searchword) != -1:
+                res.append(photo)
+                
+        return res
     
     @property
     def isPublic(self):

@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import logging
+import Cookie
 
 import math
 from functools import wraps
+import time
 
 from google.appengine.api import users
 from google.appengine.api import memcache
@@ -32,6 +35,28 @@ def render_to_javasript(*args, **kwargs):
     resp.headers['Content-Type'] = "text/javascript"
     resp.write(loader.render_to_string(*args, **kwargs))
     return resp
+
+# one request one save
+def save_cookie(cookie_dict,path="/"):
+    cookie = Cookie.SimpleCookie()
+    for key in cookie_dict.keys():        
+        cookie[key] = simplejson.dumps(cookie_dict[key])
+        now = time.asctime()
+        cookie[key]['expires'] = now[:-4] + str(int(now[-4:])+1) + ' GMT'
+        cookie[key]['path'] = path
+        
+    print cookie
+    
+def get_cookie(name,default=None):
+    browser_cookie = os.environ.get('HTTP_COOKIE', '')
+    cookie = Cookie.SimpleCookie()
+    cookie.load(browser_cookie)
+    try:
+        value = simplejson.loads(cookie[name].value)
+    except:
+        return default
+    
+    return value
 
 def Album2Dict(album):
     if not album:
@@ -165,6 +190,11 @@ def render_to_response_with_users_and_settings(templatefile, content):
     users.is_admin = checkAuthorization()    
     content["users"] = users
     content["gallery_settings"] = gallery_settings
+    
+    searchword = get_cookie("gaephotos-searchword","")
+    searchmode = get_cookie("gaephotos-searchmode")
+    content["searchword"] = searchword
+    content["searchmode"] = searchmode
     return render_to_response(templatefile, content) 
 
 class ImageMime:

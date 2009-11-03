@@ -3,6 +3,8 @@
 import os
 import logging
 import Cookie
+import time
+
 from django.utils import simplejson
 
 from settings import DEFAULT_LANG
@@ -16,8 +18,7 @@ def get_current_lang():
     try:
         lang = simplejson.loads(cookie[COOKIE_NAME].value)
     except:
-        cookie[COOKIE_NAME] = simplejson.dumps(DEFAULT_LANG)
-        print cookie
+        save_current_lang(DEFAULT_LANG)
         lang = DEFAULT_LANG
     return lang
 
@@ -26,10 +27,11 @@ def save_current_lang(lang):
     if not lang_table.has_key(lang):
         lang = DEFAULT_LANG
         
-    browser_cookie = os.environ.get('HTTP_COOKIE', '')
     cookie = Cookie.SimpleCookie()
-    cookie.load(browser_cookie)
+    now = time.asctime()
     cookie[COOKIE_NAME] = simplejson.dumps(lang)
+    cookie[COOKIE_NAME]['expires'] = now[:-4] + str(int(now[-4:])+1) + ' GMT'
+    cookie[COOKIE_NAME]['path'] = '/'
     print cookie
 
 def find_msg_index(msg):
@@ -53,6 +55,8 @@ def translate(msg):
 lang_table = {
 u"en-us":
 [
+'Album',
+'Photo',
 #base.html
 'All Albums',
 'Admin',
@@ -164,8 +168,8 @@ u"en-us":
 'Get photo error',
 'filename can not contain space',
 'Admins',
-'##Error MSG##',
-'##Error MSG##',
+'no album found',
+'Search',
 '##Error MSG##',
 '##Error MSG##',
 '##Error MSG##',
@@ -176,6 +180,8 @@ u"en-us":
 
 u"zh-cn":
 [
+'相册',
+'照片',
 '全部相册',
 '管理',
 '登出',
@@ -279,8 +285,8 @@ u"zh-cn":
 '获取相片出错',
 '文件名不能包含空白字符',
 '管理员',
-'##出错了##',
-'##出错了##',
+'没有任何相册',
+'搜索',
 '##出错了##',
 '##出错了##',
 '##出错了##',

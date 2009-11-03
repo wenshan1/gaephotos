@@ -83,7 +83,12 @@ def album(request, albumname):
     return render_to_response_with_users_and_settings("album.html", content)
 
 def photo(request, albumname, photoname):
-    album = Album.GetAlbumByName(ccEscape(albumname))
+    if albumname=="search":
+        photo = Photo.GetPhotoByName(photoname)
+        album = photo and photo.album
+    else:    
+        album = Album.GetAlbumByName(ccEscape(albumname))
+        
     if album:
         if not album.public and not checkAuthorization():
             return returnerror(translate("You are not authorized to access this photo"))
@@ -118,6 +123,47 @@ def photo(request, albumname, photoname):
                }
     return render_to_response_with_users_and_settings("photo.html", content)
 
+def search(request):
+    try:
+        page_index = int(request.GET.get('page',1))
+    except:
+        page_index = 1
+        
+
+    if request.POST:
+        searchword = ccEscape(request.POST.get("searchword",""))
+        searchmode = ccEscape(request.POST.get("searchmode"))
+        save_cookie({"gaephotos-searchword":searchword,
+                     "gaephotos-searchmode":searchmode})
+        return HttpResponseRedirect('/search/?page=%d'%page_index)
+    else:
+        searchword = get_cookie("gaephotos-searchword")
+        searchmode = get_cookie("gaephotos-searchmode")
+        searchmode = searchmode or "album"
+    
+  
+    if searchmode == "album":
+        albums = Album.SearchAlbums(searchword)
+        if not checkAuthorization():
+            albums = [album for album in albums if album.public]
+            
+        entries,pager = CCPager(list=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
+        content = {"albums":entries,
+               "pager": pager,
+               "album": {'name':'search'}}
+        return render_to_response_with_users_and_settings("index.html", content)
+    
+    elif searchmode == "photo":
+        photos = Photo.SearchPhotos(searchword)
+        if not checkAuthorization():
+            photos = [photo for photo in photos if photo.album.public]
+            
+        entries,pager = CCPager(list=photos,items_per_page=gallery_settings.thumbs_per_page).fetch(page_index)
+        content = {"photos":entries,
+               "pager": pager,
+               "album": {'name':'search'}}
+        return render_to_response_with_users_and_settings("album.html", content)
+
 def showslider(request, albumname):
     album = Album.GetAlbumByName(ccEscape(albumname))
     if album:
@@ -127,6 +173,13 @@ def showslider(request, albumname):
             photos = album.GetPhotos()
         except:
             photos = album.GetPhotos("")
+    elif albumname == 'search':
+        searchword = get_cookie("gaephotos-searchword","")
+        photos = Photo.SearchPhotos(searchword)
+        if not checkAuthorization():
+            photos = [photo for photo in photos if photo.album.public]
+        album = {'name':'search'}
+
     else:
         return returnerror(translate("Album does not exist"))
             
