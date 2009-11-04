@@ -14,7 +14,7 @@
         <div id="content">
         {% for photo in photos %}
          <div id="thumb">
-            <a href="/{{album.name}}/{{photo.name}}"><img src="/thumb/{{photo.id}}.png"/></a>
+            <a href="/{{photo.album.name}}/{{photo.name}}"><img src="/thumb/{{photo.id}}.png"/></a>
             <div id="description">{{photo.description|truncate_chinese_words:30}}</div>
          </div>
          {% endfor %}

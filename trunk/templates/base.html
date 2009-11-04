@@ -26,7 +26,7 @@ Released   : 20071001
 <div id="logo">
     <h1><a href="{{gallery_settings.baseurl}}">{{gallery_settings.title}}</a></h1> 
     <div id="subtitle"> {{gallery_settings.description}}</div>
-    {% include 'searchbox.html' %}
+    <div id="admin_search">
     <div id="admin">
             <a href="/?lang=zh-cn">中文版</a> | <a href="/?lang=en-us">English Version</a> | 
     		{% if users.is_admin %}
@@ -37,6 +37,8 @@ Released   : 20071001
             {% else %}
             <a href="/login">{% translate "Login" %}</a>
             {% endif %}
+    </div>
+    {% include 'searchbox.html' %}
     </div>
 </div>
 <div id="menu">
