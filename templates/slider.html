@@ -150,7 +150,7 @@ $(document).ready(function() {
             		<ul class="thumbs noscript">
 						{% for photo in photos %}
           				<li>
-          				<a class="thumb" name="{{photo.id}}" href="{{gallery_settings.baseurl}}/showimage/{{photo.id}}" title="{{photo.name|truncate_chinese_words:40}}">
+          				<a class="thumb" name="{{photo.id}}" href="{{gallery_settings.baseurl}}/showimage/{{photo.id}}/" title="{{photo.name|truncate_chinese_words:40}}">
 							<img src="{{gallery_settings.baseurl}}/thumb/{{photo.id}}.png" alt="{{photo.description|truncate_chinese_words:40}}" />
           				</a>
           				<div class="caption">
