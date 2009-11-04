@@ -143,7 +143,7 @@ $(document).ready(function() {
 
 {% block commandbar %}
 		<li>|</li>
-        <li><a href="/showslider/{{album.name}}">{% translate "Slide Show" %}</a></a></li>
+        <li><a href="/showslider/{{album.name}}/">{% translate "Slide Show" %}</a></a></li>
         {% if users.is_admin %}
         <li>|</li>
         <li><a href="/admin/delphoto/{{photo.id}}">{% translate "Delete this photo" %}</a></li> 
@@ -157,7 +157,7 @@ $(document).ready(function() {
         <!-- start content -->
         <div id="content">
              <div id="photo">
-                <a href="/showimage/{{photo.id}}" target="_blank"><img src="/showimage/{{photo.id}}"/></a>
+                <a href="/showimage/{{photo.id}}/" target="_blank"><img src="/showimage/{{photo.id}}/"/></a>
                 <div id="description">
                 	{% if users.is_admin %}
                 		<div id="desp_admin">
@@ -208,7 +208,7 @@ $(document).ready(function() {
 		             <tr><td>{% translate 'Dimensions' %}:</td><td>{{photo.width}}x{{photo.height}}</td></tr>
 		             <tr><td>{% translate 'Size' %}:</td><td>{{photo.size|filesizeformat}}</td></tr>
 		             <tr><td>{% translate 'Date updated' %}:</td><td>{{photo.updatedate|date:"Y-m-d H:i"}} GMT</td></tr>
-		             <tr><td>{% translate 'Web address' %}:</td><td><input value="{{gallery_settings.baseurl}}/showimage/{{photo.id}}" type="text" /></td></tr>
+		             <tr><td>{% translate 'Web address' %}:</td><td><input value="{{gallery_settings.baseurl}}/showimage/{{photo.id}}/" type="text" /></td></tr>
 		             </table>
 	             </div>
              </div>

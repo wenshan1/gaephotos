@@ -30,12 +30,12 @@ Released   : 20071001
     <div id="admin">
             <a href="/?lang=zh-cn">中文版</a> | <a href="/?lang=en-us">English Version</a> | 
     		{% if users.is_admin %}
-            <a href="/admin/settings">{% translate "Admin" %}</a> | 
+            <a href="/admin/settings/">{% translate "Admin" %}</a> | 
             {% endif %}
             {% if users.get_current_user %}
-            <a href="/logout">{% translate "Logout" %}</a>
+            <a href="/logout/">{% translate "Logout" %}</a>
             {% else %}
-            <a href="/login">{% translate "Login" %}</a>
+            <a href="/login/">{% translate "Login" %}</a>
             {% endif %}
     </div>
     {% include 'searchbox.html' %}
@@ -47,7 +47,7 @@ Released   : 20071001
         <li><a href="{{gallery_settings.baseurl}}">{% translate "All Albums" %}</a></li> 
         {% if album %}
         <li>&gt;&gt;</li>
-        <li><a href="{{gallery_settings.baseurl}}/{{album.name}}">{{album.name}}</a> </li>
+        <li><a href="{{gallery_settings.baseurl}}/{{album.name}}/">{{album.name}}</a> </li>
         {% endif %}
         {% if photo %}
         <li>&gt;&gt;</li>
@@ -61,9 +61,9 @@ Released   : 20071001
    <div id="commandbar">
        <ul>
        {% if users.is_admin %}
-        <li><a href="/admin/uploadphoto">{% translate "Add Photos" %}</a></li> 
+        <li><a href="/admin/uploadphoto/">{% translate "Add Photos" %}</a></li> 
         <li>|</li>
-        <li><a href="/admin/album">{% translate "Albums Manage" %}</a></li>
+        <li><a href="/admin/album/">{% translate "Albums Manage" %}</a></li>
        {% endif %}
         {% block commandbar %} 
         {% endblock %}
