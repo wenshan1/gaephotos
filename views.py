@@ -84,7 +84,7 @@ def album(request, albumname):
 
 def photo(request, albumname, photoname):
     if albumname=="search":
-        photo = Photo.GetPhotoByName(photoname)
+        photo = Photo.GetPhotoByName(ccEscape(photoname))
         album = photo and photo.album
     else:    
         album = Album.GetAlbumByName(ccEscape(albumname))

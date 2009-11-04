@@ -43,7 +43,7 @@ a img {
 
 #logo {
     width: 98%;
-    height: 45px;
+    height: 50px;
     margin: 0 auto;
 }
 
@@ -55,6 +55,7 @@ a img {
 #logo h1 {
     float: left;
     padding-top: 10px;
+    font-size: 2.5em;
 }
 
 #subtitle {
@@ -65,11 +66,24 @@ a img {
 	margin-left: 10px;
 }
 
+#admin_search {
+	float: right;
+	text-align: right;
+	padding-right: 10px;
+}
+
 #admin {
-    float: right;
-    padding-top: 20px;
-    padding-right: 20px;
+    float: top;
     font-size: 1.2em;
+}
+
+#searchbox{
+	float: top;
+	margin: 0; 
+}
+#searchbox form {
+    margin:0;
+    padding:0;
 }
 
 #logo a {
