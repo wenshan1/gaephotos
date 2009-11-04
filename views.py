@@ -51,9 +51,21 @@ def index(request):
         except:
             albums = Album.GetPublicAlbums()
             entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
+    
+    try:
+        latestcomments = Comment.all().order("-date").fetch(gallery_settings.latest_comments_count)    
+    except:
+        latestcomments = Comment.all().fetch(gallery_settings.latest_comments_count)   
+        
+    try:
+        latestphotos = Photo.all().order("-updatedate").fetch(gallery_settings.latest_photos_count) 
+    except:
+        latestphotos = Photo.all().fetch(gallery_settings.latest_photos_count) 
         
     content = {"albums":entries,
-               "pager": pager}
+               "pager": pager,
+               "latestcomments": latestcomments,
+               "latestphotos": latestphotos}
     return render_to_response_with_users_and_settings("index.html", content)
 
 def album(request, albumname):
@@ -199,6 +211,7 @@ def showimage(request, photoid):
                 return returnerror(translate("You are not authorized"))
             
             resp.headers['Content-Type'] = cachedata['Content-Type']
+            resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
             resp.write(cachedata['binary'])
             return resp
         
@@ -207,6 +220,7 @@ def showimage(request, photoid):
                 return returnerror(translate("You are not authorized"))
             
         resp.headers['Content-Type'] = photo.contenttype
+        resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
         resp.write(photo.binary)
         
         cachedata = {'Content-Type':photo.contenttype,
@@ -219,6 +233,7 @@ def showimage(request, photoid):
         result = urlfetch.fetch(url, deadline=10)
         if result.status_code == 200:
             resp.headers['Content-Type'] = result.headers['Content-Type']
+            resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
             resp.write(result.content)
             return resp
         return returnerror(translate("Get photo error"))
@@ -227,6 +242,7 @@ def showthumb(request, photoid):
     resp = HttpResponse()
     try:
         resp.headers['Content-Type'] = "image/png"
+        resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
         
         key = "thumb_%s"%(long(photoid))
         cachedata = memcache.get(key)
@@ -259,6 +275,7 @@ def showthumb(request, photoid):
         result = urlfetch.fetch(url, deadline=10)
         if result.status_code == 200:
             resp.headers['Content-Type'] = result.headers['Content-Type']
+            resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
             resp.write(result.content)
             return resp
         return returnerror(translate("Get photo error"))

@@ -148,6 +148,8 @@ def defaultSettings():
     gallery_settings.description = "Photo gallery based on GAE"
     gallery_settings.albums_per_page = 8
     gallery_settings.thumbs_per_page = 12
+    gallery_settings.latest_photos_count = 9
+    gallery_settings.latest_comments_count = 5
     gallery_settings.save()
     
 @requires_site_admin
@@ -158,6 +160,8 @@ def settings(request):
         description = ccEscape(request.POST.get("description"))
         albums_per_page = int(request.POST.get("albums_per_page"))
         thumbs_per_page = int(request.POST.get("thumbs_per_page"))
+        latest_photos_count = int(request.POST.get("latest_photos_count"))
+        latest_comments_count = int(request.POST.get("latest_comments_count"))
         adminlist = ccEscape(request.POST.get("adminlist"))
         save = (request.POST.get("save"))
         default = (request.POST.get("default"))
@@ -169,6 +173,8 @@ def settings(request):
             gallery_settings.description = description
             gallery_settings.albums_per_page = albums_per_page
             gallery_settings.thumbs_per_page = thumbs_per_page
+            gallery_settings.latest_photos_count = latest_photos_count
+            gallery_settings.latest_comments_count = latest_comments_count
             gallery_settings.adminlist = adminlist
             gallery_settings.save()
         elif default:
@@ -181,6 +187,7 @@ def settings(request):
                 photo.delete()
             for album in Album.all():
                 album.delete()
+            memcache.flush_all()
         elif clearcache:
             memcache.flush_all()
         else:

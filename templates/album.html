@@ -4,7 +4,7 @@
 
 {% block commandbar %}
         <li>|</li>
-        <li><a href="/showslider/{{album.name}}">{% translate "Slide Show" %}</a></a></li>
+        <li><a href="/showslider/{{album.name}}/">{% translate "Slide Show" %}</a></a></li>
 {% endblock %}
    
 {% block page %}
@@ -12,12 +12,16 @@
         {% include 'pager.html' %}
         <!-- start content -->
         <div id="content">
-        {% for photo in photos %}
-         <div id="thumb">
-            <a href="/{{photo.album.name}}/{{photo.name}}"><img src="/thumb/{{photo.id}}.png"/></a>
-            <div id="description">{{photo.description|truncate_chinese_words:30}}</div>
-         </div>
-         {% endfor %}
+        {% if not photos %}
+            {% translate "no photo found" %}
+        {% else %}
+	        {% for photo in photos %}
+	         <div id="thumb">
+	            <a href="/{{photo.album.name}}/{{photo.name}}"><img src="/thumb/{{photo.id}}.png"/></a>
+	            <div id="description">{{photo.description|truncate_chinese_words:30}}</div>
+	         </div>
+	         {% endfor %}
+         {% endif %}
          </div>
         <!-- end content -->
         {% include 'pager.html' %}

@@ -1,0 +1,32 @@
+{% load cctags %}
+<hr/>
+{% if latestcomments %}
+<fieldset id="latest_comment_container">
+<legend class="legend">{% translate "Latest Comments" %}</legend>
+<div>
+{% for comment in latestcomments %}
+<div id="comment_entry" name="comment{{comment.id}}">
+    <p>{{forloop.counter}}. {{comment.author}} {% translate 'posted on'%} 
+    {{comment.date|date:"Y-m-d H:i"}} GMT {% if users.is_admin %} <ins name="delete{{comment.id}}" class="deletecoment"> {% translate 'Delete' %}</ins> {%endif%}
+     </p>
+    <p><a href="/{{comment.photo.album.name}}/{{comment.photo.name}}" target="_blank">[{{comment.photo.name}}]</a>
+    </p>
+    <h3>{{comment.content|linebreaks}}</h3>
+</div>
+{% endfor %}
+</div>
+</fieldset>
+{% endif %}
+
+{% if latestphotos %}
+<fieldset id="latest_photo_container">
+<legend class="legend">{% translate "Latest Photos" %}</legend>
+<div>
+{% for photo in latestphotos %}
+<div id="latest_photo_thumb">
+<a href="/{{photo.album.name}}/{{photo.name}}"><img src="/thumb/{{photo.id}}.png"/></a>
+</div>
+{% endfor %}
+</div>
+</fieldset>
+{% endif %}

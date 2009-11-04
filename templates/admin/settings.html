@@ -45,6 +45,16 @@ $(document).ready(function() {
             </td>
        </tr>
        <tr>
+            <th scope="row">{% translate "Latest Photos Count" %}:</th>
+            <td><input id="latest_photos_count" name="latest_photos_count" type="text" size="20" value="{{gallery_settings.latest_photos_count}}"/>
+            </td>
+       </tr>
+       <tr>
+            <th scope="row">{% translate "Latest Comments Count" %}:</th>
+            <td><input id="latest_comments_count" name="latest_comments_count" type="text" size="20" value="{{gallery_settings.latest_comments_count}}"/>
+            </td>
+       </tr>
+       <tr>
             <th scope="row">{% translate "Admins" %}:</th>
             <td><textarea id="adminlist" name="adminlist" wrap="soft" rows="3" cols="25">{{gallery_settings.adminlist}}</textarea>
             </td>
