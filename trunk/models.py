@@ -16,7 +16,9 @@ class GallerySettings(db.Model):
     owner = db.UserProperty()
     description = db.StringProperty(multiline=True)
     albums_per_page = db.IntegerProperty(default=8)
-    thumbs_per_page = db.IntegerProperty(default=12)    
+    thumbs_per_page = db.IntegerProperty(default=12)  
+    latest_photos_count = db.IntegerProperty(default=9)
+    latest_comments_count = db.IntegerProperty(default=5)
     adminlist = db.StringProperty(default="")
     
     def save(self):
@@ -32,6 +34,9 @@ def InitGallerySettings():
     gallery_settings.description = "Photo gallery based on GAE"
     gallery_settings.albums_per_page = 8
     gallery_settings.thumbs_per_page = 12
+    gallery_settings.latest_photos_count = 9
+    gallery_settings.latest_comments_count = 5
+    gallery_settings.adminlist = ""
     gallery_settings.save()
     return gallery_settings
 
@@ -161,6 +166,10 @@ class Photo(CCPhotoModel):
         return li and li[0]
     
     @staticmethod
+    def GetLatestPhotos(num=gallery_settings.latest_photos_count):
+        return Photo.all().order("-date").fetch(num)
+    
+    @staticmethod
     def SearchPhotos(searchword):
         res = []
         if type(searchword) != unicode:
@@ -219,6 +228,10 @@ class Comment(CCPhotoModel):
     date = db.DateTimeProperty(auto_now_add=True)
     photo = db.ReferenceProperty(Photo)
     content = db.StringProperty(required=True, multiline=True)    
+
+    @staticmethod
+    def GetLatestComments(num=gallery_settings.latest_comments_count):
+        return Comment.all().order("-date").fetch(num)
 
     def Save(self):
         self.put()

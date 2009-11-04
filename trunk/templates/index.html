@@ -15,11 +15,11 @@
         {% else %}
             {% for album in albums %}
              <li><div id="album">
-                <div><a href="/{{album.name}}">{{album.name|truncate_chinese_words:20}}({{album.photoCount}})</a>
+                <div><a href="/{{album.name}}/">{{album.name|truncate_chinese_words:20}}({{album.photoCount}})</a>
                 {% if not album.public %} ({% translate "private" %}) {% endif %}
                 </div>
                 <div>{{album.updatedate|date:"Y-m-d"}}</div>
-                <div id="cover"><a href="/{{album.name}}"><img src="/thumb/{{album.coverPhotoID}}.png"/></a></div>
+                <div id="cover"><a href="/{{album.name}}/"><img src="/thumb/{{album.coverPhotoID}}.png"/></a></div>
                 <div id="description">{{album.description|truncate_chinese_words:30}}</div>
              </div> </li>
              {% endfor %}
@@ -27,6 +27,8 @@
          </div>
         <!-- end content -->
         {% include 'pager.html' %}
+        <div style="clear: both;"></div>
+        {% include 'latest.html' %}
     <div style="clear: both;">&nbsp;</div>
 </div>
 {% endblock %}

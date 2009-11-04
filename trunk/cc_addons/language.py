@@ -39,7 +39,7 @@ def find_msg_index(msg):
     for lang in lang_table.keys():
         index = 0
         for m in lang_table[lang]:
-            if str(m) == str(msg):
+            if unicode(m, 'utf-8') == msg:
                 return index
             index += 1
 
@@ -170,11 +170,11 @@ u"en-us":
 'Admins',
 'no album found',
 'Search',
-'##Error MSG##',
-'##Error MSG##',
-'##Error MSG##',
-'##Error MSG##',
-'##Error MSG##',
+'no photo found',
+'Latest Comments',
+'Latest Photos',
+'Latest Photos Count',
+'Latest Comments Count',
 '##Error MSG##',
 ],
 
@@ -287,11 +287,11 @@ u"zh-cn":
 '管理员',
 '没有任何相册',
 '搜索',
-'##出错了##',
-'##出错了##',
-'##出错了##',
-'##出错了##',
-'##出错了##',
+'没有任何照片',
+'最新评论',
+'最新照片',
+'显示的最新照片数',
+'显示的最新评论数',
 '##出错了##',
 '##出错了##',
 ],              
