@@ -15,7 +15,7 @@
 	        {{ for photo in photos: }}
 	         <div id="thumb">
 	            <a href="/{{=photo.album.name}}/{{=photo.name}}"><img src="/thumb/{{=photo.id}}.png"/></a>
-	            <div id="description">{{=ccutils.ccTruncateCnWords(photo.description,30)}}</div>
+	            <div id="description">{{<<(ccutils.ccTruncateCnWords(photo.description,30))}}</div>
 	         </div>
 	         {{ pass }}
          {{ pass }}

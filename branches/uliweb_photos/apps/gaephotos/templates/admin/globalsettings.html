@@ -1,0 +1,82 @@
+{{ extend "base.html" }}
+ 
+{{ block head_ex }} 
+<script type="text/javascript" src="{{=url_for_static('js/jquery-1.3.2.min.js')}}"></script>
+<script type="text/javascript" src="{{=url_for_static('js/jquery.blockUI.js')}}"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$('#clear').click(function() { 
+			if(! confirm('{{=_("Are you seriously destroy all data?") }}'))
+			{
+				return false;
+			}
+    		$("#page").block({message: '<h1>{{=_("Data erasing...")}}</h1>', 
+		                css: { border: '1px solid #60a0c0',width:"500px" } 
+		            });		  
+    	});    	
+});              
+</script>
+{{ end }}
+
+ 
+{{ block page }}
+<div id="page">
+    <form method="post" id="settings_form">
+    <table id="admin_table">
+        <tr>
+            <th scope="row">{{=_("Site Title")}}:</th>
+            <td><input id="title" name="title" type="text" size="45" value="{{=gallery_settings.title}}"/>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">{{=_("Site Description")}}:</th>
+            <td><input id="description"  name="description" type="text" size="45" value="{{=gallery_settings.description}}"/>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">{{=_("Albums per page")}}:</th>
+            <td><input id="albums_per_page" name="albums_per_page" type="text" size="20" value="{{=gallery_settings.albums_per_page}}"/>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">{{=_("Thumbs per page")}}:</th>
+            <td><input id="thumbs_per_page" name="thumbs_per_page" type="text" size="20" value="{{=gallery_settings.thumbs_per_page}}"/>
+            </td>
+       </tr>
+       <tr>
+            <th scope="row">{{=_("Latest Photos Count")}}:</th>
+            <td><input id="latest_photos_count" name="latest_photos_count" type="text" size="20" value="{{=gallery_settings.latest_photos_count}}"/>
+            </td>
+       </tr>
+       <tr>
+            <th scope="row">{{=_("Latest Comments Count")}}:</th>
+            <td><input id="latest_comments_count" name="latest_comments_count" type="text" size="20" value="{{=gallery_settings.latest_comments_count}}"/>
+            </td>
+       </tr>
+       <tr>
+            <th scope="row">{{=_("Admins")}}:</th>
+            <td><textarea id="adminlist" name="adminlist" wrap="soft" rows="3" cols="25">{{=gallery_settings.adminlist}}</textarea>
+            </td>
+       </tr>
+       <tr>
+            <th scope="row">{{=_("Cache Stats")}}:</th>
+            <td>hits: {{=cachestats.hits}}  | misses: {{=cachestats.misses}}  | 
+                items: {{=cachestats['items']}}  | byte_hits/bytes: {{=cachestats.byte_hits}}/{{=cachestats.bytes}}  
+                 
+            </td>
+       </tr>
+       <tr>
+            <th scope="row"><input id="save" type="submit" value="{{=_('Save Settings')}}" name="save"/></th>
+            <td>
+            <input id="default" type="submit" value="{{=_('Reset Settings')}}" name="default"/>
+            <input id="clearcache" type="submit" value="{{=_('Clean Caches')}}" name="clearcache"/>
+            <input id="clear" type="submit" value="{{=_('Destroy All Data')}}" name="clear"/>
+            ({{=_('Caution, photos can not be recovered')}})
+            </td>
+       </tr>
+    </table>
+    </form>
+    <div id="settings_logo">GAE Photos</div>
+    <div style="clear: both;">&nbsp;</div>
+</div>
+{{ end }}

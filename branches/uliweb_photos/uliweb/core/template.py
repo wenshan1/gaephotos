@@ -392,6 +392,7 @@ def _prepare_run(vars, env, out):
     return e
     
 def _run(code, locals=None, env=None, filename='template'):
+    from SimpleFrame import Dummy
     out = Out()
     locals = locals or {}
     env = env or {}
@@ -399,6 +400,13 @@ def _run(code, locals=None, env=None, filename='template'):
     
     if isinstance(code, (str, unicode)):
         code = compile(code, filename, 'exec')
+        defined = e['defined']
+        names = code.co_names
+        for name in names:
+            if not name in e:
+                if not defined(name):
+                    if not name in __builtins__:
+                        e[name] = Dummy
     exec code in e
     return out.getvalue()
 

@@ -1,4 +1,21 @@
 # -*- coding: utf-8 -*-
+#===============================================================================
+# Copyright 2009 Chao Chen
+# Licensed under the Apache License, Version 2.0 (the "License"); 
+# you may not use this file except in compliance with the License. 
+# You may obtain a copy of the License at 
+# http://www.apache.org/licenses/LICENSE-2.0 
+# Unless required by applicable law or agreed to in writing, 
+# software distributed under the License is distributed on an "AS IS" BASIS, 
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+# See the License for the specific language governing permissions and 
+# limitations under the License. 
+#
+# Author:  CChen <deepgully@gmail.com> 
+# Purpose: model defines for GAEPhotos
+# Created: 11/15/2009
+#===============================================================================
+
 import os
 import logging
 from datetime import datetime
@@ -204,15 +221,19 @@ class Photo(CCPhotoModel):
         self.album.put()
         
     def Delete(self):
+        memcache.delete("image_%s"%self.id)
+        memcache.delete("thumb_%s"%self.id)
         if self.id in self.album.photoslist:
             self.album.photoslist.remove(self.id)
             self.album.put()
+        if self.album.coverphotoid == self.id:
+            self.album.coverphotoid = 0
+            self.album.put()
+            
         for comment in self.Comments:
             comment.delete()
         self.delete()
-        memcache.delete("image_%s"%self.id)
-        memcache.delete("thumb_%s"%self.id)
-        
+
     def GetComments(self):
         comments = Comment.all().filter("photo =", self)
         return comments

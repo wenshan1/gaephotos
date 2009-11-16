@@ -1,8 +1,8 @@
 {{ extend "base.html" }}
 
 {{ block head_ex }} 
-<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
-<script type="text/javascript" src="/static/js/jquery.blockUI.js"></script>
+<script type="text/javascript" src="{{=url_for_static('js/jquery-1.3.2.min.js')}}"></script>
+<script type="text/javascript" src="{{=url_for_static('js/jquery.blockUI.js')}}"></script>
 <script type="text/javascript">
 
 $(document).ready(function() {
@@ -29,7 +29,7 @@ $(document).ready(function() {
 		
 {{ if users.is_admin(): }}
 		$("#setcover").click(function() {
-			$.getJSON("{{=gallery_settings.baseurl}}/admin/ajaxaction/?action=savephotodesp",
+			$.getJSON("{{=gallery_settings.baseurl}}/admin/ajaxaction/?action=setcoverphoto",
                     { 'photoid': {{=photo.id}},
                       'albumid': {{=photo.album.id}}},
                       function(json){ 
@@ -87,7 +87,7 @@ $(document).ready(function() {
 	       		  p.append(ins);
 	       		}
 				comment_div.append(p);
-				var h3 = $('<h3> <p>'+ comment.content +'</p></h3>');
+				var h3 = $('<h3> <p>'+ (comment.content) +'</p></h3>');
 				comment_div.append(h3);
 				$("#comment_container").append(comment_div);
 			});
@@ -161,7 +161,7 @@ $(document).ready(function() {
                 	{{ if users.is_admin(): }}
                 		<div id="desp_admin">
                 	    {{ if photo.description: }}
-                	    	{{=photo.description}}
+                	    	{{<<(photo.description)}}
                 	    {{ else: }}
                 	    	{{=_("add description") }}
                 	    {{ pass }}
@@ -174,7 +174,7 @@ $(document).ready(function() {
 							</div>
 						</div> 
                 	{{ else: }}
-                	{{<<ccutils.ccBreakLines(photo.description)}}
+                	{{<<(photo.description)}}
                 	{{ pass }}
 				</div>
              </div>
@@ -234,7 +234,7 @@ $(document).ready(function() {
              	<div id="comment_entry" name="comment{{=comment.id}}">
                 	<p>{{=counter}}.  {{=comment.author}} {{=_('posted on') }} {{=comment.date.strftime("%Y-%m-%d %H:%M")}} GMT 
                 	{{ if users.is_admin(): }} <ins name="delete{{=comment.id}}" class="deletecoment"> {{=_('Delete') }}</ins> {{pass}}</p>
-        			<h3> {{<<ccutils.ccBreakLines(comment.content)}}</h3>
+        			<h3> {{<<(ccutils.ccBreakLines(comment.content))}}</h3>
         		</div>
              {{ pass }}
              </div>

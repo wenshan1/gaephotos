@@ -1,13 +1,13 @@
 {{ extend "base.html" }}
 
 {{ block head_ex }} 
-<!--link rel="stylesheet" href="/static/galleriffic/css/basic.css" type="text/css" /-->
-<link rel="stylesheet" href="/static/galleriffic/css/galleriffic-5.css" type="text/css" />
-<link rel="stylesheet" href="/static/galleriffic/css/black.css" type="text/css" />
-<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
-<script type="text/javascript" src="/static/galleriffic/js/jquery.history.js"></script>
-<script type="text/javascript" src="/static/galleriffic/js/jquery.galleriffic.js"></script>
-<script type="text/javascript" src="/static/galleriffic/js/jquery.opacityrollover.js"></script>
+<!--link rel="stylesheet" href="{{=url_for_static('galleriffic/css/basic.css')}}" type="text/css" /-->
+<link rel="stylesheet" href="{{=url_for_static('galleriffic/css/galleriffic-5.css')}}" type="text/css" />
+<link rel="stylesheet" href="{{=url_for_static('galleriffic/css/black.css')}}" type="text/css" />
+<script type="text/javascript" src="{{=url_for_static('js/jquery-1.3.2.min.js')}}"></script>
+<script type="text/javascript" src="{{=url_for_static('galleriffic/js/jquery.history.js')}}"></script>
+<script type="text/javascript" src="{{=url_for_static('galleriffic/js/jquery.galleriffic.js')}}"></script>
+<script type="text/javascript" src="{{=url_for_static('galleriffic/js/jquery.opacityrollover.js')}}"></script>
 <script type="text/javascript">
 	document.write('<style>.noscript { display: none; }</style>');
 </script>
@@ -149,10 +149,10 @@ $(document).ready(function() {
 						{{ for photo in photos: }}
           				<li>
           				<a class="thumb" name="{{=photo.id}}" href="{{=gallery_settings.baseurl}}/showimage/{{=photo.id}}/" title="{{=photo.name}}">
-							<img src="{{=gallery_settings.baseurl}}/thumb/{{=photo.id}}.png" alt="{{=ccutils.ccTruncateCnWords(photo.description,40)}}" />
+							<img src="{{=gallery_settings.baseurl}}/thumb/{{=photo.id}}.png" alt="{{<<(ccutils.ccTruncateCnWords(photo.description,40))}}" />
           				</a>
           				<div class="caption">
-							<div class="image-desc">{{=ccutils.ccTruncateCnWords(photo.description,40)}}</div>
+							<div class="image-desc">{{<<(ccutils.ccTruncateCnWords(photo.description,40))}}</div>
 						</div>
           				</li>
             			{{ pass }}
