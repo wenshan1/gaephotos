@@ -1,0 +1,33 @@
+<hr/>
+{{ if latestcomments: }}
+<fieldset id="latest_comment_container">
+<legend class="legend">{{=_("Latest Comments") }}</legend>
+<div>
+{{ index = 0 }}
+{{ for comment in latestcomments: }}
+{{ index += 1 }}
+<div id="comment_entry" name="comment{{=comment.id}}">
+    <p>{{=index}}. {{=comment.author}} {{=_('posted on')}} 
+    {{=comment.date.strftime("%Y-%m-%d %H:%M")}} GMT {{ if users.is_admin(): }} <ins name="delete{{=comment.id}}" class="deletecoment"> {{=_('Delete') }}</ins> {{pass}}
+     </p>
+    <p><a href="/{{=comment.photo.album.name}}/{{=comment.photo.name}}" target="_blank">[{{=comment.photo.name}}]</a>
+    </p>
+    <h3>{{<<ccutils.ccBreakLines(comment.content)}}</h3>
+</div>
+{{ pass }}
+</div>
+</fieldset>
+{{ pass }}
+
+{{ if latestphotos: }}
+<fieldset id="latest_photo_container">
+<legend class="legend">{{=_("Latest Photos")}}</legend>
+<div>
+{{ for photo in latestphotos: }}
+<div id="latest_photo_thumb">
+<a href="/{{=photo.album.name}}/{{=photo.name}}"><img src="/thumb/{{=photo.id}}.png"/></a>
+</div>
+{{ pass }}
+</div>
+</fieldset>
+{{ pass }}

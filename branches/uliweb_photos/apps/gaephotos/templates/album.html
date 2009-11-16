@@ -1,0 +1,27 @@
+{{ extend "base.html" }}
+{{ block commandbar }}
+        <li>|</li>
+        <li><a href="/showslider/{{=album.name}}/">{{=_("Slide Show") }}</a></a></li>
+{{ end }}
+   
+{{ block page }}
+<div id="page">
+        {{ include 'pager.html' }}
+        <!-- start content -->
+        <div id="content">
+        {{ if not photos: }}
+            {{=_("no photo found") }}
+        {{ else: }}
+	        {{ for photo in photos: }}
+	         <div id="thumb">
+	            <a href="/{{=photo.album.name}}/{{=photo.name}}"><img src="/thumb/{{=photo.id}}.png"/></a>
+	            <div id="description">{{=ccutils.ccTruncateCnWords(photo.description,30)}}</div>
+	         </div>
+	         {{ pass }}
+         {{ pass }}
+         </div>
+        <!-- end content -->
+        {{ include 'pager.html' }}
+    <div style="clear: both;">&nbsp;</div>
+</div>
+{{ end }}

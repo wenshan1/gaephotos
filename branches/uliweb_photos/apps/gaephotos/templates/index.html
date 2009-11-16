@@ -1,0 +1,32 @@
+{{ extend "base.html" }}
+
+{{ block commandbar }}
+{{ end }}
+  
+{{ block page }}
+<div id="page">
+        {{ include 'pager.html' }}
+        <!-- start content -->
+        <div id="content">
+        {{ if not albums: }}
+            {{ =_("no album found") }}
+        {{ else: }}
+            {{ for album in albums: }}
+             <li><div id="album">
+                <div><a href="/{{=album.name}}/">{{=ccutils.ccTruncateCnWords(album.name,20)}}({{=album.photoCount}})</a>
+                {{ if not album.public: }} ({{ =_("private") }}) {{ pass }}
+                </div>
+                <div>{{=album.updatedate.strftime("%Y-%m-%d")}}</div>
+                <div id="cover"><a href="/{{=album.name}}/"><img src="/thumb/{{=album.coverPhotoID}}.png"/></a></div>
+                <div id="description">{{=ccutils.ccTruncateCnWords(album.description,30)}}</div>
+             </div> </li>
+             {{ pass }}
+         {{ pass }}
+         </div>
+        <!-- end content -->
+        {{ include 'pager.html' }}
+        <div style="clear: both;"></div>
+        {{ include 'latest.html' }}
+    <div style="clear: both;">&nbsp;</div>
+</div>
+{{ end }}
