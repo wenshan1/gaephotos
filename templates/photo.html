@@ -30,7 +30,7 @@ $(document).ready(function() {
 		
 {% if users.is_admin %}
 		$("#setcover").click(function() {
-			$.getJSON("{{gallery_settings.baseurl}}/admin/ajaxaction/?action=savephotodesp",
+			$.getJSON("{{gallery_settings.baseurl}}/admin/ajaxaction/?action=setcoverphoto",
                     { 'photoid': {{photo.id}},
                       'albumid': {{photo.album.id}}},
                       function(json){ 
