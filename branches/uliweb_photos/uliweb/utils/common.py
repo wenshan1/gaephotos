@@ -163,13 +163,25 @@ def is_pyfile_exist(dir, pymodule):
                 return False
     return True
     
-def wrap_func(des, src):
-    des.__name__ = src.__name__
-    des.func_globals.update(src.func_globals)
-    des.__doc__ = src.__doc__
-    des.__module__ = src.__module__
-    des.__dict__.update(src.__dict__)
-    return des
+def wraps(src):
+    def _f(des):
+        def f(*args, **kwargs):
+            from uliweb import application
+            env = application.get_view_env()
+            for k, v in env.iteritems():
+                src.func_globals[k] = v
+            
+            src.func_globals['env'] = env
+            return des(*args, **kwargs)
+        
+        f.__name__ = src.__name__
+        f.func_globals.update(src.func_globals)
+        f.__doc__ = src.__doc__
+        f.__module__ = src.__module__
+        f.__dict__.update(src.__dict__)
+        return f
+    
+    return _f
 
 def sort_list(alist, default=500):
     """
@@ -204,13 +216,13 @@ def sort_list(alist, default=500):
 
 def timeit(func):
     import time
+    @wraps(func)
     def f(*args, **kwargs):
         begin = time.time()
         ret = func(*args, **kwargs)
         end = time.time()
         log.info("%s.%s [%s]s" % (func.__module__, func.__name__, end-begin))
         return ret
-    wrap_func(f, func)
     return f
 
 if __name__ == '__main__':

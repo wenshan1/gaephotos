@@ -12,7 +12,7 @@ from werkzeug.exceptions import HTTPException, NotFound, InternalServerError
 import template
 from storage import Storage
 import dispatch
-from uliweb.utils.common import pkg, log, sort_list, import_func, import_mod_func, myimport, wrap_func
+from uliweb.utils.common import pkg, log, sort_list, import_func, import_mod_func, myimport, wraps
 from uliweb.utils.pyini import Ini
 import uliweb as conf
 from rules import Mapping, add_rule
@@ -198,6 +198,7 @@ def pre_view(topic, *args1, **kwargs1):
     methods = kwargs1.pop('methods', None)
     signal = kwargs1.pop('signal', None)
     def _f(f):
+        @wraps(f)
         def _f2(*args, **kwargs):
             m = methods or []
             m = [x.upper() for x in m]
@@ -206,13 +207,13 @@ def pre_view(topic, *args1, **kwargs1):
                 if ret:
                     return ret
             return f(*args, **kwargs)
-        return wrap_func(_f2, f)
     return _f
 
 def post_view(topic, *args1, **kwargs1):
     methods = kwargs1.pop('methods', None)
     signal = kwargs1.pop('signal', None)
     def _f(f):
+        @wraps(f)
         def _f2(*args, **kwargs):
             m = methods or []
             m = [x.upper() for x in m]
@@ -221,7 +222,6 @@ def post_view(topic, *args1, **kwargs1):
             if not m or (m and conf.local.request.method in m):
                 ret1 = dispatch.get(conf.local.application, topic, signal=signal, *args1, **kwargs1)
             return ret or ret1
-        return wrap_func(_f2, f)
     return _f
     
 def POST(rule, **kw):

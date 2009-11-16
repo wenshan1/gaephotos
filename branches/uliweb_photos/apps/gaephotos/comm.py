@@ -2,6 +2,8 @@
 
 from functools import wraps
 
+import simplejson
+
 from google.appengine.api import users
 from uliweb.core.SimpleFrame import Response
 from uliweb.core.template import render_file
@@ -43,3 +45,28 @@ def returnerror(msg):
     content = {'error_msg':msg}
     response.template = 'admin/error.html'
     return content
+
+def returnjson(dit,response):
+    #response.headers['Content-Type'] = "application/json"
+    response.write(simplejson.dumps(dit))
+    return response 
+
+def album2dict(album):
+    if not album:
+        return {}
+    return {"id": album.id,
+            "name":album.name,
+            "description": ccUnEscape(album.description),
+            "public":album.public,
+            "createdate":ccFormatDate(album.createdate),
+            "updatedate":ccFormatDate(album.updatedate),
+            "photoslist":album.photoslist, 
+            "coverphotoid": album.coverPhotoID,}
+    
+def buildcomments(comments):
+    li = []
+    for comment in comments:
+        li.append({'author':comment.author, 'content':comment.content,
+                   'date':ccFormatDate(comment.date), 'id':comment.id,
+                   'admin':users.is_current_user_admin(),})
+    return li
