@@ -7,6 +7,7 @@ from google.appengine.ext import db
 from google.appengine.api import datastore
 from google.appengine.api import datastore_errors
 from google.appengine.api import users
+from google.appengine.api import memcache
 
 
 class GallerySettings(db.Model):
@@ -195,6 +196,8 @@ class Photo(CCPhotoModel):
     def Save(self):
         self.updatedate = datetime.now()
         self.put()
+        memcache.delete("image_%s"%self.id)
+        memcache.delete("thumb_%s"%self.id)
         if self.id in self.album.photoslist:
             self.album.photoslist.remove(self.id)
         self.album.photoslist.insert(0,self.id)
@@ -207,6 +210,8 @@ class Photo(CCPhotoModel):
         for comment in self.Comments:
             comment.delete()
         self.delete()
+        memcache.delete("image_%s"%self.id)
+        memcache.delete("thumb_%s"%self.id)
         
     def GetComments(self):
         comments = Comment.all().filter("photo =", self)

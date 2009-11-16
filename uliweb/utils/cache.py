@@ -2,7 +2,7 @@ import uliweb
 from weto.cache import Cache as CacheCls, CacheKeyException
 from uliweb import Response
 from uliweb.core.SimpleFrame import ResponseProxy
-from uliweb.utils.common import wrap_func
+from uliweb.utils.common import wraps
 
 def get_cache(cache_setting_name='CACHE', cache_storage_setting_name='CACHE_STORAGE'):
     cache = Cache(uliweb.settings.get_var('%s/type' % cache_setting_name), 
@@ -13,6 +13,7 @@ def get_cache(cache_setting_name='CACHE', cache_storage_setting_name='CACHE_STOR
 class Cache(CacheCls):
     def page(self, k=None, expire=None):
         def _f(func):
+            @wraps(func)
             def f(*args, **kwargs):
                 from uliweb import request
                 if not k:
@@ -29,7 +30,6 @@ class Cache(CacheCls):
                     self.put(key, ret, expire=expire)
                     return ret
             
-            wrap_func(f, func)
             return f
         return _f
 

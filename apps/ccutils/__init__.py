@@ -9,6 +9,12 @@ import time
 
 from werkzeug.utils import http_date
 
+def ccUnEscape(html):
+    return html.replace('&amp;','&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"').replace('&#39;', "'") 
+                                                                                                               
+def ccFormatDate(dt):
+    return dt.strftime('%Y-%m-%d %H:%M GMT')
+
 def ccGetcookie(name,default=None):
     browser_cookie = os.environ.get('HTTP_COOKIE', '')
     cookie = Cookie.SimpleCookie()
