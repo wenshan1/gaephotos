@@ -316,6 +316,7 @@ class Loader(object):
             return True
         return filename.endswith('.html')
 
+
 class DummyObject(int):
     def __str__(self):
         return ''
@@ -324,7 +325,7 @@ class DummyObject(int):
         return u''
     
     def __getattr__(self, name):
-        return DummyObject()
+        return self
     
     def __setattr__(self, name, value):
         pass
@@ -334,6 +335,8 @@ class DummyObject(int):
 
     def next(self):
         raise StopIteration()
+    
+Dummy = DummyObject()
        
 class Dispatcher(object):
     installed = False
@@ -450,7 +453,7 @@ class Dispatcher(object):
                     if not name in new_e:
                         if not defined(name):
                             if not name in __builtins__:
-                                new_e[name] = DummyObject()
+                                new_e[name] = Dummy
 
             __loader__ = Loader(fname, vars, env, dirs)
             exec code in new_e
@@ -474,7 +477,7 @@ class Dispatcher(object):
                     if not name in new_e:
                         if not defined(name):
                             if not name in __builtins__:
-                                new_e[name] = DummyObject()
+                                new_e[name] = Dummy
             exec code in new_e
             text = out.getvalue()
             output = dispatch.get(self, 'after_render_template', text, vars, e)
