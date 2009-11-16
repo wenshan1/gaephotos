@@ -1,1 +1,0 @@
-appcfg.py update ./ --noisy -e deepgully@gmail.com

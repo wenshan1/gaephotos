@@ -16,35 +16,6 @@ indexes:
   - name: updatedate
     direction: desc
 
-- kind: Comment
-  properties:
-  - name: photo
-  - name: date
-
-- kind: Comment
-  properties:
-  - name: photo
-  - name: date
-    direction: desc
-
-- kind: Photo
-  properties:
-  - name: album
-  - name: name
-  - name: updatedate
-
-- kind: Photo
-  properties:
-  - name: album
-  - name: name
-  - name: updatedate
-    direction: desc
-
-- kind: Photo
-  properties:
-  - name: album
-  - name: updatedate
-
 - kind: Photo
   properties:
   - name: album
