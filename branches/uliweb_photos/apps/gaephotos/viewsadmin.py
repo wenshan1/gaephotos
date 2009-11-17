@@ -148,7 +148,6 @@ def swfuploadphoto():
                 if not img_binary:
                     return returnjson({"result":ccEscape(translate("no image data"))}, resp)
                 
-                logging.info(dir(filedata))
                 if filedata.content_length > 1024*1024:
                     return returnjson({"result":ccEscape(translate("file size exceed 1M"))}, resp)
                 
@@ -200,6 +199,8 @@ def swfuploadphoto():
     
     except Exception,e:
         logging.exception("upload error "+str(e))
+        resp = Response()
+        return returnjson({"result":("exception in swfuploadphoto")}, resp)
         
 @expose('/admin/ajaxaction/')
 def ajaxAction():
