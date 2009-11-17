@@ -195,12 +195,16 @@ class Photo(CCPhotoModel):
     def Save(self):
         self.updatedate = datetime.now()
         self.put()
+        memcache.delete("image_%s"%self.id)
+        memcache.delete("thumb_%s"%self.id)
         if self.id in self.album.photoslist:
             self.album.photoslist.remove(self.id)
         self.album.photoslist.insert(0,self.id)
         self.album.put()
         
     def Delete(self):
+        memcache.delete("image_%s"%self.id)
+        memcache.delete("thumb_%s"%self.id)
         if self.id in self.album.photoslist:
             self.album.photoslist.remove(self.id)
             self.album.put()

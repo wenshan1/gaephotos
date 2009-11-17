@@ -201,81 +201,167 @@ def showslider(request, albumname):
     return render_to_response_with_users_and_settings("slider.html", content)
 
 def showimage(request, photoid):
-    resp = HttpResponse()
-    try:
-        key = "image_%s"%(long(photoid))
-        
-        cachedata = memcache.get(key)
-        if cachedata:
-            if not cachedata['public'] and not checkAuthorization():
-                return returnerror(translate("You are not authorized"))
-            
-            resp.headers['Content-Type'] = cachedata['Content-Type']
-            resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
-            resp.write(cachedata['binary'])
-            return resp
-        
-        photo = Photo.GetPhotoByID(long(photoid))
-        if not photo.album.public and not checkAuthorization():
-                return returnerror(translate("You are not authorized"))
-            
-        resp.headers['Content-Type'] = photo.contenttype
-        resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
-        resp.write(photo.binary)
-        
-        cachedata = {'Content-Type':photo.contenttype,
-                     'binary':photo.binary,
-                     'public':photo.album.public}
-        memcache.set(key, cachedata, 20*24*3600)
-        return resp
-    except:
-        url = "http://%s/static/images/error.gif"%os.environ["HTTP_HOST"]
-        result = urlfetch.fetch(url, deadline=10)
-        if result.status_code == 200:
-            resp.headers['Content-Type'] = result.headers['Content-Type']
-            resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
-            resp.write(result.content)
-            return resp
-        return returnerror(translate("Get photo error"))
+    return showimg(request,photoid, "image")
+#    resp = HttpResponse()
+#    try:
+#        key = "image_%s"%(long(photoid))
+#        
+#        cachedata = memcache.get(key)
+#        if cachedata:
+#            if not cachedata['public'] and not checkAuthorization():
+#                return returnerror(translate("You are not authorized"))
+#            
+#            resp.headers['Content-Type'] = cachedata['Content-Type']
+#            resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
+#            resp.write(cachedata['binary'])
+#            return resp
+#        
+#        photo = Photo.GetPhotoByID(long(photoid))
+#        if not photo.album.public and not checkAuthorization():
+#                return returnerror(translate("You are not authorized"))
+#            
+#        resp.headers['Content-Type'] = photo.contenttype
+#        resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
+#        resp.write(photo.binary)
+#        
+#        cachedata = {'Content-Type':photo.contenttype,
+#                     'binary':photo.binary,
+#                     'public':photo.album.public}
+#        memcache.set(key, cachedata, 20*24*3600)
+#        return resp
+#    except:
+#        url = "http://%s/static/images/error.gif"%os.environ["HTTP_HOST"]
+#        result = urlfetch.fetch(url, deadline=10)
+#        if result.status_code == 200:
+#            resp.headers['Content-Type'] = result.headers['Content-Type']
+#            resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
+#            resp.write(result.content)
+#            return resp
+#        return returnerror(translate("Get photo error"))
 
 def showthumb(request, photoid):
-    resp = HttpResponse()
+    return showimg(request,photoid, "thumb")
+#    resp = HttpResponse()
+#    try:
+#        resp.headers['Content-Type'] = "image/png"
+#        resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
+#        
+#        key = "thumb_%s"%(long(photoid))
+#        cachedata = memcache.get(key)
+#        
+#        if cachedata:
+#            if not cachedata['public'] and not checkAuthorization():
+#                return returnerror(translate("You are not authorized"))
+#            resp.write(cachedata['binary'])
+#            return resp
+#            
+#        photo = Photo.GetPhotoByID(long(photoid))
+#        if not photo.album.public and not checkAuthorization():
+#                return returnerror(translate("You are not authorized"))
+#            
+#        binary_thumb = photo.binary_thumb
+#        if not binary_thumb:
+#            img = images.Image(photo.binary)
+#            img.resize(200, 200)
+#            binary_thumb = img.execute_transforms()
+#            
+#        resp.write(binary_thumb)
+#
+#        cachedata = {'binary':binary_thumb,
+#                     'public':photo.album.public}
+#        memcache.set(key, cachedata, 20*24*3600)
+#        
+#        return resp
+#    except:
+#        url = "http://%s/static/images/error.gif"%os.environ["HTTP_HOST"]
+#        result = urlfetch.fetch(url, deadline=10)
+#        if result.status_code == 200:
+#            resp.headers['Content-Type'] = result.headers['Content-Type']
+#            resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
+#            resp.write(result.content)
+#            return resp
+#        return returnerror(translate("Get photo error"))
+
+    
+def showimg(request, photoid, mode="thumb"):
+    cache_timeout = 3600*24*30
     try:
-        resp.headers['Content-Type'] = "image/png"
-        resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
-        
-        key = "thumb_%s"%(long(photoid))
+        key = "%s_%s"%(mode,long(photoid))
         cachedata = memcache.get(key)
         
-        if cachedata:
+        if cachedata and cachedata.get('etag',None):
             if not cachedata['public'] and not checkAuthorization():
                 return returnerror(translate("You are not authorized"))
-            resp.write(cachedata['binary'])
-            return resp
             
+            resp = HttpResponse() 
+            resp.headers['Date'] = http_date()
+            resp.headers['Etag'] = cachedata['etag']
+            resp.headers['Cache-Control'] = 'max-age=%d, public' % cache_timeout
+            resp.headers['Expires'] = http_date(time.time() + cache_timeout)
+            if mode == "thumb":
+                resp.headers['Content-Type'] = "image/png"
+            else:
+                resp.headers['Content-Type'] = cachedata['Content-Type']
+                
+            if request.environ.get('HTTP_IF_NONE_MATCH') == cachedata['etag']:
+                resp.status_code = 304
+            else:
+                resp.status_code = 200
+                resp.write(cachedata['binary'])
+            return resp
+        
+        #no cache
         photo = Photo.GetPhotoByID(long(photoid))
         if not photo.album.public and not checkAuthorization():
                 return returnerror(translate("You are not authorized"))
             
-        binary_thumb = photo.binary_thumb
-        if not binary_thumb:
-            img = images.Image(photo.binary)
-            img.resize(200, 200)
-            binary_thumb = img.execute_transforms()
+        
+        resp = HttpResponse() 
+        if mode == "thumb":
+            binary = photo.binary_thumb
+            if not binary:
+                img = images.Image(photo.binary)
+                img.resize(200, 200)
+                binary = img.execute_transforms()
+            resp.headers['Content-Type'] = "image/png"
+        else:
+            binary = photo.binary
+            resp.headers['Content-Type'] = photo.contenttype
             
-        resp.write(binary_thumb)
+        resp.headers['Date'] = http_date()    
+        resp.headers['Etag'] = '"%s"'%(generate_etag(photo.updatedate, 
+                                              len(binary),
+                                               str(photo.id)))
+        resp.headers['Cache-control'] = "max-age=%d,public"%(cache_timeout*365)
+        resp.headers['Expires'] = http_date(time.time() + cache_timeout)
+        resp.headers['Content-Length'] = len(binary)
+        resp.headers['Last-Modified'] = http_date(photo.updatedate)                
+        
+        resp.write(binary)
 
-        cachedata = {'binary':binary_thumb,
-                     'public':photo.album.public}
-        memcache.set(key, cachedata, 20*24*3600)
+        cachedata = {'binary':binary,
+                     'public':photo.album.public,
+                     'etag': resp.headers['Etag'],}
+        
+        if mode == "thumb":
+            cachedata.update( {'Content-Type':"image/png"} )
+        else:
+            cachedata.update( {'Content-Type':photo.contenttype} )
+                
+        try:
+            memcache.set(key, cachedata, 20*24*3600)
+        except:
+            logging.exception("memcache set error")
         
         return resp
-    except:
+    
+    except Exception,e:
         url = "http://%s/static/images/error.gif"%os.environ["HTTP_HOST"]
         result = urlfetch.fetch(url, deadline=10)
         if result.status_code == 200:
+            resp = HttpResponse()
             resp.headers['Content-Type'] = result.headers['Content-Type']
-            resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
+            resp.headers['Cache-control'] = "max-age=%d,public"%(cache_timeout*365)
             resp.write(result.content)
             return resp
         return returnerror(translate("Get photo error"))
