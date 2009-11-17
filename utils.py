@@ -4,10 +4,13 @@
 import os
 import logging
 import Cookie
-
-import math
-from functools import wraps
 import time
+import math
+
+from functools import wraps
+from time import gmtime,mktime
+from datetime import datetime
+from zlib import adler32
 
 from google.appengine.api import users
 from google.appengine.api import memcache
@@ -20,6 +23,43 @@ from django.http import HttpResponse
 
 from cc_addons.language import translate 
 from models import *
+
+
+def generate_etag(mtime, file_size, real_filename):
+    return 'wzsdm-%d-%s-%s' % (
+        mktime(mtime.timetuple()),
+        file_size,
+        adler32(real_filename) & 0xffffffff
+    )
+
+def _dump_date(d, delim):
+    """Used for `http_date` and `cookie_date`."""
+    if d is None:
+        d = gmtime()
+    elif isinstance(d, datetime):
+        d = d.utctimetuple()
+    elif isinstance(d, (int, long, float)):
+        d = gmtime(d)
+    return '%s, %02d%s%s%s%s %02d:%02d:%02d GMT' % (
+        ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')[d.tm_wday],
+        d.tm_mday, delim,
+        ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+         'Oct', 'Nov', 'Dec')[d.tm_mon - 1],
+        delim, str(d.tm_year), d.tm_hour, d.tm_min, d.tm_sec
+    )
+
+def http_date(timestamp=None):
+    """Formats the time to match the RFC1123 date format.
+
+    Accepts a floating point number expressed in seconds since the epoc in, a
+    datetime object or a timetuple.  All times in UTC.  The :func:`parse_date`
+    function can be used to parse such a date.
+
+    Outputs a string in the format ``Wdy, DD Mon YYYY HH:MM:SS GMT``.
+
+    :param timestamp: If provided that date is used, otherwise the current.
+    """
+    return _dump_date(timestamp, ' ')
    
 def unescape(html):
     return html.replace('&amp;','&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"').replace('&#39;', "'") 
