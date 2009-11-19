@@ -202,8 +202,7 @@ def swfuploadphoto():
         resp = Response()
         return returnjson({"result":("exception in swfuploadphoto")}, resp)
 
-@json
-@expose('/admin/ajaxaction/addcomment/')
+
 def addComment():
     logging.info("addcomment")
     
@@ -350,6 +349,9 @@ def ajaxAction():
         
         action = request.GET.get('action',None)
         logging.info(action)
+        
+        if action == "addcomment":
+            return addComment()
         
         
         if not checkAuthorization():
