@@ -1,6 +1,6 @@
 import logging
 import inspect
-from uliweb.utils.common import import_func
+from uliweb.utils.common import import_attr
 
 __all__ = ['HIGH', 'MIDDLE', 'LOW', 'bind', 'call', 'get', 'unbind', 'call_once', 'get_once']
 
@@ -88,7 +88,7 @@ def call(sender, topic, *args, **kwargs):
         _f = f['func']
         if not _f:
             try:
-                _f = import_func(f['func_name'])
+                _f = import_attr(f['func_name'])
             except ImportError:
                 logging.error("Can't import function %s" % f['func_name'])
                 raise
@@ -127,7 +127,7 @@ def get(sender, topic, *args, **kwargs):
         _f = f['func']
         if not _f:
             try:
-                _f = import_func(f['func_name'])
+                _f = import_attr(f['func_name'])
             except ImportError:
                 logging.error("Can't import function %s" % f['func_name'])
                 raise

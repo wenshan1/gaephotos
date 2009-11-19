@@ -1,13 +1,13 @@
 import os, sys
 
-def import_mod_func(path):
+def import_mod_attr(path):
     module, func = path.rsplit('.', 1)
     mod = __import__(module, {}, {}, [''])
     f = getattr(mod, func)
     return mod, f
 
-def import_func(func):
-    mod, f = import_mod_func(func)
+def import_attr(func):
+    mod, f = import_mod_attr(func)
     return f
 
 def myimport(module):
@@ -167,11 +167,12 @@ def wraps(src):
     def _f(des):
         def f(*args, **kwargs):
             from uliweb import application
-            env = application.get_view_env()
-            for k, v in env.iteritems():
-                src.func_globals[k] = v
-            
-            src.func_globals['env'] = env
+            if application:
+                env = application.get_view_env()
+                for k, v in env.iteritems():
+                    src.func_globals[k] = v
+                
+                src.func_globals['env'] = env
             return des(*args, **kwargs)
         
         f.__name__ = src.__name__
