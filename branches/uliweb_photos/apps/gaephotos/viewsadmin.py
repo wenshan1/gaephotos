@@ -20,7 +20,7 @@ import logging
 
 from google.appengine.api import memcache
 
-from uliweb import expose
+from uliweb import expose,json
 from uliweb.core.SimpleFrame import Response
 
 from comm import *
@@ -201,7 +201,148 @@ def swfuploadphoto():
         logging.exception("upload error "+str(e))
         resp = Response()
         return returnjson({"result":("exception in swfuploadphoto")}, resp)
+
+@json
+@expose('/admin/ajaxaction/addcomment/')
+def addComment():
+    logging.info("addcomment")
+    
+    photoid = long(request.GET.get('photoid',None))
+    author = ccEscape(request.GET.get('author',None))
+    comment_content = ccEscape(request.GET.get('comment_content',None))
+    if photoid and author and comment_content:
+        photo = Photo.get_by_id(photoid)
+        if not photo:
+            return {"result":"error",
+                   "msg":ccEscape(translate("Photo does not exist"))}
+        if not photo.album.public and not checkAuthorization():
+            return {"result":"error",
+                   "msg":ccEscape(translate("You are not authorized to access this photo"))}
         
+        photo.AddComment(author, comment_content)
+        logging.info( buildcomments(photo.GetComments()) )
+        return {"result":"ok",
+                 "comments": buildcomments(photo.GetComments())}
+
+    else:
+        return {"result":"error",
+                   "msg":ccEscape(translate("Pls input name and content"))}
+   
+def saveCoverPhoto():
+    albumid = long(request.GET.get('albumid',0))
+    album = albumid and Album.get_by_id(albumid)
+    if album:
+        id = long(request.GET.get('photoid',0))
+        photo = id and Photo.GetPhotoByID(id)
+        if photo:
+            album.SetCoverPhoto(photo.id)
+            return {"result":"ok",}
+        else:
+            return {"result":"error",
+                         "msg":ccEscape(translate("Photo does not exist")),}
+    else:
+        return {"result":"error",
+                     "msg":ccEscape(translate("Album does not exist")),}
+
+        
+def getAlbumInfo():
+    albumname = ccEscape(request.GET.get('albumname',None))
+    album = albumname and Album.GetAlbumByName(albumname)
+    if album:
+        return {"result":"ok",
+                           "album":album2dict(album),
+                           }
+    else:
+        return {"result":"error",
+                           "msg":ccEscape(translate("Album does not exist"))}
+    
+    
+def saveAlbumInfo():
+    id = long(request.GET.get('albumid',0))
+    album = id and Album.GetAlbumByID(id)
+    if album:
+        albumname = ccEscape(request.GET.get('albumname',None))
+        description = ccEscape(request.GET.get('description',None))  
+        coverphotoid = long(request.GET.get('coverphotoid',0))
+        public = request.GET.get("public")
+        if public == "true":
+            public = True
+        else:
+            public = False
+            
+        album.name = albumname
+        album.description = description
+        album.public = public
+        album.save()
+        if coverphotoid:
+            album.SetCoverPhoto(coverphotoid)
+            
+        return {"result":"ok",
+                      "album":album2dict(album),}
+    else:
+        return {"result":"error",
+                     "msg":ccEscape(translate("Album does not exist")),}
+
+def clearAlbumPhotos():
+    id = long(request.GET.get('albumid',0))
+    album = id and Album.GetAlbumByID(id)
+    if album:
+        for photo in album.GetPhotos():
+            photo.Delete()
+        album = Album.GetAlbumByID(id)
+        return {"result":"ok",
+                           "album":album2dict(album),
+                           }
+    else:
+        return {"result":"error",
+                           "msg":ccEscape(translate("Album does not exist"))}
+    
+def deleteAlbum():
+    id = long(request.GET.get('albumid',0))
+    album = id and Album.GetAlbumByID(id)
+    if album:
+        for photo in album.GetPhotos():
+            photo.Delete()
+        album = Album.GetAlbumByID(id)
+        album.delete()
+        album = Album.all().fetch(1)
+        album = album and album[0]
+        return {"result":"ok",
+                           "album":album2dict(album),
+                           }
+    else:
+        return {"result":"error",
+                           "msg":ccEscape(translate("Album does not exist"))}
+    
+    
+def savePhotoDescription():
+    id = long(request.GET.get('photoid',0))
+    photo = id and Photo.GetPhotoByID(id)
+    if photo:
+        description = ccEscape(request.GET.get('description',None))
+        photo.description = description
+        photo.Save()
+        return {"result":"ok",
+                    "description": (photo.description),}
+    else:
+        return {"result":"error",
+                     "msg":ccEscape(translate("Photo does not exist"))}
+    
+    
+def deleteComment():
+    id = long(request.GET.get('commentid',0))
+    comment = id and Comment.get_by_id(id)
+    photoid = comment.photo.id
+    if comment:
+        comment.Delete()
+        photo = Photo.get_by_id(photoid)
+        return {"result":"ok",
+                     "comments": buildcomments(photo.GetComments())}
+    else:
+        return {"result":"error",
+                     "msg":ccEscape(translate("Comment does not exist"))}
+    
+@json
 @expose('/admin/ajaxaction/')
 def ajaxAction():
     try:
@@ -210,155 +351,39 @@ def ajaxAction():
         action = request.GET.get('action',None)
         logging.info(action)
         
-        if action == "addcomment":
-            photoid = long(request.GET.get('photoid',None))
-            author = ccEscape(request.GET.get('author',None))
-            comment_content = ccEscape(request.GET.get('comment_content',None))
-            if photoid and author and comment_content:
-                photo = Photo.get_by_id(photoid)
-                if not photo:
-                    return returnjson({"result":"error",
-                           "msg":ccEscape(translate("Photo does not exist"))}, resp)
-                if not photo.album.public and not checkAuthorization():
-                    return returnjson({"result":"error",
-                           "msg":ccEscape(translate("You are not authorized to access this photo"))}, resp)
-                
-                photo.AddComment(author, comment_content)
-                logging.info( buildcomments(photo.GetComments()) )
-                return returnjson({"result":"ok",
-                         "comments": buildcomments(photo.GetComments())}, resp)
-        
-            else:
-                return returnjson({"result":"error",
-                           "msg":ccEscape(translate("Pls input name and content"))}, resp)
         
         if not checkAuthorization():
             return returnjson({"result":"error",
                            "msg":ccEscape(translate("You are not authorized"))}, resp)
         
         if action == "setcoverphoto":
-            albumid = long(request.GET.get('albumid',0))
-            album = albumid and Album.get_by_id(albumid)
-            if album:
-                id = long(request.GET.get('photoid',0))
-                photo = id and Photo.GetPhotoByID(id)
-                if photo:
-                    album.SetCoverPhoto(photo.id)
-                    return returnjson({"result":"ok",
-                                       }, resp)
-                else:
-                    return returnjson({"result":"error",
-                                       "msg":ccEscape(translate("Photo does not exist")),
-                                       }, resp)
-            else:
-                return returnjson({"result":"error",
-                                   "msg":ccEscape(translate("Album does not exist"))}, resp)
+            return saveCoverPhoto()
         
         elif action == "getalbum":
-            albumname = ccEscape(request.GET.get('albumname',None))
-            album = albumname and Album.GetAlbumByName(albumname)
-            if album:
-                return returnjson({"result":"ok",
-                                   "album":album2dict(album),
-                                   }, resp)
-            else:
-                return returnjson({"result":"error",
-                                   "msg":ccEscape(translate("Album does not exist"))}, resp)
+            return getAlbumInfo()
                 
         elif action == "savealbum":
-            id = long(request.GET.get('albumid',0))
-            album = id and Album.GetAlbumByID(id)
-            if album:
-                albumname = ccEscape(request.GET.get('albumname',None))
-                description = ccEscape(request.GET.get('description',None))  
-                coverphotoid = long(request.GET.get('coverphotoid',0))
-                public = request.GET.get("public")
-                if public == "true":
-                    public = True
-                else:
-                    public = False
-                    
-                album.name = albumname
-                album.description = description
-                album.public = public
-                album.save()
-                if coverphotoid:
-                    album.SetCoverPhoto(coverphotoid)
-                    
-                return returnjson({"result":"ok",
-                                   "album":album2dict(album),
-                                   }, resp)
-            else:
-                return returnjson({"result":"error",
-                                   "msg":ccEscape(translate("Album does not exist"))}, resp)
+            return saveAlbumInfo()
                 
         elif action == "clearalbum":
-            id = long(request.GET.get('albumid',0))
-            album = id and Album.GetAlbumByID(id)
-            if album:
-                for photo in album.GetPhotos():
-                    photo.Delete()
-                album = Album.GetAlbumByID(id)
-                return returnjson({"result":"ok",
-                                   "album":album2dict(album),
-                                   }, resp)
-            else:
-                return returnjson({"result":"error",
-                                   "msg":ccEscape(translate("Album does not exist"))}, resp)
+            return clearAlbumPhotos()
                 
         elif action == "deletealbum":
-            id = long(request.GET.get('albumid',0))
-            album = id and Album.GetAlbumByID(id)
-            if album:
-                for photo in album.GetPhotos():
-                    photo.Delete()
-                album = Album.GetAlbumByID(id)
-                album.delete()
-                album = Album.all().fetch(1)
-                album = album and album[0]
-                return returnjson({"result":"ok",
-                                   "album":album2dict(album),
-                                   }, resp)
-            else:
-                return returnjson({"result":"error",
-                                   "msg":ccEscape(translate("Album does not exist"))}, resp)
+            return deleteAlbum()
                 
         elif action == "savephotodesp":
-            id = long(request.GET.get('photoid',0))
-            photo = id and Photo.GetPhotoByID(id)
-            if photo:
-                description = ccEscape(request.GET.get('description',None))
-                photo.description = description
-                photo.Save()
-                return returnjson({"result":"ok",
-                                   "description": (photo.description),
-                                   }, resp)
-            else:
-                return returnjson({"result":"error",
-                                   "msg":ccEscape(translate("Photo does not exist"))}, resp)
+            return savePhotoDescription()
                 
         elif action == "deletecomment":
-            id = long(request.GET.get('commentid',0))
-            comment = id and Comment.get_by_id(id)
-            photoid = comment.photo.id
-            if comment:
-                comment.Delete()
-#                return returnjson({"result":"ok",
-#                                   "commentid":id,
-#                                   }, resp)
-                photo = Photo.get_by_id(photoid)
-                return returnjson({"result":"ok",
-                         "comments": buildcomments(photo.GetComments())}, resp)
-            else:
-                return returnjson({"result":"error",
-                                   "msg":ccEscape(translate("Comment does not exist"))}, resp)
+            return deleteComment()
             
-        return returnjson({"result":"error",
-                           "msg":ccEscape("no action")}, resp)
+        return {"result":"error",
+                     "msg":ccEscape("no action")}
+    
     except Exception,e:
         logging.exception(str(e))
-        return returnjson({"result":"error",
-                           "msg":str(e)}, resp)
+        return {"result":"error",
+                     "msg":str(e)}
 
 
 def defaultSettings():
