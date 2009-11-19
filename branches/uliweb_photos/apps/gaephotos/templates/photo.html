@@ -119,7 +119,7 @@ $(document).ready(function() {
         	$.blockUI({message: '<h1>{{=_("comment is saving...") }}</h1>', 
 		                css: { border: '1px solid #60a0c0',width:"500px" } 
 		           	});	
-		    $.getJSON("{{=gallery_settings.baseurl}}/admin/ajaxaction/addcomment/",
+		    $.getJSON("{{=gallery_settings.baseurl}}/admin/ajaxaction/?action=addcomment",
                     { 'photoid': {{=photo.id}},
                       'author': $("#comment_author").val(),
                       'comment_content' :  $("#comment_content").val() },
