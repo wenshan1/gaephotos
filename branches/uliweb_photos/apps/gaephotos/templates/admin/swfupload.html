@@ -31,7 +31,7 @@
 					progressTarget : "fsUploadProgress",
 					cancelButtonId : "btnCancel"
 				},
-				post_params: {"owner" : "{{users.get_current_user().nickname()}}"},
+				post_params: {"owner" : "{{=users.get_current_user().nickname()}}"},
 				debug: true,
 
 				// Button settings
