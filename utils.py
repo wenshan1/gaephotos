@@ -76,6 +76,12 @@ def render_to_javasript(*args, **kwargs):
     resp.write(loader.render_to_string(*args, **kwargs))
     return resp
 
+def render_to_atom(*args, **kwargs):
+    resp = HttpResponse()
+    resp.headers['Content-Type'] = "application/atom+xml"
+    resp.write(loader.render_to_string(*args, **kwargs))
+    return resp
+    
 # one request one save
 def save_cookie(cookie_dict,path="/"):
     cookie = Cookie.SimpleCookie()

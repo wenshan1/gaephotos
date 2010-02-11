@@ -174,6 +174,19 @@ def search(request):
                "album": {'name':'search'}}
         return render_to_response_with_users_and_settings("album.html", content)
 
+def feed(request):
+    latestphotos = Photo.GetLatestPhotos(num=gallery_settings.latest_photos_count,
+                                          showprivate= checkAuthorization())
+                                          
+    if latestphotos:
+       last_updated = latestphotos[0].updatedate
+       last_updated = last_updated.strftime("%Y-%m-%dT%H:%M:%SZ")
+       
+    content = {"last_updated": last_updated,
+               "latestphotos": latestphotos,
+               "gallery_settings": gallery_settings}
+    return render_to_atom("atom.xml", content)
+
 def showslider(request, albumname):
     album = Album.GetAlbumByName(ccEscape(albumname))
     if album:
