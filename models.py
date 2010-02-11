@@ -167,8 +167,21 @@ class Photo(CCPhotoModel):
         return li and li[0]
     
     @staticmethod
-    def GetLatestPhotos(num=gallery_settings.latest_photos_count):
-        return Photo.all().order("-date").fetch(num)
+    def GetLatestPhotos(num=gallery_settings.latest_photos_count, showprivate=False):
+        try:
+            allphotos = Photo.all().order("-updatedate")
+        except:
+            allphotos = Photo.all()
+        if showprivate:
+            return allphotos.fetch(num)
+        else:
+            latestphtos = []
+            for photo in allphotos:
+               if photo.isPublic:
+                   latestphtos.append(photo)
+               if len(latestphtos)>= num:
+                   return latestphtos
+            return latestphtos
     
     @staticmethod
     def SearchPhotos(searchword):
