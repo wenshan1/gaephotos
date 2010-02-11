@@ -29,7 +29,7 @@ Released   : 20071001
     <div id="admin_search">
     <div id="admin">
             <a href="/?lang=zh-cn">中文版</a> | <a href="/?lang=en-us">English Version</a> | 
-    		{% if users.is_admin %}
+    		   {% if users.is_admin %}
             <a href="/admin/settings/">{% translate "Admin" %}</a> | 
             {% endif %}
             {% if users.get_current_user %}
@@ -37,6 +37,7 @@ Released   : 20071001
             {% else %}
             <a href="/login/">{% translate "Login" %}</a>
             {% endif %}
+            |<a href="/feed"><img src="/static/images/rss.gif" alt="RSS"></a> 
     </div>
     {% include 'searchbox.html' %}
     </div>

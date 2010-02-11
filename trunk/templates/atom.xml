@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title><![CDATA[{{ gallery_settings.title }}]]></title>
+    <id>{{ gallery_settings.baseurl }}/</id>
+    <subtitle>{{ gallery_settings.description }}</subtitle>
+    <link href="{{ gallery_settings.baseurl }}" />
+    <link href="{{ gallery_settings.baseurl }}/feed" rel="self" />
+    <updated>{{last_updated}}</updated>
+    <author>
+      <name>{{ gallery_settings.owner.nickname }}</name>
+    </author>
+{% for photo in latestphotos %}
+  <entry>
+      <link href="{{ gallery_settings.baseurl }}/{{photo.album.name}}/{{photo.name}}"/>
+      <id>{{ blog.baseurl }}/{{photo.album.name}}/{{photo.name}}</id>
+      <title><![CDATA[{{photo.description}} -- {{photo.name}}]]></title>
+      <content type="html"><![CDATA[
+      <a href="{{ gallery_settings.baseurl }}/{{photo.album.name}}/{{photo.name}}">
+      <img src="{{ gallery_settings.baseurl }}/thumb/{{photo.id}}.png"/>
+      </a>
+      ]]></content>
+      <author>
+          <name>{{photo.owner}}</name>
+      </author>
+      <updated>{{photo.updatedate}}</updated>
+  </entry>
+{% endfor %}
+</feed>
