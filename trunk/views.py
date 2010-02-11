@@ -56,11 +56,9 @@ def index(request):
         latestcomments = Comment.all().order("-date").fetch(gallery_settings.latest_comments_count)    
     except:
         latestcomments = Comment.all().fetch(gallery_settings.latest_comments_count)   
-        
-    try:
-        latestphotos = Photo.all().order("-updatedate").fetch(gallery_settings.latest_photos_count) 
-    except:
-        latestphotos = Photo.all().fetch(gallery_settings.latest_photos_count) 
+       
+    latestphotos = Photo.GetLatestPhotos(num=gallery_settings.latest_photos_count,
+                                          showprivate= checkAuthorization())
         
     content = {"albums":entries,
                "pager": pager,
