@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <title><![CDATA[{{ gallery_settings.title }}]]></title>
+    <title>{{ gallery_settings.title }}</title>
     <id>{{ gallery_settings.baseurl }}/</id>
     <subtitle>{{ gallery_settings.description }}</subtitle>
     <link href="{{ gallery_settings.baseurl }}" />
@@ -13,7 +13,7 @@
   <entry>
       <link href="{{ gallery_settings.baseurl }}/{{photo.album.name}}/{{photo.name}}"/>
       <id>{{ blog.baseurl }}/{{photo.album.name}}/{{photo.name}}</id>
-      <title><![CDATA[{{photo.description}} -- {{photo.name}}]]></title>
+      <title>{{photo.description}} -- {{photo.name}}</title>
       <content type="html"><![CDATA[
       <a href="{{ gallery_settings.baseurl }}/{{photo.album.name}}/{{photo.name}}">
       <img src="{{ gallery_settings.baseurl }}/thumb/{{photo.id}}.png"/>
