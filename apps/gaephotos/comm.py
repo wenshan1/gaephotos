@@ -80,6 +80,13 @@ def render_to_javasript(*args, **kwargs):
     resp.write(application.template(*args, **kwargs))
     return resp
 
+def render_to_atom(*args, **kwargs):
+    from uliweb import application
+    resp = Response()
+    resp.headers['Content-Type'] = "application/atom+xml"
+    resp.write(application.template(*args, **kwargs))
+    return resp
+
 def album2dict(album):
     if not album:
         return {}
