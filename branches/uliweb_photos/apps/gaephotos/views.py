@@ -107,6 +107,20 @@ def index():
             
     return content
 
+@expose('/feed')
+def feed():
+    latestphotos = Photo.GetLatestPhotos(num=gallery_settings.latest_photos_count,
+                                          showprivate= checkAuthorization())
+                                          
+    if latestphotos:
+       last_updated = latestphotos[0].updatedate
+       last_updated = last_updated.strftime("%Y-%m-%dT%H:%M:%SZ")
+       
+    content = {"last_updated": last_updated,
+               "latestphotos": latestphotos,
+               "gallery_settings": gallery_settings}
+    return render_to_atom("atom.xml", content)
+
 @expose('/<albumname>/')
 def album(albumname):
     try:
