@@ -626,6 +626,7 @@
 				var nextIndex = this.getNextIndex(imageData.index);
 
 				// Construct new hidden span for the image
+				var containerWidth = this.$imageContainer.width();
 				var newSlide = this.$imageContainer
 					.append('<span class="image-wrapper current"><a class="advance-link" rel="history" href="#'+this.data[nextIndex].hash+'" title="'+imageData.title+'">&nbsp;</a></span>')
 					.find('span.current').css('opacity', '0');
@@ -635,6 +636,10 @@
 					.click(function(e) {
 						gallery.clickHandler(e, this);
 					});
+				var image = newSlide.find('a').find('img');
+				var imageWidth = image.width();
+				image.css('width', imageWidth);
+				newSlide.css('left', (containerWidth-imageWidth)/2);
 				
 				var newCaption = 0;
 				if (this.$captionContainer) {
