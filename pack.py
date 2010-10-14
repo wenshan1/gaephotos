@@ -9,15 +9,26 @@ import stat,fnmatch
 import zipfile
 import hashlib
 
-def getFileList(path, ext, subdir = True ):
+ReleaseVersion = 0.2
+
+def getFileList(path, ext, excluded_exts, subdir = True ):
     if os.path.exists(path):
         dirlist = []
 
         for name in os.listdir(path):
             fullname = os.path.join(path, name)
             st = os.lstat(fullname)
+            
+            excluded = False
+            for ex_ext in excluded_exts:
+               if fnmatch.fnmatch( fullname, ex_ext):
+                  excluded = True
+                  break
+            if excluded:
+                continue
+                
             if stat.S_ISDIR(st.st_mode) and subdir:
-                dirlist +=  getFileList(fullname,ext)
+                dirlist +=  getFileList(fullname,ext,excluded_exts)
             elif os.path.isfile(fullname):
                 if fnmatch.fnmatch( fullname, ext):  
                     dirlist.append(fullname)
@@ -27,17 +38,18 @@ def getFileList(path, ext, subdir = True ):
     else:
         return []
 
-Package_Name = "GAEPhotos_v0.1.zip"
+Package_Name = "GAEPhotos_v%s.zip"%(ReleaseVersion)
 Base_Path = os.path.abspath(os.path.dirname(os.path.realpath(__file__))) 
 
 included_exts = ["*.*"]
+excluded_exts = ["*.pyc","*.svn"]
 excluded_files = ["pack.py",Package_Name]   
     
 def package():
     zfile = zipfile.ZipFile(os.path.join(Base_Path,Package_Name), mode='w')
-    
+     
     for ext in included_exts:
-      filelist = getFileList(Base_Path, ext, True)
+      filelist = getFileList(Base_Path, ext, excluded_exts,  True)
       for f in filelist:
          writefiletozipwithrule(f, zfile)
 
