@@ -2,11 +2,25 @@
 {% load cctags %}
 
 {% block head_ex %} 
+<style type="text/css">
+   #copylink.active { background-color:#aaa; }
+</style>
+
 <script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery.blockUI.js"></script>
+<script type="text/javascript" src="/static/zeroclipboard/ZeroClipboard.js"></script>
 <script type="text/javascript">
 
 $(document).ready(function() {
+     ZeroClipboard.setMoviePath( '/static/zeroclipboard/ZeroClipboard.swf' );
+     var clip = new ZeroClipboard.Client();
+     
+     clip.addEventListener( 'mouseDown', function(client) { 
+            clip.setText( "{{gallery_settings.baseurl}}/showimage/{{photo.id}}/" );
+            } );
+     clip.glue("copylink");
+     
+     
 		var bind_delete = function()
 		{
 			$(".deletecoment").click(function() {
@@ -148,7 +162,7 @@ $(document).ready(function() {
         <li>|</li>
         <li><a href="/admin/delphoto/{{photo.id}}">{% translate "Delete this photo" %}</a></li> 
         <li>|</li>
-        <li><a id="setcover">{% translate "Set as Cover Photo" %}</a></li> 
+        <li><a href="#" id="setcover">{% translate "Set as Cover Photo" %}</a></li> 
         {% endif %}
 {% endblock %}
    
@@ -209,6 +223,7 @@ $(document).ready(function() {
 		             <tr><td>{% translate 'Size' %}:</td><td>{{photo.size|filesizeformat}}</td></tr>
 		             <tr><td>{% translate 'Date updated' %}:</td><td>{{photo.updatedate|date:"Y-m-d H:i"}} GMT</td></tr>
 		             <tr><td>{% translate 'Web address' %}:</td><td><input value="{{gallery_settings.baseurl}}/showimage/{{photo.id}}/" type="text" /></td></tr>
+                             <tr><td></td><td><input type="button" id="copylink" value="{% translate 'Copy Photo Link' %}"/></td></tr>
 		             </table>
 	             </div>
              </div>
