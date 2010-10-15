@@ -157,7 +157,7 @@ $(document).ready(function() {
 
 {% block commandbar %}
 		<li>|</li>
-        <li><a href="/showslider/{{album.name}}/">{% translate "Slide Show" %}</a></a></li>
+        <li><a href="/showslider/{{album.name}}/">{% translate "Slide Show" %}</a></li>
         {% if users.is_admin %}
         <li>|</li>
         <li><a href="/admin/delphoto/{{photo.id}}">{% translate "Delete this photo" %}</a></li> 
