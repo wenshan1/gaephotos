@@ -262,7 +262,10 @@ def saveAlbumInfo():
     if album:
         albumname = ccEscape(request.GET.get('albumname',None))
         description = ccEscape(request.GET.get('description',None))  
-        coverphotoid = long(request.GET.get('coverphotoid',0))
+        try:
+            coverphotoid = long(request.GET.get('coverphotoid',0))
+        except:
+            coverphotoid = 0
         public = request.GET.get("public")
         if public == "true":
             public = True

@@ -126,7 +126,7 @@ $(document).ready(function() {
 		                css: { border: '1px solid #60a0c0',width:"500px" } 
 		            });
 				  
-                $.getJSON("http://localhost:8080/admin/ajaxaction/?action=deletealbum",
+                $.getJSON("{{gallery_settings.baseurl}}/admin/ajaxaction/?action=deletealbum",
                     { 'albumid': $('#albumid').val(),'albumname': $('#name').val(), 
                     'description': $('#description').val(), 
                     'public': $("#public").attr('checked')},
