@@ -132,7 +132,18 @@ def album(albumname):
     if album:
         if not album.public and not checkAuthorization():
                 return returnerror(translate("You are not authorized"))
-        
+
+        if checkAuthorization():
+            try:
+                albums = Album.all().order("-updatedate")
+            except:
+                albums = Album.all()
+        else:
+            try:
+                albums = Album.GetPublicAlbums().order("-updatedate")
+            except:
+                albums = Album.GetPublicAlbums()
+
         try:    
             photos = album.GetPhotos()
             entries,pager = ccPager(query=photos,items_per_page=gallery_settings.thumbs_per_page).fetch(page_index)
@@ -143,6 +154,7 @@ def album(albumname):
         return returnerror(translate("Album does not exist"))
             
     content = {"album":album,
+               "albums":albums,
                "photos":entries,
                "pager": pager}
     
@@ -183,7 +195,19 @@ def photo(albumname, photoname):
     except:
         pass
     
+    if checkAuthorization():
+        try:
+            albums = Album.all().order("-updatedate")
+        except:
+            albums = Album.all()
+    else:
+        try:
+            albums = Album.GetPublicAlbums().order("-updatedate")
+        except:
+            albums = Album.GetPublicAlbums()
+
     content = {"album":album,
+               "albums":albums,
                "photo":photo,
                "prevphoto":prevphoto,"nextphoto":nextphoto,
                "current":current+1,"total":total,}

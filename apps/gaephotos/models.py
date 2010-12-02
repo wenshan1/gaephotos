@@ -262,6 +262,26 @@ class Photo(CCPhotoModel):
         if comment and comment.photo == self:
             comment.Delete()
 
+    def Move2Album(self, fromalbum, toalbum):
+        self.album = toalbum
+
+        if self.id in fromalbum.photoslist:
+            fromalbum.photoslist.remove(self.id)
+
+        if fromalbum.coverphotoid == self.id:
+            fromalbum.coverphotoid = 0
+
+        if not self.id in toalbum.photoslist:
+            toalbum.photoslist.insert(0,self.id)
+
+        self.album= toalbum
+
+        toalbum.put()
+        fromalbum.put()
+        self.updatedate = datetime.now()
+        self.put()
+
+
 class Comment(CCPhotoModel):
     author = db.StringProperty()
     date = db.DateTimeProperty(auto_now_add=True)
