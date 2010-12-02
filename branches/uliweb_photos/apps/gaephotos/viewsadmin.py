@@ -344,6 +344,47 @@ def deleteComment():
         return {"result":"error",
                      "msg":ccEscape(translate("Comment does not exist"))}
     
+
+def deletePhoto():
+    try:
+        idlist = (request.GET.get('idlist',''))
+        idlist = idlist.strip().split(',')
+        idlist = [id for id in idlist if id]
+        for photoid in idlist:
+            photo = Photo.GetPhotoByID(long(photoid))
+            if photo:
+                photo.Delete()
+        return {"result":"ok",
+                "photouid": photoid}
+    except:
+        return {"result":"error",
+                "msg":ccEscape(translate("Photo does not exist"))}
+
+
+def movePhoto():
+    idlist = (request.GET.get('idlist',''))
+    idlist = idlist.strip().split(',')
+    idlist = [id for id in idlist if id]
+    albumid = long(request.GET.get('albumid',0))
+    newalbumid = long(request.GET.get('newalbumid',0))
+    logging.info(albumid)
+    logging.info(newalbumid)
+    logging.info(idlist)
+
+    album = albumid and Album.GetAlbumByID(albumid)
+    newalbum = newalbumid and Album.GetAlbumByID(newalbumid)
+    if album and newalbum:
+        for photoid in idlist:
+            photo = Photo.GetPhotoByID(long(photoid))
+            if photo:
+                photo.Move2Album(album, newalbum)
+
+        return {"result":"ok",
+            "albumid": albumid}
+    else:
+        return {"result":"error",
+            "msg":ccEscape(translate("Album does not exist"))}
+
 @json
 @expose('/admin/ajaxaction/')
 def ajaxAction():
@@ -382,6 +423,12 @@ def ajaxAction():
         elif action == "deletecomment":
             return deleteComment()
             
+        elif action == "deletephoto":
+            return deletePhoto()
+
+        elif action == "movephoto":
+            return movePhoto()
+
         return {"result":"error",
                      "msg":ccEscape("no action")}
     
