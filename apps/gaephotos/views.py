@@ -213,7 +213,7 @@ def search():
         content = {"albums":entries,
                "allalbums": get_all_albums(),
                "pager": pager,
-               "album": ccDict({'name':'search'})}
+               "album": ccDict({'name':'search','id':0,})}
         response.template = "index.html"
         return content
     
@@ -226,7 +226,7 @@ def search():
         content = {"photos":entries,
                "pager": pager,
                "allalbums": get_all_albums(),
-               "album": ccDict({'name':'search'})}
+               "album": ccDict({'name':'search','id':0,})}
         response.template = "album.html"
         return content
 
