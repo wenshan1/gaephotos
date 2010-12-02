@@ -374,13 +374,12 @@ def movePhoto():
     logging.info(newalbumid)
     logging.info(idlist)
 
-    album = albumid and Album.GetAlbumByID(albumid)
     newalbum = newalbumid and Album.GetAlbumByID(newalbumid)
-    if album and newalbum:
+    if newalbum:
         for photoid in idlist:
             photo = Photo.GetPhotoByID(long(photoid))
             if photo:
-                photo.Move2Album(album, newalbum)
+                photo.Move2Album(newalbum)
 
         return {"result":"ok",
             "albumid": albumid}

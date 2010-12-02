@@ -262,8 +262,10 @@ class Photo(CCPhotoModel):
         if comment and comment.photo == self:
             comment.Delete()
 
-    def Move2Album(self, fromalbum, toalbum):
-        self.album = toalbum
+    def Move2Album(self, toalbum):
+        fromalbum = self.album
+        if fromalbum.id == toalbum.id:
+           return
 
         if self.id in fromalbum.photoslist:
             fromalbum.photoslist.remove(self.id)
