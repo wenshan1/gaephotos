@@ -77,20 +77,8 @@ def index():
     except:
         page_index = 1
     
-    if checkAuthorization():
-        try:
-            albums = Album.all().order("-updatedate")
-            entries,pager = ccPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
-        except:
-            albums = Album.all()
-            entries,pager = ccPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
-    else:
-        try:
-            albums = Album.GetPublicAlbums().order("-updatedate")
-            entries,pager = ccPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
-        except:
-            albums = Album.GetPublicAlbums()
-            entries,pager = ccPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
+    albums = get_all_albums()
+    entries,pager = ccPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
     
     try:
         latestcomments = Comment.all().order("-date").fetch(gallery_settings.latest_comments_count)    
@@ -101,6 +89,7 @@ def index():
                                           showprivate= checkAuthorization())
         
     content = {"albums":entries,
+               "allalbums":albums,
                "pager": pager,
                "latestcomments": latestcomments,
                "latestphotos": latestphotos}    
@@ -133,16 +122,7 @@ def album(albumname):
         if not album.public and not checkAuthorization():
                 return returnerror(translate("You are not authorized"))
 
-        if checkAuthorization():
-            try:
-                albums = Album.all().order("-updatedate")
-            except:
-                albums = Album.all()
-        else:
-            try:
-                albums = Album.GetPublicAlbums().order("-updatedate")
-            except:
-                albums = Album.GetPublicAlbums()
+        albums = get_all_albums()
 
         try:    
             photos = album.GetPhotos()
@@ -154,7 +134,7 @@ def album(albumname):
         return returnerror(translate("Album does not exist"))
             
     content = {"album":album,
-               "albums":albums,
+               "allalbums":albums,
                "photos":entries,
                "pager": pager}
     
@@ -195,19 +175,10 @@ def photo(albumname, photoname):
     except:
         pass
     
-    if checkAuthorization():
-        try:
-            albums = Album.all().order("-updatedate")
-        except:
-            albums = Album.all()
-    else:
-        try:
-            albums = Album.GetPublicAlbums().order("-updatedate")
-        except:
-            albums = Album.GetPublicAlbums()
+    albums = get_all_albums()
 
     content = {"album":album,
-               "albums":albums,
+               "allalbums":albums,
                "photo":photo,
                "prevphoto":prevphoto,"nextphoto":nextphoto,
                "current":current+1,"total":total,}
@@ -240,6 +211,7 @@ def search():
             
         entries,pager = ccPager(list=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
         content = {"albums":entries,
+               "allalbums": get_all_albums(),
                "pager": pager,
                "album": ccDict({'name':'search'})}
         response.template = "index.html"
@@ -253,6 +225,7 @@ def search():
         entries,pager = ccPager(list=photos,items_per_page=gallery_settings.thumbs_per_page).fetch(page_index)
         content = {"photos":entries,
                "pager": pager,
+               "allalbums": get_all_albums(),
                "album": ccDict({'name':'search'})}
         response.template = "album.html"
         return content
@@ -279,6 +252,7 @@ def slider(albumname):
             
     content = {"album":album,
                "photos":photos,
+               "allalbums": get_all_albums(),
                }
     return content
 

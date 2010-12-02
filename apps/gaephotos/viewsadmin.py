@@ -76,7 +76,8 @@ def globalsettings():
         else:
             pass
         
-    content = {"cachestats": ccDict(memcache.get_stats())}
+    content = {"cachestats": ccDict(memcache.get_stats()),
+               "allalbums": get_all_albums(),}
     response.template = 'admin/globalsettings.html'
     return content  
 
@@ -108,6 +109,7 @@ def albummanage():
     
     albums = Album.all()        
     content = {"albums": albums,
+               "allalbums": albums,
                }
     response.template = 'admin/album_manage.html'
     return content
@@ -193,6 +195,7 @@ def swfuploadphoto():
         
         content = {
                    "albums": albums,
+                   "allalbums": albums,
                    }
         response.template = 'admin/swfupload.html'
         return content

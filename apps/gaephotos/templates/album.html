@@ -90,8 +90,10 @@ $(document).ready(function() {
         <li>|</li>
         <li><a href="#" id="moveselected">{{=_("Move Selected to:") }}</a></li>
         <li><select id="selectalbum" name="selectalbum">
-                {{ for album in albums: }}
-                <option value="{{=album.id}}">{{=album.name}}</option>
+                {{ for album in allalbums: }}
+                <option value="{{=album.id}}">{{=album.name}}
+                {{ if not album.public: }} ({{ =_("private") }}) {{ pass }}
+                </option>
                 {{ pass }}
             </select>
         </li>

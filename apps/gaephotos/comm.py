@@ -52,6 +52,19 @@ def checkAuthorization():
     
     return False
 
+def get_all_albums(order="-updatedate"):
+    if checkAuthorization():
+        try:
+            albums = Album.all().order(order)
+        except:
+            albums = Album.all()
+    else:
+        try:
+            albums = Album.GetPublicAlbums().order(order)
+        except:
+            albums = Album.GetPublicAlbums()
+    return albums
+
 def requires_site_admin(method):
     @wraps(method)
     def wrapper(*args, **kwargs):
