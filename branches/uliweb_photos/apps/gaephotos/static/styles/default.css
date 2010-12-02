@@ -121,6 +121,24 @@ a img {
     color: #ff6600;
 }
 
+#dropmenu ul { display: none; }
+
+#dropmenu:hover ul {
+display: block;
+position: absolute;
+float: none;
+border: 1px solid black;
+background: none repeat scroll 0 0 #C6C6C6;
+margin: 0px;
+padding: 5px;
+width: 160px;
+z-index:200;
+}
+
+#dropmenu li {
+float: none;
+}
+
 /* Navigation */
 
 #navigation {
