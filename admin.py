@@ -50,7 +50,7 @@ def savephoto2DB(binary,album,filename, description, contenttype, owner):
         photo.binary_thumb = img.execute_transforms()
         photo.save()
     except:
-        logging.exception("create thumb error"+str(e))
+        logging.exception("create thumb error:")
     return photo
 
 
