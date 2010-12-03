@@ -40,9 +40,9 @@ def savephoto2DB(binary,album,filename, description, contenttype, owner):
     photo.width = img.width
     photo.height = img.height
     photo.contenttype = contenttype
-    photo.binary = binary
     photo.mime = contenttype
     photo.owner = owner
+    photo.Binary = binary
     photo.Save()
     
     img.resize(200, 200)

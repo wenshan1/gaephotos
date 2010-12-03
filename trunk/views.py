@@ -249,13 +249,16 @@ def showimg(request, photoid, mode="thumb"):
         if mode == "thumb":
             binary = photo.binary_thumb
             if not binary:
-                #img = images.Image(photo.binary)
-                #img.resize(200, 200)
-                #binary = img.execute_transforms()
-                binary = photo.binary
+                try:
+                    img = images.Image(photo.Binary)
+                    img.resize(200, 200)
+                    binary = img.execute_transforms()
+                except:
+                    logging.exception("get thumb error")
+                    binary = photo.Binary
             resp.headers['Content-Type'] = "image/png"
         else:
-            binary = photo.binary
+            binary = photo.Binary
             resp.headers['Content-Type'] = photo.contenttype
             
         resp.headers['Date'] = http_date()    
