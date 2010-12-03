@@ -142,10 +142,8 @@ class Album(CCPhotoModel):
         photo = Photo.GetPhotoByID(photoid)
         return photo
 
-class PhotoPart(CCPhotoModel):
-    binary = db.BlobProperty()
-    
-class Photo(CCPhotoModel):
+
+class Photo(CCPhotoModel): 
     album = db.ReferenceProperty(Album)
     
     name = db.StringProperty()
@@ -158,6 +156,7 @@ class Photo(CCPhotoModel):
     width = db.IntegerProperty()
     height = db.IntegerProperty()
     contenttype = db.StringProperty(multiline=False)
+    binary = db.BlobProperty()
     binarylist = db.ListProperty(long) 
     binary_thumb = db.BlobProperty()
     
@@ -215,20 +214,31 @@ class Photo(CCPhotoModel):
         return self.GetComments()
     
     @PROPERTY
-    def binary():
+    def Binary():
         def fget(self):
-            bin = StringIO()
-            for id in self.binarylist:
-                part = PhotoPart.get_by_id(id)
-                bin.write(part.binary)
-            return bin.getvalue()
+            if self.size > MAX_BLOD_SIZE and self.binarylist:
+                bin = StringIO()
+                for id in self.binarylist:
+                    part = PhotoPart.get_by_id(id)
+                    bin.write(part.binary)
+                return bin.getvalue()
+            else:
+                return self.binary
         def fset(self, bin):
             length = len(bin)
-            for i in range(0, length/MAX_BLOD_SIZE+1):
-                part = PhotoPart()
-                part.binary = bin[i*MAX_BLOD_SIZE:(i+1)*MAX_BLOD_SIZE]
-                part.put()
-                self.binarylist.append(part.id)
+            if length > MAX_BLOD_SIZE:
+                seq = 0
+                self.put()
+                for i in range(0, length/MAX_BLOD_SIZE+1):
+                    part = PhotoPart()
+                    part.binary = bin[i*MAX_BLOD_SIZE:(i+1)*MAX_BLOD_SIZE]
+                    part.photo = self
+                    part.seq = seq
+                    part.put()
+                    self.binarylist.append(part.id)
+                    seq += 1
+            else:
+                self.binary = bin
             self.put()    
         return locals()
         
@@ -251,6 +261,11 @@ class Photo(CCPhotoModel):
         if self.album.coverphotoid == self.id:
             self.album.coverphotoid = 0
             self.album.put()
+            
+        if self.binarylist:
+            for id in self.binarylist:
+               part = PhotoPart.get_by_id(id)
+               part.delete()
             
         for comment in self.Comments:
             comment.delete()
@@ -291,6 +306,11 @@ class Photo(CCPhotoModel):
         fromalbum.put()
         self.updatedate = datetime.now()
         self.put()
+
+class PhotoPart(CCPhotoModel):
+    binary = db.BlobProperty()
+    photo = db.ReferenceProperty(Photo)
+    seq = db.IntegerProperty()
 
 class Comment(CCPhotoModel):
     author = db.StringProperty()
