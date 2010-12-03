@@ -89,3 +89,6 @@ def ifle(parser, token):
 @register.tag
 def translate(parser, token):
     return do_translate(parser, token)
+@register.tag
+def _(parser, token):
+    return do_translate(parser, token)

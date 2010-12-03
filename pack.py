@@ -9,7 +9,7 @@ import stat,fnmatch
 import zipfile
 import hashlib
 
-ReleaseVersion = 0.2
+ReleaseVersion = 0.3
 
 def getFileList(path, ext, excluded_exts, subdir = True ):
     if os.path.exists(path):
@@ -21,9 +21,9 @@ def getFileList(path, ext, excluded_exts, subdir = True ):
             
             excluded = False
             for ex_ext in excluded_exts:
-               if fnmatch.fnmatch( fullname, ex_ext):
-                  excluded = True
-                  break
+                if fnmatch.fnmatch( fullname, ex_ext):
+                    excluded = True
+                    break
             if excluded:
                 continue
                 
@@ -49,9 +49,9 @@ def package():
     zfile = zipfile.ZipFile(os.path.join(Base_Path,Package_Name), mode='w')
      
     for ext in included_exts:
-      filelist = getFileList(Base_Path, ext, excluded_exts,  True)
-      for f in filelist:
-         writefiletozipwithrule(f, zfile)
+        filelist = getFileList(Base_Path, ext, excluded_exts,  True)
+        for f in filelist:
+            writefiletozipwithrule(f, zfile)
 
     zfile.close()
     

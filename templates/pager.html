@@ -4,11 +4,11 @@
 <div id="pager">
 <div class="alignleft">	
     {% if pager.prev %}
-	      <a href="?page=1">{% translate "First Page" %}</a>
+	      <a href="?page=1">{% _ "First Page" %}</a>
 		  {% for i in pager.lead %}
 		  <a href="?page={{i}}">{{i}}</a>
 		  {% endfor %}
-		  &laquo; <a href="?page={{ pager.prev}}">{% translate "Prev Page" %}</a>
+		  &laquo; <a href="?page={{ pager.prev}}">{% _ "Prev Page" %}</a>
 	 {% else %} 
 	    &nbsp;  
 	 {% endif %}
@@ -16,11 +16,11 @@
 <div class="aligncenter">{{pager.page_index}}/{{pager.page_count}}</div>
 <div class="alignright">
 	{% if pager.next %}
-		    <a href="?page={{ pager.next }}">{% translate "Next Page" %} &raquo;</a>
+		    <a href="?page={{ pager.next }}">{% _ "Next Page" %} &raquo;</a>
 			{% for i in pager.follow %}
 		    <a href="?page={{i}}">{{i}}</a>
 			{% endfor %}
-			<a href="?page={{pager.last}}">{% translate "Last Page" %}</a>
+			<a href="?page={{pager.last}}">{% _ "Last Page" %}</a>
 	{% endif %}
 </div>
 </div>

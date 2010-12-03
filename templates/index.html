@@ -11,12 +11,12 @@
         <!-- start content -->
         <div id="content">
         {% if not albums %}
-            {% translate "no album found" %}
+            {% _ "no album found" %}
         {% else %}
             {% for album in albums %}
              <li><div id="album">
                 <div><a href="/{{album.name}}/">{{album.name|truncate_chinese_words:20}}({{album.photoCount}})</a>
-                {% if not album.public %} ({% translate "private" %}) {% endif %}
+                {% if not album.public %} ({% _ "private" %}) {% endif %}
                 </div>
                 <div>{{album.updatedate|date:"Y-m-d"}}</div>
                 <div id="cover"><a href="/{{album.name}}/"><img src="/thumb/{{album.coverPhotoID}}.png"/></a></div>

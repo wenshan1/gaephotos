@@ -4,9 +4,9 @@
 <form  action="/search/" method="post">
     <input type="text" value="{{searchword}}" name="searchword" id="searchword"/>
     <select name="searchmode" id="searchmode">
-        <option value="album" {% ifeq searchmode "album" %}selected{% endifeq %}>{% translate "Album" %}</option>
-        <option value="photo" {% ifeq searchmode "photo" %}selected{% endifeq %}>{% translate "Photo" %}</option>
+        <option value="album" {% ifeq searchmode "album" %}selected{% endifeq %}>{% _ "Album" %}</option>
+        <option value="photo" {% ifeq searchmode "photo" %}selected{% endifeq %}>{% _ "Photo" %}</option>
     </select>
-    <button id="searchbtn" type="submit">{% translate "Search" %}</button>
+    <button id="searchbtn" type="submit">{% _ "Search" %}</button>
 </form>
 </div>

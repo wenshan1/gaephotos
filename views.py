@@ -36,22 +36,9 @@ def index(request):
         save_current_lang(lang)
         return HttpResponseRedirect(request.META.get('HTTP_REFERER','/'))
     
-         
-    if checkAuthorization():
-        try:
-            albums = Album.all().order("-updatedate")
-            entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
-        except:
-            albums = Album.all()
-            entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
-    else:
-        try:
-            albums = Album.GetPublicAlbums().order("-updatedate")
-            entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
-        except:
-            albums = Album.GetPublicAlbums()
-            entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
-    
+    albums = get_all_albums()
+    entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
+       
     try:
         latestcomments = Comment.all().order("-date").fetch(gallery_settings.latest_comments_count)    
     except:
@@ -62,6 +49,7 @@ def index(request):
         
     content = {"albums":entries,
                "pager": pager,
+               "allalbums":albums,
                "latestcomments": latestcomments,
                "latestphotos": latestphotos}
     return render_to_response_with_users_and_settings("index.html", content)
@@ -88,7 +76,9 @@ def album(request, albumname):
             
     content = {"album":album,
                "photos":entries,
-               "pager": pager}
+               "pager": pager,
+               "allalbums":get_all_albums(),
+               }
     
     return render_to_response_with_users_and_settings("album.html", content)
 
@@ -128,6 +118,7 @@ def photo(request, albumname, photoname):
     
     content = {"album":album,
                "photo":photo,
+               "allalbums":get_all_albums(),
                "prevphoto":prevphoto,"nextphoto":nextphoto,
                "current":current+1,"total":total,
                }
@@ -160,7 +151,8 @@ def search(request):
         entries,pager = CCPager(list=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
         content = {"albums":entries,
                "pager": pager,
-               "album": {'name':'search'}}
+               "allalbums":get_all_albums(),
+               "album": {'name':'search', 'id':0,}}
         return render_to_response_with_users_and_settings("index.html", content)
     
     elif searchmode == "photo":
@@ -171,7 +163,8 @@ def search(request):
         entries,pager = CCPager(list=photos,items_per_page=gallery_settings.thumbs_per_page).fetch(page_index)
         content = {"photos":entries,
                "pager": pager,
-               "album": {'name':'search'}}
+               "allalbums":get_all_albums(),
+               "album": {'name':'search', 'id':0,}}
         return render_to_response_with_users_and_settings("album.html", content)
 
 def feed(request):
@@ -179,8 +172,8 @@ def feed(request):
                                           showprivate= checkAuthorization())
                                           
     if latestphotos:
-       last_updated = latestphotos[0].updatedate
-       last_updated = last_updated.strftime("%Y-%m-%dT%H:%M:%SZ")
+        last_updated = latestphotos[0].updatedate
+        last_updated = last_updated.strftime("%Y-%m-%dT%H:%M:%SZ")
        
     content = {"last_updated": last_updated,
                "latestphotos": latestphotos,
@@ -201,98 +194,22 @@ def showslider(request, albumname):
         photos = Photo.SearchPhotos(searchword)
         if not checkAuthorization():
             photos = [photo for photo in photos if photo.album.public]
-        album = {'name':'search'}
+        album = {'name':'search', 'id':0,}
 
     else:
         return returnerror(translate("Album does not exist"))
             
     content = {"album":album,
                "photos":photos,
+               "allalbums":get_all_albums(),
                }
     return render_to_response_with_users_and_settings("slider.html", content)
 
 def showimage(request, photoid):
     return showimg(request,photoid, "image")
-#    resp = HttpResponse()
-#    try:
-#        key = "image_%s"%(long(photoid))
-#        
-#        cachedata = memcache.get(key)
-#        if cachedata:
-#            if not cachedata['public'] and not checkAuthorization():
-#                return returnerror(translate("You are not authorized"))
-#            
-#            resp.headers['Content-Type'] = cachedata['Content-Type']
-#            resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
-#            resp.write(cachedata['binary'])
-#            return resp
-#        
-#        photo = Photo.GetPhotoByID(long(photoid))
-#        if not photo.album.public and not checkAuthorization():
-#                return returnerror(translate("You are not authorized"))
-#            
-#        resp.headers['Content-Type'] = photo.contenttype
-#        resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
-#        resp.write(photo.binary)
-#        
-#        cachedata = {'Content-Type':photo.contenttype,
-#                     'binary':photo.binary,
-#                     'public':photo.album.public}
-#        memcache.set(key, cachedata, 20*24*3600)
-#        return resp
-#    except:
-#        url = "http://%s/static/images/error.gif"%os.environ["HTTP_HOST"]
-#        result = urlfetch.fetch(url, deadline=10)
-#        if result.status_code == 200:
-#            resp.headers['Content-Type'] = result.headers['Content-Type']
-#            resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
-#            resp.write(result.content)
-#            return resp
-#        return returnerror(translate("Get photo error"))
 
 def showthumb(request, photoid):
     return showimg(request,photoid, "thumb")
-#    resp = HttpResponse()
-#    try:
-#        resp.headers['Content-Type'] = "image/png"
-#        resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
-#        
-#        key = "thumb_%s"%(long(photoid))
-#        cachedata = memcache.get(key)
-#        
-#        if cachedata:
-#            if not cachedata['public'] and not checkAuthorization():
-#                return returnerror(translate("You are not authorized"))
-#            resp.write(cachedata['binary'])
-#            return resp
-#            
-#        photo = Photo.GetPhotoByID(long(photoid))
-#        if not photo.album.public and not checkAuthorization():
-#                return returnerror(translate("You are not authorized"))
-#            
-#        binary_thumb = photo.binary_thumb
-#        if not binary_thumb:
-#            img = images.Image(photo.binary)
-#            img.resize(200, 200)
-#            binary_thumb = img.execute_transforms()
-#            
-#        resp.write(binary_thumb)
-#
-#        cachedata = {'binary':binary_thumb,
-#                     'public':photo.album.public}
-#        memcache.set(key, cachedata, 20*24*3600)
-#        
-#        return resp
-#    except:
-#        url = "http://%s/static/images/error.gif"%os.environ["HTTP_HOST"]
-#        result = urlfetch.fetch(url, deadline=10)
-#        if result.status_code == 200:
-#            resp.headers['Content-Type'] = result.headers['Content-Type']
-#            resp.headers['Cache-control'] = "max-age=%d"%(3600*24*30*365)
-#            resp.write(result.content)
-#            return resp
-#        return returnerror(translate("Get photo error"))
-
     
 def showimg(request, photoid, mode="thumb"):
     cache_timeout = 3600*24*30
@@ -300,6 +217,7 @@ def showimg(request, photoid, mode="thumb"):
         key = "%s_%s"%(mode,long(photoid))
         cachedata = memcache.get(key)
         
+        #try to get from cache
         if cachedata and cachedata.get('etag',None):
             if not cachedata['public'] and not checkAuthorization():
                 return returnerror(translate("You are not authorized"))

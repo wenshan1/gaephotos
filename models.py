@@ -177,10 +177,10 @@ class Photo(CCPhotoModel):
         else:
             latestphtos = []
             for photo in allphotos:
-               if photo.isPublic:
-                   latestphtos.append(photo)
-               if len(latestphtos)>= num:
-                   return latestphtos
+                if photo.isPublic:
+                    latestphtos.append(photo)
+                if len(latestphtos)>= num:
+                    return latestphtos
             return latestphtos
     
     @staticmethod
@@ -244,6 +244,27 @@ class Photo(CCPhotoModel):
         comment = Comment.get_by_id(commentid)
         if comment and comment.photo == self:
             comment.Delete()
+            
+    def Move2Album(self, toalbum):
+        fromalbum = self.album
+        if fromalbum.id == toalbum.id:
+            return
+
+        if self.id in fromalbum.photoslist:
+            fromalbum.photoslist.remove(self.id)
+
+        if fromalbum.coverphotoid == self.id:
+            fromalbum.coverphotoid = 0
+
+        if not self.id in toalbum.photoslist:
+            toalbum.photoslist.insert(0,self.id)
+
+        self.album= toalbum
+
+        toalbum.put()
+        fromalbum.put()
+        self.updatedate = datetime.now()
+        self.put()
 
 class Comment(CCPhotoModel):
     author = db.StringProperty()

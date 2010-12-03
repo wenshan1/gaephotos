@@ -3,7 +3,7 @@
 
 {% block ex_navigation %} 
 <li>&gt;&gt;</li>
-<li><a href="/admin/uploadphoto/">{% translate "Add Photos" %}</a> </li>
+<li><a href="/admin/uploadphoto/">{% _ "Add Photos" %}</a> </li>
 {% endblock %}
 
 {% block commandbar %}
@@ -40,7 +40,7 @@
 				button_width: "120",
 				button_height: "29",
 				button_placeholder_id: "spanButtonPlaceHolder",
-				button_text: '<span class="size12">{% translate "Select Photos" %}</span>',
+				button_text: '<span class="size12">{% _ "Select Photos" %}</span>',
 				button_text_style: ".size16 { font-size: 12; }",
 				button_text_left_padding: 20,
 				button_text_top_padding: 5,
@@ -67,28 +67,28 @@
 	<form id="form1" action="" method="post" enctype="multipart/form-data">
 		<p></p>
 		{% if albums.count %}
-			<div id="div_selectphoto">{% translate "Select Album" %}: <select id="albumsSelect">
+			<div id="div_selectphoto">{% _ "Select Album" %}: <select id="albumsSelect">
 	        {% for album in albums %}
-		    <option value="{{album.name}}">{{album.name}}{% if not album.public %}({% translate "private" %}){% endif %}</option>
+		    <option value="{{album.name}}">{{album.name}}{% if not album.public %}({% _ "private" %}){% endif %}</option>
 		    {% endfor %}
 	  		</select>
 	  		</div>
 			<div id="div_button">
 				<span id="spanButtonPlaceHolder"></span>
-				<input id="btnCancel" type="button" value="{% translate 'Cancel All' %}" onclick="swfu.cancelQueue();" disabled="disabled" style="margin-left: 2px; font-size: 8pt; height: 29px;" />
+				<input id="btnCancel" type="button" value="{% _ 'Cancel All' %}" onclick="swfu.cancelQueue();" disabled="disabled" style="margin-left: 2px; font-size: 8pt; height: 29px;" />
 			</div>
 			<div id="divStatus"></div>
 			<div style="clear: both;">&nbsp;</div>
 			<div class="fieldset flash" id="fsUploadProgress">
-			<span class="legend">{% translate 'Photos Queue' %}</span>
+			<span class="legend">{% _ 'Photos Queue' %}</span>
 			</div>
 			<div id="upload_thumbs" class="fieldset flash">
-			<span class="legend">{% translate 'Thumbs' %}</span>
+			<span class="legend">{% _ 'Thumbs' %}</span>
 			<div id="upload_thumbs_container"></div>
 			</div>
 			
   		{% else %}
-  			<a href="/admin/album/">{% translate 'Create Album' %}</a>
+  			<a href="/admin/album/">{% _ 'Create Album' %}</a>
   		{% endif %}
   		<div style="clear: both;">&nbsp;</div>
 	</form>
