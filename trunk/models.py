@@ -2,6 +2,7 @@
 import os
 import logging
 from datetime import datetime
+from cStringIO import StringIO
 
 from google.appengine.ext import db
 from google.appengine.api import datastore
@@ -9,6 +10,10 @@ from google.appengine.api import datastore_errors
 from google.appengine.api import users
 from google.appengine.api import memcache
 
+def PROPERTY( function ):
+    return property( **function() )
+
+MAX_BLOD_SIZE = 1024*768  #768k
 
 class GallerySettings(db.Model):
     #domain = db.StringProperty(multiline=False)
@@ -136,7 +141,10 @@ class Album(CCPhotoModel):
             return None
         photo = Photo.GetPhotoByID(photoid)
         return photo
-        
+
+class PhotoPart(CCPhotoModel):
+    binary = db.BlobProperty()
+    
 class Photo(CCPhotoModel):
     album = db.ReferenceProperty(Album)
     
@@ -150,7 +158,7 @@ class Photo(CCPhotoModel):
     width = db.IntegerProperty()
     height = db.IntegerProperty()
     contenttype = db.StringProperty(multiline=False)
-    binary = db.BlobProperty() 
+    binarylist = db.ListProperty(long) 
     binary_thumb = db.BlobProperty()
     
     commentcount = db.IntegerProperty(default=0)
@@ -205,6 +213,24 @@ class Photo(CCPhotoModel):
     @property
     def Comments(self):
         return self.GetComments()
+    
+    @PROPERTY
+    def binary():
+        def fget(self):
+            bin = StringIO()
+            for id in self.binarylist:
+                part = PhotoPart.get_by_id(id)
+                bin.write(part.binary)
+            return bin.getvalue()
+        def fset(self, bin):
+            length = len(bin)
+            for i in range(0, length/MAX_BLOD_SIZE+1):
+                part = PhotoPart()
+                part.binary = bin[i*MAX_BLOD_SIZE:(i+1)*MAX_BLOD_SIZE]
+                part.put()
+                self.binarylist.append(part.id)
+            self.put()    
+        return locals()
         
     def Save(self):
         self.updatedate = datetime.now()

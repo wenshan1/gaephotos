@@ -50,7 +50,7 @@ def savephoto2DB(binary,album,filename, description, contenttype, owner):
         photo.binary_thumb = img.execute_transforms()
         photo.save()
     except:
-        pass
+        logging.exception("create thumb error"+str(e))
     return photo
 
 
@@ -76,8 +76,10 @@ def swfuploadphoto(request):
                 if not img_binary:
                     return returnjson({"result":ccEscape(translate("no image data"))}, resp)
                 
-                if len(img_binary) > 1024*1024:
-                    return returnjson({"result":ccEscape(translate("file size exceed 1M"))}, resp)
+                #logging.info("filelength: %s"%(len(img_binary)))
+                
+                if len(img_binary) > 1024*1024*8:
+                    return returnjson({"result":ccEscape(translate("file size exceed 8M"))}, resp)
                 
                 filename = request.POST.get("Filename")
                 if filename != filedata['filename']:
