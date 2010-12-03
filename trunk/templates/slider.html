@@ -6,7 +6,6 @@
 <!--link rel="stylesheet" href="/static/galleriffic/css/basic.css" type="text/css" /-->
 <link rel="stylesheet" href="/static/galleriffic/css/galleriffic-5.css" type="text/css" />
 <link rel="stylesheet" href="/static/galleriffic/css/black.css" type="text/css" />
-<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
 <script type="text/javascript" src="/static/galleriffic/js/jquery.history.js"></script>
 <script type="text/javascript" src="/static/galleriffic/js/jquery.galleriffic.js"></script>
 <script type="text/javascript" src="/static/galleriffic/js/jquery.opacityrollover.js"></script>
@@ -41,12 +40,12 @@ $(document).ready(function() {
 					loadingContainerSel:       '#loading',
 					renderSSControls:          true,
 					renderNavControls:         true,
-					playLinkText:              '{% translate "Play Slideshow" %}',
-					pauseLinkText:             '{% translate "Pause Slideshow" %}',
-					prevLinkText:              '&lsaquo; {% translate "Prev photo" %}',
-					nextLinkText:              '{% translate "Next photo" %} &rsaquo;',
-					nextPageLinkText:          '{% translate "Next Page" %} &rsaquo;',
-					prevPageLinkText:          '&lsaquo; {% translate "Prev Page" %}',
+					playLinkText:              '{% _ "Play Slideshow" %}',
+					pauseLinkText:             '{% _ "Pause Slideshow" %}',
+					prevLinkText:              '&lsaquo; {% _ "Prev photo" %}',
+					nextLinkText:              '{% _ "Next photo" %} &rsaquo;',
+					nextPageLinkText:          '{% _ "Next Page" %} &rsaquo;',
+					prevPageLinkText:          '&lsaquo; {% _ "Prev Page" %}',
 					enableHistory:             true,
 					autoStart:                 false,
 					syncTransitions:           true,
@@ -56,7 +55,7 @@ $(document).ready(function() {
 							.eq(prevIndex).fadeTo('fast', onMouseOutOpacity).end()
 							.eq(nextIndex).fadeTo('fast', 1.0);
 
-						$('#page').find('div.photo-index').html('{% translate "Photo" %} '+ (nextIndex+1) +'/'+ this.data.length);
+						$('#page').find('div.photo-index').html('{% _ "Photo" %} '+ (nextIndex+1) +'/'+ this.data.length);
 					},onPageTransitionOut:       function(callback) {
 						$('#thumbs ul.thumbs').fadeTo('fast', 0.0, callback);
 					},
@@ -132,7 +131,7 @@ $(document).ready(function() {
         
 {% block ex_navigation %} 
 <li>&gt;&gt;</li>
-<li><a href="">{% translate "Slide Show" %}</a></li>
+<li><a href="">{% _ "Slide Show" %}</a></li>
 {% endblock %}
         
 {% block commandbar %}
@@ -146,7 +145,7 @@ $(document).ready(function() {
             <div class="navigation-container">
             	<div id="thumbs" class="navigation">
             		<div style="clear: both;"></div>
-            		<a class="pageLink prev" style="visibility: hidden;" href="#" title="{% translate 'Prev Page' %}"></a>
+            		<a class="pageLink prev" style="visibility: hidden;" href="#" title="{% _ 'Prev Page' %}"></a>
             		<ul class="thumbs noscript">
 						{% for photo in photos %}
           				<li>
@@ -159,7 +158,7 @@ $(document).ready(function() {
           				</li>
             			{% endfor %}
 					</ul>
-					<a class="pageLink next" style="visibility: hidden;" href="#" title="{% translate 'Next Page' %}"></a>
+					<a class="pageLink next" style="visibility: hidden;" href="#" title="{% _ 'Next Page' %}"></a>
             	</div>
             	
             </div>

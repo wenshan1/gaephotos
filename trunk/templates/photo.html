@@ -5,8 +5,6 @@
 <style type="text/css">
    #copylink.active { background-color:#aaa; }
 </style>
-
-<script type="text/javascript" src="/static/js/jquery-1.3.2.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery.blockUI.js"></script>
 <script type="text/javascript" src="/static/zeroclipboard/ZeroClipboard.js"></script>
 <script type="text/javascript">
@@ -34,7 +32,7 @@ $(document).ready(function() {
 	                  		}
 	                  		else
 	                  		{
-	                  			alert('{% translate "error" %}: '+json.msg);
+	                  			alert('{% _ "error" %}: '+json.msg);
 	                  		}
 						});	
 			return false;
@@ -50,11 +48,11 @@ $(document).ready(function() {
                       function(json){ 
                             if(json.result == 'ok')
                             {
-                                alert('{% translate "Cover Photo Saved" %}');
+                                alert('{% _ "Cover Photo Saved" %}');
                             }
                             else
                             {
-                                alert('{% translate "error" %}: '+json.msg);
+                                alert('{% _ "error" %}: '+json.msg);
                             }
                         });     
 		});
@@ -72,7 +70,7 @@ $(document).ready(function() {
         	var old_desp = $("#desp_admin").html().replace(/(^\s*)|(\s*$)/g, "");
 			$("#desp_admin").show();
 			$("#despeditor").hide();
-			$("#desp_admin").html('{% translate "photo description is saving..." %}')
+			$("#desp_admin").html('{% _ "photo description is saving..." %}')
 			$.getJSON("{{gallery_settings.baseurl}}/admin/ajaxaction/?action=savephotodesp",
                     { 'photoid': {{photo.id}},
                       'description': $("#despcontent").val()},
@@ -83,7 +81,7 @@ $(document).ready(function() {
 	                  		}
 	                  		else
 	                  		{
-	                  			alert('{% translate "error" %}: '+json.msg);
+	                  			alert('{% _ "error" %}: '+json.msg);
 	                  			$("#desp_admin").html(old_desp);
 	                  		}
 						});	    
@@ -95,10 +93,10 @@ $(document).ready(function() {
 			$.each( comments, function(i,comment){
 	        	var comment_div = $('<div id="comment_entry" name="comment'+comment.id+'"></div>');
 	                  				
-	       		var p = $('<p>'+(i+1)+'. '+comment.author+' {% translate "posted on" %} '+ comment.date + '</p>');
+	       		var p = $('<p>'+(i+1)+'. '+comment.author+' {% _ "posted on" %} '+ comment.date + '</p>');
 	       		if(comment.admin)
 	       		{
-	       		  var ins = $('<ins class="deletecoment" name="delete'+comment.id+'"> {% translate "Delete" %}</ins>');
+	       		  var ins = $('<ins class="deletecoment" name="delete'+comment.id+'"> {% _ "Delete" %}</ins>');
 	       		  p.append(ins);
 	       		}
 				comment_div.append(p);
@@ -117,21 +115,21 @@ $(document).ready(function() {
         	var comment = $("#comment_content").val().replace(/(^\s*)|(\s*$)/g, "");
         	if(comment.length <=0 )
         	{
-        		alert('{% translate "Pls input content" %}!');
+        		alert('{% _ "Pls input content" %}!');
         		return false;
         	}
         	if(comment.length > 500 )
         	{
-        		alert('{% translate "comment can not over 500 chars" %}!');
+        		alert('{% _ "comment can not over 500 chars" %}!');
         		return false;
         	}
         	var author = $("#comment_author").val().replace(/(^\s*)|(\s*$)/g, "");
         	if(author.length <= 0)
         	{
-        		alert('{% translate "Pls input your name" %}');
+        		alert('{% _ "Pls input your name" %}');
         		return false;
         	}
-        	$.blockUI({message: '<h1>{% translate "comment is saving..." %}</h1>', 
+        	$.blockUI({message: '<h1>{% _ "comment is saving..." %}</h1>', 
 		                css: { border: '1px solid #60a0c0',width:"500px" } 
 		           	});	
 		    $.getJSON("{{gallery_settings.baseurl}}/admin/ajaxaction/?action=addcomment",
@@ -146,7 +144,7 @@ $(document).ready(function() {
 	                  		}
 	                  		else
 	                  		{
-	                  			alert('{% translate "error" %}: '+json.msg);
+	                  			alert('{% _ "error" %}: '+json.msg);
 	                  		}
 						});
 			return false;
@@ -157,12 +155,12 @@ $(document).ready(function() {
 
 {% block commandbar %}
 		<li>|</li>
-        <li><a href="/showslider/{{album.name}}/">{% translate "Slide Show" %}</a></li>
+        <li><a href="/showslider/{{album.name}}/">{% _ "Slide Show" %}</a></li>
         {% if users.is_admin %}
         <li>|</li>
-        <li><a href="/admin/delphoto/{{photo.id}}">{% translate "Delete this photo" %}</a></li> 
+        <li><a href="/admin/delphoto/{{photo.id}}">{% _ "Delete this photo" %}</a></li> 
         <li>|</li>
-        <li><a href="#" id="setcover">{% translate "Set as Cover Photo" %}</a></li> 
+        <li><a href="#" id="setcover">{% _ "Set as Cover Photo" %}</a></li> 
         {% endif %}
 {% endblock %}
    
@@ -178,14 +176,14 @@ $(document).ready(function() {
                 	    {% if photo.description %}
                 	    	{{photo.description}}
                 	    {% else %}
-                	    	{% translate "add description" %}
+                	    	{% _ "add description" %}
                 	    {% endif %}
                 	    </div>
                 	    <div id="despeditor" style="display: none;">
 							<textarea id="despcontent" rows="2">{{photo.description}}</textarea>
 							<div>
-							<input type="button" value="{% translate 'save' %}" name="{% translate 'save' %}" id="despsubmit"/>
-							<input type="button" value="{% translate 'cancel' %}" name="{% translate 'cancel' %}" id="despcancel"/>
+							<input type="button" value="{% _ 'save' %}" name="{% _ 'save' %}" id="despsubmit"/>
+							<input type="button" value="{% _ 'cancel' %}" name="{% _ 'cancel' %}" id="despcancel"/>
 							</div>
 						</div> 
                 	{% else %}
@@ -206,41 +204,41 @@ $(document).ready(function() {
 		            </div>
 		            <div> 
 	             	 {% if prevphoto %}
-		             <a href="/{{album.name}}/{{prevphoto.name}}">{% translate 'Prev photo' %}</a> 
+		             <a href="/{{album.name}}/{{prevphoto.name}}">{% _ 'Prev photo' %}</a> 
 		             {% endif %} 
 		             {{current}}/{{total}}  
 		             {% if nextphoto %}
-		             <a href="/{{album.name}}/{{nextphoto.name}}">{% translate 'Next photo' %}</a>
+		             <a href="/{{album.name}}/{{nextphoto.name}}">{% _ 'Next photo' %}</a>
 		             {% endif %} 
 		            </div> 
 	             </div>
 	             <div id="information">
 		             <table>
-		             <tr><td>{% translate 'Filename' %}:</td><td><div id="filename">{{photo.name}}</div></td></tr>
-		             <tr><td>{% translate 'Owner' %}:</td><td>{{photo.owner}}</td></tr>
-		             <tr><td>{% translate 'Type' %}:</td><td>{{photo.contenttype}}</td></tr>
-		             <tr><td>{% translate 'Dimensions' %}:</td><td>{{photo.width}}x{{photo.height}}</td></tr>
-		             <tr><td>{% translate 'Size' %}:</td><td>{{photo.size|filesizeformat}}</td></tr>
-		             <tr><td>{% translate 'Date updated' %}:</td><td>{{photo.updatedate|date:"Y-m-d H:i"}} GMT</td></tr>
-		             <tr><td>{% translate 'Web address' %}:</td><td><input value="{{gallery_settings.baseurl}}/showimage/{{photo.id}}/" type="text" /></td></tr>
-                             <tr><td></td><td><input type="button" id="copylink" value="{% translate 'Copy Photo Link' %}"/></td></tr>
+		             <tr><td>{% _ 'Filename' %}:</td><td><div id="filename">{{photo.name}}</div></td></tr>
+		             <tr><td>{% _ 'Owner' %}:</td><td>{{photo.owner}}</td></tr>
+		             <tr><td>{% _ 'Type' %}:</td><td>{{photo.contenttype}}</td></tr>
+		             <tr><td>{% _ 'Dimensions' %}:</td><td>{{photo.width}}x{{photo.height}}</td></tr>
+		             <tr><td>{% _ 'Size' %}:</td><td>{{photo.size|filesizeformat}}</td></tr>
+		             <tr><td>{% _ 'Date updated' %}:</td><td>{{photo.updatedate|date:"Y-m-d H:i"}} GMT</td></tr>
+		             <tr><td>{% _ 'Web address' %}:</td><td><input value="{{gallery_settings.baseurl}}/showimage/{{photo.id}}/" type="text" /></td></tr>
+                             <tr><td></td><td><input type="button" id="copylink" value="{% _ 'Copy Photo Link' %}"/></td></tr>
 		             </table>
 	             </div>
              </div>
              <div id="comment">
              <form method="post" id="comment_form">
-             <div id="addcomment">{% translate 'click me to post comment(most 500 chars)' %}:</div>
+             <div id="addcomment">{% _ 'click me to post comment(most 500 chars)' %}:</div>
              <div id="addcomment2" style="display:none;">
-             <div>{% translate 'name' %}: <input name="comment_author" id="comment_author" value="{{users.get_current_user.nickname}}" type="text" /> 
-             <button id="submitcomment">{% translate 'submit' %}</button></div>
+             <div>{% _ 'name' %}: <input name="comment_author" id="comment_author" value="{{users.get_current_user.nickname}}" type="text" /> 
+             <button id="submitcomment">{% _ 'submit' %}</button></div>
              <div><textarea name="comment_content" id="comment_content" rows="4" maxlength="500"></textarea></div>
              </div>
              </form>
              <div id="comment_container">
              {% for comment in photo.Comments %}
              	<div id="comment_entry" name="comment{{comment.id}}">
-                	<p>{{forloop.counter}}.  {{comment.author}} {% translate 'posted on' %} {{comment.date|date:"Y-m-d H:i"}} GMT 
-                	{% if users.is_admin %} <ins name="delete{{comment.id}}" class="deletecoment"> {% translate 'Delete' %}</ins> {%endif%}</p>
+                	<p>{{forloop.counter}}.  {{comment.author}} {% _ 'posted on' %} {{comment.date|date:"Y-m-d H:i"}} GMT 
+                	{% if users.is_admin %} <ins name="delete{{comment.id}}" class="deletecoment"> {% _ 'Delete' %}</ins> {%endif%}</p>
         			<h3> {{comment.content|linebreaks}}</h3>
         		</div>
              {% endfor %}

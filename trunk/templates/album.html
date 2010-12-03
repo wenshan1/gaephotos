@@ -2,9 +2,103 @@
 {% load ccfilters %}
 {% load cctags %}
 
+{% block head_ex %}
+{% if users.is_admin %}
+<script type="text/javascript" src="/static/js/jquery.blockUI.js"></script>
+<script type="text/javascript">
+var get_selected_photos  = function() {
+	var selected_id_list = new Array();
+    $.each($('.selectedphotos'), function() {
+            if ($(this).attr('checked')){
+                    selected_id_list.push(this.id);
+                }
+    });
+    return selected_id_list;
+};
+
+$(document).ready(function() {
+	$("#deleteselected").click(function() {
+		$("#page").block({ message: $('#deletequestion'), css: { width: '375px' } });
+    });
+	$('#deleteyes').click(function() {
+        var selected_id_list = get_selected_photos();
+        if (selected_id_list.length == 0){
+            $("#page").unblock();
+            return;
+        }
+
+        $("#page").block({message: '<h1>{% _ "Deleting Selected Photos..." %}</h1>',
+		                css: { border: '1px solid #60a0c0',width:"400px" }
+		            });
+        $.getJSON("{{gallery_settings.baseurl}}/admin/ajaxaction/?action=deletephoto",
+                { 'idlist': selected_id_list.join(',')},
+       	        function(json){
+                  	 if (json.result=='ok') {
+                  	 }
+                  	 else
+                  	 {
+                 	 	alert(json.msg);
+                  	 }
+                     window.location.reload();
+        });
+    });
+	$('#deleteno').click( function() {$("#page").unblock(); });
+
+
+    $("#moveselected").click(function() {
+		$("#page").block({message: '<h1>{% _ "Moving Selected Photos..." %}</h1>',
+		                css: { border: '1px solid #60a0c0',width:"400px" }
+		            });
+        var selected_id_list = get_selected_photos();
+        if (selected_id_list.length == 0){
+            $("#page").unblock();
+            return;
+        }
+
+        var ablumid = '{{album.id}}';
+        var newalbumid = $("#selectalbum option:selected").attr('value');
+        if (newalbumid == ablumid)
+        {
+            $("#page").unblock();
+            return;
+        }
+
+        $.getJSON("{{gallery_settings.baseurl}}/admin/ajaxaction/?action=movephoto",
+                { 'idlist': selected_id_list.join(','),
+                  'albumid': ablumid,
+                  'newalbumid': newalbumid},
+       	        function(json){
+                  	 if (json.result=='ok') {
+                  	 }
+                  	 else
+                  	 {
+                 	 	alert(json.msg);
+                  	 }
+                     window.location.reload();
+        });
+    });
+});
+</script>
+{% endif %}  
+{% endblock %}
+
 {% block commandbar %}
         <li>|</li>
-        <li><a href="/showslider/{{album.name}}/">{% translate "Slide Show" %}</a></a></li>
+        <li><a href="/showslider/{{album.name}}/">{% _ "Slide Show" %}</a></a></li>
+		{% if users.is_admin %}
+        <li>|</li>
+        <li><a href="#" id="deleteselected">{% _ "Delete Selected"%}</a></li>
+        <li>|</li>
+        <li><a href="#" id="moveselected">{% _ "Move Selected to:"%}</a></li>
+        <li><select id="selectalbum" name="selectalbum">
+                {% for ab in allalbums %}
+                <option value="{{ab.id}}">{{ab.name}}
+                {% if not ab.public %} ({% _ "private"%}) {% endif %}
+                </option>
+                {% endfor %}
+            </select>
+        </li>
+        {% endif %}
 {% endblock %}
    
 {% block page %}
@@ -13,16 +107,30 @@
         <!-- start content -->
         <div id="content">
         {% if not photos %}
-            {% translate "no photo found" %}
+            {% _ "no photo found" %}
         {% else %}
 	        {% for photo in photos %}
 	         <div id="thumb">
 	            <a href="/{{photo.album.name}}/{{photo.name}}"><img src="/thumb/{{photo.id}}.png"/></a>
-	            <div id="description">{{photo.description|truncate_chinese_words:30}}</div>
+	            <div id="description">
+				 {{photo.description|truncate_chinese_words:30}}
+				 {% if users.is_admin %}
+                 <input class="selectedphotos" id="{{photo.id}}" value="{{photo.id}}" type="checkbox"/>
+                 {% endif %}
+				</div>
 	         </div>
 	         {% endfor %}
          {% endif %}
          </div>
+		 
+		{% if users.is_admin %}
+         <div id="deletequestion" style="display:none; cursor: default; color: red;">
+           <h1>{% _ 'R you seriously delete selected photos?' %}</h1>
+           <input type="button" id="deleteno" value="{% _ 'No, I just try the button'%}" />
+           <input type="button" id="deleteyes" value="{% _ 'Yes, just delete it'%}" />
+        </div>
+        {% endif %}
+		
         <!-- end content -->
         {% include 'pager.html' %}
     <div style="clear: both;">&nbsp;</div>
