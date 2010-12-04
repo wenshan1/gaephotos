@@ -42,8 +42,12 @@ def savephoto2DB(binary,album,filename, description, contenttype, owner):
     photo.contenttype = contenttype
     photo.mime = contenttype
     photo.owner = owner
-    photo.Binary = binary
-    photo.Save()
+    try:
+        photo.Binary = binary
+        photo.Save()
+    except:
+        photo.Delete()
+        raise
     
     img.resize(200, 200)
     try:
@@ -85,6 +89,7 @@ def swfuploadphoto(request):
                 if filename != filedata['filename']:
                     return returnjson({"result":ccEscape("POST filename %s != FILES filename %s" %(filename, filedata['filename'])) }, resp)
                 
+                filename = filename.replace(" ","_")
                 if filename.find(" ") != -1:
                     return returnjson({"result":ccEscape(translate("filename can not contain space"))}, resp)
                 filename = ccEscape(filename)               
@@ -127,6 +132,7 @@ def swfuploadphoto(request):
         return render_to_response_with_users_and_settings('admin/swfupload.html',content)
     except Exception,e:
         logging.exception("upload error "+str(e))
+        return returnerror(str(e))
         
 @requires_site_admin
 def delphoto(request, photoid):
@@ -178,7 +184,7 @@ def settings(request):
             gallery_settings.thumbs_per_page = thumbs_per_page
             gallery_settings.latest_photos_count = latest_photos_count
             gallery_settings.latest_comments_count = latest_comments_count
-            gallery_settings.adminlist = adminlist
+            gallery_settings.adminlist = adminlist.replace(",",";")
             gallery_settings.save()
         elif default:
             defaultSettings()
@@ -190,6 +196,8 @@ def settings(request):
                 photo.delete()
             for album in Album.all():
                 album.delete()
+            for part in PhotoPart.all():
+                part.delete()
             memcache.flush_all()
         elif clearcache:
             memcache.flush_all()
@@ -290,6 +298,8 @@ def clearAlbumPhotos(request, resp):
     if album:
         for photo in album.GetPhotos():
             photo.Delete()
+        album.photoslist = []
+        album.put()
         album = Album.GetAlbumByID(id)
         return returnjson({"result":"ok",
                            "album":Album2Dict(album),

@@ -196,6 +196,8 @@ def requires_site_admin(method):
     return wrapper        
         
 def checkAuthorization():
+    if users.is_current_user_admin():
+        return True
     user = users.get_current_user()
     if not user:
         return False
@@ -210,9 +212,6 @@ def checkAuthorization():
     for admin in adminlist:
         if admin == email:
             return True
-    
-    if users.is_current_user_admin():
-        return True
     
     return False
         
