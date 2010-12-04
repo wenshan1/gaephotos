@@ -104,8 +104,13 @@ def photo(request, albumname, photoname):
         content = ccEscape(request.POST.get("comment_content"))
         photo.AddComment(author, content)
         return HttpResponseRedirect((u"/%s/%s"%(albumname,photoname )).encode("utf-8"))
-        
-    current = album.photoslist.index(photo.id)
+    
+    try:    
+        current = album.photoslist.index(photo.id)
+    except ValueError:
+        album.photoslist.insert(0,self.id)
+        album.put()
+        current = album.photoslist.index(photo.id)
     total = album.photoCount
     prevphoto = None
     if current:
@@ -188,7 +193,7 @@ def showslider(request, albumname):
         try:    
             photos = album.GetPhotos()
         except:
-            photos = album.GetPhotos("")
+            photos = Photo.get_by_id(album.photoslist)
     elif albumname == 'search':
         searchword = get_cookie("gaephotos-searchword","")
         photos = Photo.SearchPhotos(searchword)
