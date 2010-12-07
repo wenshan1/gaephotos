@@ -228,7 +228,8 @@ class Photo(CCPhotoModel):
             length = len(bin)
             if length > MAX_BLOD_SIZE:
                 seq = 0
-                self.put()
+                if not self.is_saved():
+                    self.put()
                 for i in range(0, length/MAX_BLOD_SIZE+1):
                     part = PhotoPart()
                     part.binary = bin[i*MAX_BLOD_SIZE:(i+1)*MAX_BLOD_SIZE]
@@ -239,7 +240,6 @@ class Photo(CCPhotoModel):
                     seq += 1
             else:
                 self.binary = bin
-            self.put()    
         return locals()
         
     def Save(self):
@@ -313,7 +313,7 @@ class Photo(CCPhotoModel):
         binary = cachedata['binary']
         length = len(binary)
         if length > memcache.MAX_VALUE_SIZE*0.9:
-            logging.info('Set Big Cache %s'%self.name)
+            logging.info('Set Big Cache %s %s'%(length,self.name))
             seq = 0
             cachedata['binary']=[]
             for i in range(0, length/memcache.MAX_VALUE_SIZE+1):
@@ -341,7 +341,7 @@ class Photo(CCPhotoModel):
                 bin.write(binpart)
             data['binary'] = bin.getvalue()
             bin.close()
-            logging.info('Get Big Cache %s'%self.name)
+            logging.info('Get Big Cache %s %s'%(len(data['binary']),self.name))
             return data
         else:
             return data
