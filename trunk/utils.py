@@ -19,7 +19,7 @@ from django.shortcuts import render_to_response
 from django.utils import simplejson
 from django.utils.html import escape
 from django.template import loader
-from django.http import HttpResponse
+from django.http import HttpResponse,HttpRequest
 
 from cc_addons.language import translate 
 from models import *
@@ -281,26 +281,50 @@ def getImageType(binary):
     else:
         return ImageMime.UNKNOWN        
         
-def pagecache(method):
-    @wraps(method)
-    def _wrapper(*args, **kwargs):
-        request = args[0]
-        if request.POST or request.FILES:
-            resp = method(*args, **kwargs)
-            return resp
+#def pagecache(method):
+    #@wraps(method)
+    #def _wrapper(*args, **kwargs):
+        #request = args[0]
+        #if request.POST or request.FILES:
+            #resp = method(*args, **kwargs)
+            #return resp
         
-        key = "html:" + request.META["PATH_INFO"]+ request.META["QUERY_STRING"]  
-        resp = memcache.get(key)
-        if resp is not None:
-            return resp
-        else:
-            resp = method(*args, **kwargs)
-            if resp.status_code == 200:
-                if not memcache.set(key, resp, 60):
-                    logging.error("Memcache set failed.")
-            return resp
-    return _wrapper        
+        #key = "html:" + request.META["PATH_INFO"]+ request.META["QUERY_STRING"]  
+        #resp = memcache.get(key)
+        #if resp is not None:
+            #return resp
+        #else:
+            #resp = method(*args, **kwargs)
+            #if resp.status_code == 200:
+                #if not memcache.set(key, resp, 60):
+                    #logging.error("Memcache set failed.")
+            #return resp
+    #return _wrapper        
 
-        
-        
-        
+def pagecache(keyprefix, time=60*60):
+    def _decorator(method):
+        def _wrapper(*args, **kwargs):
+            if len(args) == 0:
+                return method(*args, **kwargs)
+            request = args[0]
+            if not issubclass( type(request), HttpRequest):
+                return method(*args, **kwargs)
+            if request.method == "POST":
+                return method(*args, **kwargs)
+            
+            key = "%s_%s?%s_%s"%(keyprefix, request.path, 
+                              request.META.get('QUERY_STRING',''),
+                              checkAuthorization())
+            key = key.replace(' ','_')
+            data = memcache.get(key)
+            if data is not None:
+                logging.info("get %s from cache"%key)
+                return data
+            data = method(*args, **kwargs)
+            memcache.set(key, data, time)
+            PageCacheStat.Add(key)
+            return data
+        return _wrapper
+    return _decorator
+
+

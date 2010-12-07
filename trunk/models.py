@@ -306,6 +306,45 @@ class Photo(CCPhotoModel):
         fromalbum.put()
         self.updatedate = datetime.now()
         self.put()
+        
+    def SetCache(self, cachedata, mode, time=20*24*3600):
+        key = "%s_%s"%(mode,self.id)
+        
+        binary = cachedata['binary']
+        length = len(binary)
+        if length > memcache.MAX_VALUE_SIZE*0.9:
+            logging.info('Set Big Cache %s'%self.name)
+            seq = 0
+            cachedata['binary']=[]
+            for i in range(0, length/memcache.MAX_VALUE_SIZE+1):
+                partkey = "%s_part_%s"%(key,i)
+                partbin = binary[i*memcache.MAX_VALUE_SIZE:(i+1)*memcache.MAX_VALUE_SIZE]
+                memcache.set(partkey, partbin, time)
+                cachedata['binary'].append(partkey)
+            
+            memcache.set(key, cachedata)
+        else:
+            memcache.set(key, cachedata, time)
+    
+    def GetCache(self, mode):
+        key = "%s_%s"%(mode,self.id)
+        data = memcache.get(key)
+        if not data:
+            return None
+        if isinstance(data['binary'], list):
+            partslist = data['binary']
+            bin = StringIO()
+            for partkey in partslist:
+                binpart = memcache.get(partkey, None)
+                if not binpart:
+                    return None
+                bin.write(binpart)
+            data['binary'] = bin.getvalue()
+            bin.close()
+            logging.info('Get Big Cache %s'%self.name)
+            return data
+        else:
+            return data
 
 class PhotoPart(CCPhotoModel):
     binary = db.BlobProperty()
@@ -334,6 +373,23 @@ class Comment(CCPhotoModel):
             self.photo.commentcount-=1
             self.photo.put()
         self.delete()
+        
+class PageCacheStat(CCPhotoModel):
+    cachekey = db.BlobProperty()
     
+    @staticmethod
+    def CleanPageCache():
+        #clean all cache
+        keylist = []
+        for s in PageCacheStat.all():
+            keylist.append(s.cachekey)
+            s.delete()
+        memcache.delete_multi(list(set(keylist)))
+        
+    @staticmethod
+    def Add(key):
+        s = PageCacheStat()
+        s.cachekey = key
+        s.put()
     
     

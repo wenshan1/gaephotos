@@ -118,6 +118,9 @@ def swfuploadphoto(request):
                 res = {}
                 res["result"]="ok"
                 res["id"] = photo.id
+                
+                PageCacheStat.CleanPageCache()
+                
                 return returnjson(res, resp)
         
         if checkAuthorization():
@@ -127,7 +130,7 @@ def swfuploadphoto(request):
         
         content = {
                    "albums": albums,
-                   "allalbums": get_all_albums(),
+                   "allalbums": albums,
                    }
         return render_to_response_with_users_and_settings('admin/swfupload.html',content)
     except Exception,e:
@@ -142,6 +145,7 @@ def delphoto(request, photoid):
         index = (photoslist.index(photo.id)+1) % len(photoslist)
         photo2 = Photo.GetPhotoByID(photoslist[index])
         photo.Delete()
+        PageCacheStat.CleanPageCache()
         if photo2:
             return HttpResponseRedirect((u"/%s/%s"%(photo.album.name, photo2.name)).encode("utf-8"))
         else:
@@ -176,6 +180,8 @@ def settings(request):
         default = (request.POST.get("default"))
         clear = (request.POST.get("clear"))
         clearcache = (request.POST.get("clearcache"))
+        
+        PageCacheStat.CleanPageCache()
         
         if save:
             gallery_settings.title = title
@@ -224,7 +230,6 @@ def addComment(request, resp):
                    "msg":ccEscape(translate("You are not authorized to access this photo"))}, resp)
         
         photo.AddComment(author, comment_content)
-        logging.info( buildComments(photo.GetComments()) )
         return returnjson({"result":"ok",
                  "comments": buildComments(photo.GetComments())}, resp)
 
@@ -399,6 +404,8 @@ def ajaxAction(request):
         action = request.GET.get('action',None)
         logging.info(action)
         
+        PageCacheStat.CleanPageCache()
+        
         if action == "addcomment":
             return addComment(request,resp)
         
@@ -442,6 +449,9 @@ def ajaxAction(request):
 @requires_site_admin
 def albummanage(request):
     if request.POST:
+        
+        PageCacheStat.CleanPageCache()
+        
         new = request.POST.get("createalbum")
         if new:  #create album
             new_name = ccEscape(request.POST.get("new_name"))
