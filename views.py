@@ -20,7 +20,8 @@ from cc_addons.language import *
 from settings import *
 from models import *
 from utils import *
-    
+
+@pagecache("index")
 def index(request):
     global gallery_settings
     if not gallery_settings:
@@ -54,6 +55,7 @@ def index(request):
                "latestphotos": latestphotos}
     return render_to_response_with_users_and_settings("index.html", content)
 
+@pagecache("album")
 def album(request, albumname):
     try:
         page_index = int(request.GET['page'])
@@ -82,6 +84,7 @@ def album(request, albumname):
     
     return render_to_response_with_users_and_settings("album.html", content)
 
+@pagecache("photo")
 def photo(request, albumname, photoname):
     if albumname=="search":
         photo = Photo.GetPhotoByName(ccEscape(photoname))
@@ -172,6 +175,7 @@ def search(request):
                "album": {'name':'search', 'id':0,}}
         return render_to_response_with_users_and_settings("album.html", content)
 
+@pagecache("feed")
 def feed(request):
     latestphotos = Photo.GetLatestPhotos(num=gallery_settings.latest_photos_count,
                                           showprivate= checkAuthorization())
@@ -185,6 +189,7 @@ def feed(request):
                "gallery_settings": gallery_settings}
     return render_to_atom("atom.xml", content)
 
+@pagecache("showslider")
 def showslider(request, albumname):
     album = Album.GetAlbumByName(ccEscape(albumname))
     if album:
@@ -220,7 +225,13 @@ def showimg(request, photoid, mode="thumb"):
     cache_timeout = 3600*24*30
     try:
         key = "%s_%s"%(mode,long(photoid))
-        cachedata = memcache.get(key)
+        
+        photo = Photo.GetPhotoByID(long(photoid))
+        if not photo:
+            return returnerror(translate("Photo does not exist"))
+        
+        #cachedata = memcache.get(key)
+        cachedata = photo.GetCache(mode)
         
         #try to get from cache
         if cachedata and cachedata.get('etag',None):
@@ -245,7 +256,6 @@ def showimg(request, photoid, mode="thumb"):
             return resp
         
         #no cache
-        photo = Photo.GetPhotoByID(long(photoid))
         if not photo.album.public and not checkAuthorization():
                 return returnerror(translate("You are not authorized"))
             
@@ -287,7 +297,8 @@ def showimg(request, photoid, mode="thumb"):
             cachedata.update( {'Content-Type':photo.contenttype} )
                 
         try:
-            memcache.set(key, cachedata, 20*24*3600)
+            #memcache.set(key, cachedata, 20*24*3600)
+            photo.SetCache(cachedata, mode)
         except:
             logging.exception("memcache set error")
         
