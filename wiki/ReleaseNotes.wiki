@@ -1,0 +1,15 @@
+#Release notes
+
+= Latest Version=
+
+V0.3:
+
+  # Increase photo size limit from 1M to 8M.
+  # Support multi move/delete photos.
+
+= History =
+V0.21: Some bugs fixed.
+
+V0.2: Rss feed support.
+
+V0.1: Init release.
