@@ -264,8 +264,8 @@ class Photo(CCPhotoModel):
             
         if self.binarylist:
             for id in self.binarylist:
-               part = PhotoPart.get_by_id(id)
-               part.delete()
+                part = PhotoPart.get_by_id(id)
+                part.delete()
             
         for comment in self.Comments:
             comment.delete()
@@ -346,10 +346,12 @@ class Photo(CCPhotoModel):
         else:
             return data
 
+
 class PhotoPart(CCPhotoModel):
     binary = db.BlobProperty()
     photo = db.ReferenceProperty(Photo)
     seq = db.IntegerProperty()
+
 
 class Comment(CCPhotoModel):
     author = db.StringProperty()
@@ -373,6 +375,7 @@ class Comment(CCPhotoModel):
             self.photo.commentcount-=1
             self.photo.put()
         self.delete()
+
         
 class PageCacheStat(CCPhotoModel):
     cachekey = db.BlobProperty()
