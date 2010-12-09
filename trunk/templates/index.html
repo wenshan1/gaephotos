@@ -11,7 +11,8 @@
         <!-- start content -->
         <div id="content">
         {% if not albums %}
-            {% _ "no album found" %}
+            {% _ "no album found" %}  
+            &nbsp;&nbsp;<a href="/admin/album/">{% _ 'Create Album' %}</a>
         {% else %}
             {% for album in albums %}
              <li><div id="album">

@@ -141,12 +141,14 @@ def swfuploadphoto(request):
 @requires_site_admin
 def uploadv2(request):
     try:
+        resp = HttpResponse()
         if request.POST:
-            resp = HttpResponse()
             fileinfo = request.META.get('HTTP_CONTENT_DISPOSITION','')
             
             if not fileinfo:
                 return returnjson({"result":ccEscape(translate("no upload file"))}, resp)
+            
+            fileinfo = simplejson.loads(fileinfo)
             
             img_binary = request.raw_post_data
             if not img_binary:
@@ -155,13 +157,13 @@ def uploadv2(request):
             if len(img_binary) > 1024*1024*8:
                 return returnjson({"result":ccEscape(translate("file size exceed 8M"))}, resp)
             
-            filename = fileinfo.split(';')[1].strip()
+            filename = fileinfo["filename"]
             filename = filename.replace(" ","_")
             if filename.find(" ") != -1:
                 return returnjson({"result":ccEscape(translate("filename can not contain space"))}, resp)
             filename = ccEscape(filename)    
             
-            albumid = long(fileinfo.split(';')[0])
+            albumid = long(fileinfo["albumid"])
             
             album = Album.GetAlbumByID(albumid)
             if not album:
@@ -181,6 +183,8 @@ def uploadv2(request):
                 
             res = {}
             res["result"]="ok"
+            res["photoid"] = photo.id
+            res["albumid"] = albumid
             
             PageCacheStat.CleanPageCache()
             
@@ -189,7 +193,7 @@ def uploadv2(request):
             return returnjson({"result":ccEscape(translate("no upload file"))}, resp)
     except Exception,e:
         logging.exception("uploadv2 error:")
-        raise e
+        return returnjson({"result":"Exception:"+str(e)}, resp)
     
 @requires_site_admin
 def delphoto(request, photoid):
