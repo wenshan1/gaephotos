@@ -15,77 +15,29 @@ var TCNDDU = TCNDDU || {};
 	
 		dropListing = document.getElementById("content");
 		dropContainer = document.getElementById("page");
+		savedBackColor = dropContainer.style.backgroundColor;
                 
 		dropContainer.addEventListener("dragenter", function(event){
 			event.stopPropagation();event.preventDefault();
-			dropContainer.style.backgroundColor = "red";
+			dropContainer.style.backgroundColor = "#CDEB8B";
 		}, false);
 		dropContainer.addEventListener("dragover", function(event){
 			event.stopPropagation();event.preventDefault();
-			dropContainer.style.backgroundColor = "red";
+			dropContainer.style.backgroundColor = "#CDEB8B";
 		}, false);
 		dropContainer.addEventListener("dragleave", function(event){
 			event.stopPropagation();event.preventDefault();
-			dropContainer.style.backgroundColor = "transparent";
+			dropContainer.style.backgroundColor = savedBackColor;
 		}, false);
 		dropContainer.addEventListener("drop", function(event){
 			event.stopPropagation();event.preventDefault();
-			dropContainer.style.backgroundColor = "transparent";
+			dropContainer.style.backgroundColor = savedBackColor;
 			TCNDDU.handleDrop(event);
 		}, false);
 	};
-            
-	TCNDDU.uploadError = function (error) {
-		console.log("error: " + error.code);
-	};
-            
-	TCNDDU.processXHR = function (container, file, index, bin) {
-        var xhr = new 
-			XMLHttpRequest(),
-			//container = document.getElementById("item"+index),
-			fileUpload = xhr.upload,
-			progressBarWidth;
-		
-		progressDomElements = [
-			document.createElement('div'),
-			document.createElement('p')
-		];
-		progressDomElements[0].className = "progressBar";
-		progressDomElements[1].textContent = "0%";
-		progressDomElements[0].appendChild(progressDomElements[1]);
-		container.appendChild(progressDomElements[0]);
-		fileUpload.log = container;
-		
-		progressBarWidth = progressDomElements[0].clientWidth;
-		
-		fileUpload.addEventListener("progress", function(event) {
-			if (event.lengthComputable) {
-				var percentage = Math.round((event.loaded * 100) / event.total),
-				loaderIndicator = container.firstChild.nextSibling.nextSibling.firstChild;
-				if (percentage < 100) {
-					loaderIndicator.style.width = (percentage*progressBarWidth/100) + "px";
-					loaderIndicator.textContent = percentage + "%";
-				}
-			}
-		}, false);
-		
-		fileUpload.addEventListener("load", function(event) {
-			container.className = "loaded";
-		}, false);
-		
-		fileUpload.addEventListener("error", TCNDDU.uploadError, false);
-		
-		xhr.open("POST", "/admin/uploadv2/");
-		xhr.overrideMimeType('text/plain; charset=x-user-defined-binary'); 
-		xhr.setRequestHeader('Content-Disposition', {{album.id}}+';'+file.name);
-		xhr.sendAsBinary(bin);
-		/*if(xhr.sendAsBinary) xhr.sendAsBinary(bin);	
-		else xhr.send(file);*/
-	};
-            
+	
 	TCNDDU.handleDrop = function (event) {
-		var dt = event.dataTransfer,
-		    files = dt.files,
+		var files = event.dataTransfer.files,
 		    count = files.length;
                 
 		for (var i = 0; i < count; i++) { 
@@ -93,52 +45,130 @@ var TCNDDU = TCNDDU || {};
 				var file = files[i],
 					droppedFileName = file.name,
 					reader = new FileReader();
+					
 				reader.index = i;
 				reader.file = file;
-				
-		   		reader.addEventListener("loadend", TCNDDU.buildImageListItem, false);
+				reader.onload = function(evt){ TCNDDU.buildImageListItem(evt);} 
 			    reader.readAsDataURL(file);
-				
 		    } 
 			else {
-		        alert("file is too big, needs to be below 8mb");
-		    } 
-		}
+		        alert('{% _ "file size exceed 8M" %}');
+		    } /*end if*/
+		} /*end for*/
 	};
-            
+	
 	TCNDDU.buildImageListItem = function (event) {
-        var domElements = [
-			document.createElement('div'),
-			document.createElement('a'),
-			document.createElement('img'),
-			document.createElement('div')
-		];      
+        var thumb =	document.createElement('div'),
+			a = document.createElement('a'),
+			photo = document.createElement('img'),
+			description = document.createElement('div');
+    
 		var data = event.target.result, 
 			index = event.target.index, 
 			file = event.target.file, 
 			imgPreviewFragment = document.createDocumentFragment(),
 			getBinaryDataReader = new FileReader();
 			
+		description.id = "description";	
 			
-		domElements[2].src = data; // base64 encoded string of local file(s) 
-		domElements[1].appendChild(domElements[2]); 
-		domElements[1].href = "/{{album.name}}/"+file.name;
-		domElements[3].id = "description";
-		domElements[0].id = "thumb"; 
-		domElements[0].appendChild(domElements[1]); 
-		domElements[0].appendChild(domElements[3]);
-		domElements[0].className = "loading";
+		photo.src = data; // base64 encoded string of local file(s) 
+		a.href = "/{{album.name}}/"+file.name.replace(/ /g,'_');
+		a.appendChild(photo); 
 		
-		imgPreviewFragment.appendChild(domElements[0]); 
+		thumb.appendChild(a); 
+		thumb.appendChild(description);
+		thumb.id = "thumb"; 
+		thumb.className = "loading";
 		
-		dropListing.appendChild(imgPreviewFragment); 
+		imgPreviewFragment.appendChild(thumb); 
 		
-		getBinaryDataReader.addEventListener("loadend", function(evt){
-			TCNDDU.processXHR(domElements[0], file, index, evt.target.result);
-	    }, false);
+		dropListing.insertBefore(imgPreviewFragment, dropListing.firstChild); 
+				
+		getBinaryDataReader.onload = function(evt){ 
+				TCNDDU.processXHR(thumb, file, index, evt.target.result);
+		};
 		getBinaryDataReader.readAsBinaryString(file);
 	};
+	   
+	TCNDDU.processXHR = function (div_thumb, file, index, bin) {
+        var xhr = new XMLHttpRequest(),
+			fileUpload = xhr.upload,
+		    progressBar = document.createElement('div'),
+			percentP = document.createElement('p'),
+			progressBarWidth;
+		
+		percentP.textContent = "0%";
+		progressBar.className = "progressBar";
+		progressBar.appendChild(percentP);
+		div_thumb.appendChild(progressBar);
+		
+		var loaderIndicator = percentP;
+		
+		fileUpload.log = div_thumb;
+		
+		progressBarWidth = progressBar.clientWidth;
+		
+		fileUpload.addEventListener("progress", function(event) {
+			if (event.lengthComputable) {
+				var percentage = Math.round((event.loaded * 100) / event.total);
+				percentage = percentage - 1;
+				if (percentage < 100) {
+					loaderIndicator.style.width = (percentage*progressBarWidth/100) + "px";
+					loaderIndicator.textContent = percentage + "%";
+				}
+			}
+		}, false);
+		
+		
+		fileUpload.addEventListener("error", TCNDDU.uploadError, false);
+		
+		xhr.onreadystatechange = function (evt) {
+			if (xhr.readyState == 4) {
+				if(xhr.status == 200) {
+					var resp = window.JSON.parse(xhr.responseText);
+					if (resp.result=='ok')
+					{
+						$.each($('.selectedphotos'), function() {
+							if (this.id == resp.photoid)
+							{
+								$(this.parentNode.parentNode).hide();
+							}
+						});		
+						
+						var description = div_thumb.getElementsByTagName('div')[0];
+						checkbox = document.createElement('input');
+						checkbox.type =	"checkbox";
+						checkbox.className = "selectedphotos";
+						checkbox.id = resp.photoid;
+						checkbox.value = resp.photoid;
+						description.appendChild(checkbox);	
+						div_thumb.className = "loaded";
+					}
+					else
+					{
+						div_thumb.className = "loading";
+						progressBar.style.margin = "0px";
+						loaderIndicator.textContent = "error:"+resp.result;
+						loaderIndicator.style.color = "red";
+					}
+				} else {
+					alert('{% _ "Upload Failed" %}');
+				}
+			}
+		};
+
+		xhr.open("POST", "/admin/uploadv2/");
+		xhr.overrideMimeType('text/plain; charset=x-user-defined-binary'); 
+		xhr.setRequestHeader('Content-Disposition', '{"albumid":"'+ {{album.id}}+'","filename":"'+file.name + '"}');
+		if(xhr.sendAsBinary) xhr.sendAsBinary(bin);	
+		else xhr.send(file);
+	};
             
+	TCNDDU.uploadError = function (error) {
+		console.log("error: " + error.code);
+	};   
+	
+	/* setup TCNDDU */
 	window.addEventListener("load", TCNDDU.setup, false);
 })();
 

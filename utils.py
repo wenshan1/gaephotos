@@ -6,6 +6,7 @@ import logging
 import Cookie
 import time
 import math
+import hashlib
 
 from functools import wraps
 from time import gmtime,mktime
@@ -19,9 +20,9 @@ from django.shortcuts import render_to_response
 from django.utils import simplejson
 from django.utils.html import escape
 from django.template import loader
-from django.http import HttpResponse,HttpRequest
+from django.http import HttpResponse,HttpRequest,HttpResponseRedirect
 
-from cc_addons.language import translate 
+from cc_addons.language import translate,get_current_lang,save_current_lang
 from models import *
 
 
@@ -68,7 +69,11 @@ def format_date(dt):
     return dt.strftime('%Y-%m-%d %H:%MGMT')
 
 def ccEscape(str):
-    return unicode(escape(str),'utf-8').strip()
+    escaped = escape(str)
+    if not isinstance(escaped, unicode):
+        return unicode(escape(str),'utf-8').strip()
+    else:
+        return escaped
 
 def render_to_javasript(*args, **kwargs):
     resp = HttpResponse()
@@ -311,14 +316,25 @@ def pagecache(keyprefix, time=60*60):
                 return method(*args, **kwargs)
             if request.method == "POST":
                 return method(*args, **kwargs)
+            lang = request.GET.get("lang",None)
+            if lang:
+                save_current_lang(lang)
+                return HttpResponseRedirect(request.META.get('HTTP_REFERER','/'))
             
-            key = "%s_%s?%s_%s"%(keyprefix, request.path, 
+            txtkey = u"%s_%s?%s_%s_%s"%(keyprefix, ccEscape(request.path), 
                               request.META.get('QUERY_STRING',''),
-                              checkAuthorization())
-            key = key.replace(' ','_')
+                              checkAuthorization(),
+                              get_current_lang())
+            txtkey = txtkey.replace(' ','_')
+            key = txtkey
+            if isinstance(key, unicode):
+                key = unicode.encode(key,'utf-8')
+            mySha1 = hashlib.sha1()
+            mySha1.update(key)
+            key = mySha1.hexdigest()
             data = memcache.get(key)
             if data is not None:
-                logging.info("get %s from cache"%key)
+                logging.info("get %s from cache"%txtkey)
                 return data
             data = method(*args, **kwargs)
             memcache.set(key, data, time)

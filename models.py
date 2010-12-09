@@ -378,7 +378,7 @@ class Comment(CCPhotoModel):
 
         
 class PageCacheStat(CCPhotoModel):
-    cachekey = db.BlobProperty()
+    cachekey = db.StringProperty()
     
     @staticmethod
     def CleanPageCache():
