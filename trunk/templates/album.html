@@ -9,10 +9,8 @@
 var TCNDDU = TCNDDU || {};
 (function(){
 	var dropContainer,
-		dropListing,
-		imgPreviewFragment = document.createDocumentFragment(),
-		domElements;
-            
+		dropListing;
+		
 	TCNDDU.setup = function () {
 	
 		dropListing = document.getElementById("content");
@@ -41,10 +39,13 @@ var TCNDDU = TCNDDU || {};
 		console.log("error: " + error.code);
 	};
             
-	TCNDDU.processXHR = function (file, index, bin) {
-        var xhr = new XMLHttpRequest(),
-        container = document.getElementById("item"+index),
-		fileUpload = xhr.upload,
+	TCNDDU.processXHR = function (container, file, index, bin) {
+        var xhr = new 
+			XMLHttpRequest(),
+			//container = document.getElementById("item"+index),
+			fileUpload = xhr.upload,
+			progressBarWidth;
+		
 		progressDomElements = [
 			document.createElement('div'),
 			document.createElement('p')
@@ -55,12 +56,14 @@ var TCNDDU = TCNDDU || {};
 		container.appendChild(progressDomElements[0]);
 		fileUpload.log = container;
 		
+		progressBarWidth = progressDomElements[0].clientWidth;
+		
 		fileUpload.addEventListener("progress", function(event) {
 			if (event.lengthComputable) {
 				var percentage = Math.round((event.loaded * 100) / event.total),
-				loaderIndicator = container.firstChild.nextSibling.firstChild;
+				loaderIndicator = container.firstChild.nextSibling.nextSibling.firstChild;
 				if (percentage < 100) {
-					loaderIndicator.style.width = (percentage*2) + "px";
+					loaderIndicator.style.width = (percentage*progressBarWidth/100) + "px";
 					loaderIndicator.textContent = percentage + "%";
 				}
 			}
@@ -68,14 +71,16 @@ var TCNDDU = TCNDDU || {};
 		
 		fileUpload.addEventListener("load", function(event) {
 			container.className = "loaded";
-			console.log("xhr upload of "+container.id+" complete");
 		}, false);
 		
 		fileUpload.addEventListener("error", TCNDDU.uploadError, false);
 		
-		xhr.open("POST", "../upload.php");
-		xhr.overrideMimeType('text/plain; charset=x-user-defined-binary');
+		xhr.open("POST", "/admin/uploadv2/");
+		xhr.overrideMimeType('text/plain; charset=x-user-defined-binary'); 
+		xhr.setRequestHeader('Content-Disposition', {{album.id}}+';'+file.name);
 		xhr.sendAsBinary(bin);
+		/*if(xhr.sendAsBinary) xhr.sendAsBinary(bin);	
+		else xhr.send(file);*/
 	};
             
 	TCNDDU.handleDrop = function (event) {
@@ -93,36 +98,44 @@ var TCNDDU = TCNDDU || {};
 				
 		   		reader.addEventListener("loadend", TCNDDU.buildImageListItem, false);
 			    reader.readAsDataURL(file);
+				
 		    } 
 			else {
 		        alert("file is too big, needs to be below 8mb");
 		    } 
+		}
 	};
             
 	TCNDDU.buildImageListItem = function (event) {
-        domElements = [
-			document.createElement('li'),
+        var domElements = [
+			document.createElement('div'),
 			document.createElement('a'),
 			document.createElement('img'),
-			document.createElement('p')
+			document.createElement('div')
 		];      
 		var data = event.target.result, 
 			index = event.target.index, 
 			file = event.target.file, 
-			getBinaryDataReader = new FileReader(); 
+			imgPreviewFragment = document.createDocumentFragment(),
+			getBinaryDataReader = new FileReader();
+			
 			
 		domElements[2].src = data; // base64 encoded string of local file(s) 
-		domElements[2].width = 300; 
-		domElements[2].height = 200; 
 		domElements[1].appendChild(domElements[2]); 
-		domElements[0].id = "item"+index; 
+		domElements[1].href = "/{{album.name}}/"+file.name;
+		domElements[3].id = "description";
+		domElements[0].id = "thumb"; 
 		domElements[0].appendChild(domElements[1]); 
+		domElements[0].appendChild(domElements[3]);
+		domElements[0].className = "loading";
 		
 		imgPreviewFragment.appendChild(domElements[0]); 
 		
 		dropListing.appendChild(imgPreviewFragment); 
 		
-		getBinaryDataReader.addEventListener("loadend", function(evt){TCNDDU.processXHR(file, index, evt.target.result);}, false);
+		getBinaryDataReader.addEventListener("loadend", function(evt){
+			TCNDDU.processXHR(domElements[0], file, index, evt.target.result);
+	    }, false);
 		getBinaryDataReader.readAsBinaryString(file);
 	};
             

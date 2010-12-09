@@ -2,6 +2,7 @@
 
 from datetime import datetime
 import time
+import base64
 
 from google.appengine.ext import db  
 from google.appengine.api import users
@@ -134,9 +135,62 @@ def swfuploadphoto(request):
                    }
         return render_to_response_with_users_and_settings('admin/swfupload.html',content)
     except Exception,e:
-        logging.exception("upload error "+str(e))
+        logging.exception("upload error:")
         return returnerror(str(e))
-        
+
+@requires_site_admin
+def uploadv2(request):
+    try:
+        if request.POST:
+            resp = HttpResponse()
+            fileinfo = request.META.get('HTTP_CONTENT_DISPOSITION','')
+            
+            if not fileinfo:
+                return returnjson({"result":ccEscape(translate("no upload file"))}, resp)
+            
+            img_binary = request.raw_post_data
+            if not img_binary:
+                return returnjson({"result":ccEscape(translate("no image data"))}, resp)
+                        
+            if len(img_binary) > 1024*1024*8:
+                return returnjson({"result":ccEscape(translate("file size exceed 8M"))}, resp)
+            
+            filename = fileinfo.split(';')[1].strip()
+            filename = filename.replace(" ","_")
+            if filename.find(" ") != -1:
+                return returnjson({"result":ccEscape(translate("filename can not contain space"))}, resp)
+            filename = ccEscape(filename)    
+            
+            albumid = long(fileinfo.split(';')[0])
+            
+            album = Album.GetAlbumByID(albumid)
+            if not album:
+                return returnjson({"result":ccEscape("%s"%(translate("Album does not exist")))}, resp)
+         
+            owner = users.get_current_user().nickname()
+            description = ""
+            
+            contenttype = getImageType(img_binary)
+            if contenttype.find('image')==-1:
+                return returnjson({"result":ccEscape(translate("unsupported file type"))}, resp)
+            
+            photo = savephoto2DB(img_binary,album,filename, description, contenttype, owner)
+            if not photo:
+                return returnjson({"result":ccEscape(translate("Database error"))}, resp)
+            logging.info('%s saved to DB'%filename)
+                
+            res = {}
+            res["result"]="ok"
+            
+            PageCacheStat.CleanPageCache()
+            
+            return returnjson(res, resp)
+        else:
+            return returnjson({"result":ccEscape(translate("no upload file"))}, resp)
+    except Exception,e:
+        logging.exception("uploadv2 error:")
+        raise e
+    
 @requires_site_admin
 def delphoto(request, photoid):
     photo = Photo.GetPhotoByID(long(photoid))
