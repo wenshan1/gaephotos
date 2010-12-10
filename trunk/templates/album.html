@@ -36,6 +36,8 @@ var TCNDDU = TCNDDU || {};
 		}, false);
 	};
 	
+	TCNDDU.fileTypes = "jpg,png,gif,jpeg,tiff,ico,bmp,jpe,JPG,PNG,GIF,JPEG,TIFF,ICO,BMP,JPE";
+	
 	TCNDDU.handleDrop = function (event) {
 		var files = event.dataTransfer.files,
 		    count = files.length;
@@ -43,13 +45,23 @@ var TCNDDU = TCNDDU || {};
 		for (var i = 0; i < count; i++) { 
 			if(files[i].size < 8*1000*1000) {
 				var file = files[i],
-					droppedFileName = file.name,
+					filename = file.name,
 					reader = new FileReader();
-					
-				reader.index = i;
-				reader.file = file;
-				reader.onload = function(evt){ TCNDDU.buildImageListItem(evt);} 
-			    reader.readAsDataURL(file);
+				
+				/* check file ext */
+				filename = filename.split('.');
+				ext = filename[filename.length-1];
+				if ( TCNDDU.fileTypes.indexOf(ext) >= 0 )
+				{
+					reader.index = i;
+					reader.file = file;
+					reader.onload = function(evt){ TCNDDU.buildImageListItem(evt);} 
+					reader.readAsDataURL(file);
+				}
+				else
+				{
+					alert('{% _ "unsupported file type" %} '+file.name);
+				}
 		    } 
 			else {
 		        alert('{% _ "file size exceed 8M" %}');

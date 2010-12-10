@@ -139,7 +139,7 @@ def search(request):
         page_index = 1
         
 
-    if request.POST:
+    if request.method == "POST":
         searchword = ccEscape(request.POST.get("searchword",""))
         searchmode = ccEscape(request.POST.get("searchmode"))
         save_cookie({"gaephotos-searchword":searchword,
