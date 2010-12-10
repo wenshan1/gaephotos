@@ -505,7 +505,10 @@ div.loaded .progressBar
 	display: none;
 }
 div .progressBar {
--moz-border-radius:10px 10px 10px 10px;
+-moz-border-radius:10px;
+-webkit-border-radius:10px;
+-khtml-border-radius:10px;
+border-radius:10px;
 -moz-box-shadow:1px 1px 2px #FFFFFF;
 border:1px solid #000000;
 height:16px;
@@ -515,7 +518,10 @@ position:absolute;
 width:180px;
 }
 div .progressBar p {
--moz-border-radius:10px 10px 10px 10px;
+-moz-border-radius:10px;
+-webkit-border-radius:10px;
+-khtml-border-radius:10px;
+border-radius:10px;
 background-color:#1E528C;
 height:16px;
 }

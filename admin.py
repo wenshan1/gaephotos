@@ -67,7 +67,7 @@ def localjavascript(request, scriptname):
 # is_current_user_admin return False in the swfupload request always  
 def swfuploadphoto(request):
     try:
-        if request.POST:
+        if request.method == "POST":
             if request.FILES:
                 resp = HttpResponse()
                 #resp.headers['Content-Type'] = "application/json"
@@ -142,7 +142,7 @@ def swfuploadphoto(request):
 def uploadv2(request):
     try:
         resp = HttpResponse()
-        if request.POST:
+        if request.method == "POST":
             fileinfo = request.META.get('HTTP_CONTENT_DISPOSITION','')
             
             if not fileinfo:
@@ -226,7 +226,7 @@ def defaultSettings():
 @requires_site_admin
 def settings(request):
     global gallery_settings
-    if request.POST:
+    if request.method == "POST":
         title = ccEscape(request.POST.get("title"))
         description = ccEscape(request.POST.get("description"))
         albums_per_page = int(request.POST.get("albums_per_page"))
@@ -506,7 +506,7 @@ def ajaxAction(request):
 
 @requires_site_admin
 def albummanage(request):
-    if request.POST:
+    if request.method == "POST":
         
         PageCacheStat.CleanPageCache()
         
