@@ -39,14 +39,10 @@ def index(request):
     
     albums = get_all_albums()
     entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
-       
-    try:
-        latestcomments = Comment.all().order("-date").fetch(gallery_settings.latest_comments_count)    
-    except:
-        latestcomments = Comment.all().fetch(gallery_settings.latest_comments_count)   
-       
-    latestphotos = Photo.GetLatestPhotos(num=gallery_settings.latest_photos_count,
-                                          showprivate= checkAuthorization())
+     
+    public = not checkAuthorization()
+    latestcomments = Comment.GetLatestComments(gallery_settings.latest_photos_count, public)
+    latestphotos = Photo.GetLatestPhotos(gallery_settings.latest_photos_count, public)
         
     content = {"albums":entries,
                "pager": pager,
@@ -63,19 +59,15 @@ def album(request, albumname):
         page_index = 1
         
     album = Album.GetAlbumByName(ccEscape(albumname))
-    if album:
-        if not album.public and not checkAuthorization():
-                return returnerror(translate("You are not authorized"))
-        
-        try:    
-            photos = album.GetPhotos()
-            entries,pager = CCPager(query=photos,items_per_page=gallery_settings.thumbs_per_page).fetch(page_index)
-        except:
-            photos = Photo.all().filter("album =", album)
-            entries,pager = CCPager(query=photos,items_per_page=gallery_settings.thumbs_per_page).fetch(page_index)
-    else:
+    if not album:
         return returnerror(translate("Album does not exist"))
-            
+    
+    if not album.public and not checkAuthorization():
+        return returnerror(translate("You are not authorized"))
+    
+    photos = album.GetPhotosQuery()
+    entries,pager = CCPager(query=photos,items_per_page=gallery_settings.thumbs_per_page).fetch(page_index)
+                 
     content = {"album":album,
                "photos":entries,
                "pager": pager,
@@ -92,15 +84,15 @@ def photo(request, albumname, photoname):
     else:    
         album = Album.GetAlbumByName(ccEscape(albumname))
         
-    if album:
-        if not album.public and not checkAuthorization():
-            return returnerror(translate("You are not authorized to access this photo"))
-        
-        photo = album.GetPhotoByName(ccEscape(photoname))
-        if not photo:
-            return returnerror(translate("Photo does not exist"))
-    else:
+    if not album:
         return returnerror(translate("Album does not exist"))
+    
+    if not album.public and not checkAuthorization():
+        return returnerror(translate("You are not authorized to access this photo"))
+        
+    photo = album.GetPhotoByName(ccEscape(photoname))
+    if not photo:
+        return returnerror(translate("Photo does not exist"))
     
     if request.POST:
         author = ccEscape(request.POST.get("comment_author"))
@@ -109,20 +101,16 @@ def photo(request, albumname, photoname):
         return HttpResponseRedirect((u"/%s/%s"%(albumname,photoname )).encode("utf-8"))
     
     try:    
-        current = album.photoslist.index(photo.id)
+        current = album.GetPhotoIndex(photo)
     except ValueError:
-        album.photoslist.insert(0,self.id)
-        album.put()
-        current = album.photoslist.index(photo.id)
+        current = album.InsertPhoto2List(photo)
+        
     total = album.photoCount
-    prevphoto = None
-    if current:
+    prevphoto = nextphoto = None
+    if current > 0:
         prevphoto = Photo.GetPhotoByID(album.photoslist[current-1])
-    nextphoto = None
-    try:
+    if current < total-1:
         nextphoto = Photo.GetPhotoByID(album.photoslist[current+1])
-    except:
-        pass
     
     content = {"album":album,
                "photo":photo,
@@ -150,29 +138,25 @@ def search(request):
         searchmode = get_cookie("gaephotos-searchmode")
         searchmode = searchmode or "album"
     
-  
+    public = not checkAuthorization();
     if searchmode == "album":
-        albums = Album.SearchAlbums(searchword)
-        if not checkAuthorization():
-            albums = [album for album in albums if album.public]
+        albums = Album.SearchAlbums(searchword, public)
             
         entries,pager = CCPager(list=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
         content = {"albums":entries,
-               "pager": pager,
-               "allalbums":get_all_albums(),
-               "album": {'name':'search', 'id':0,}}
+                   "pager": pager,
+                   "allalbums":get_all_albums(),
+                   "album": {'name':'search', 'id':0,}}
         return render_to_response_with_users_and_settings("index.html", content)
     
     elif searchmode == "photo":
-        photos = Photo.SearchPhotos(searchword)
-        if not checkAuthorization():
-            photos = [photo for photo in photos if photo.album.public]
+        photos = Photo.SearchPhotos(searchword, public)
             
         entries,pager = CCPager(list=photos,items_per_page=gallery_settings.thumbs_per_page).fetch(page_index)
         content = {"photos":entries,
-               "pager": pager,
-               "allalbums":get_all_albums(),
-               "album": {'name':'search', 'id':0,}}
+                   "pager": pager,
+                   "allalbums":get_all_albums(),
+                   "album": {'name':'search', 'id':0,}}
         return render_to_response_with_users_and_settings("album.html", content)
 
 @pagecache("feed")
@@ -196,14 +180,13 @@ def showslider(request, albumname):
         if not album.public and not checkAuthorization():
                 return returnerror(translate("You are not authorized"))
         try:    
-            photos = album.GetPhotos()
+            photos = album.GetPhotosQuery()
         except:
             photos = Photo.get_by_id(album.photoslist)
     elif albumname == 'search':
         searchword = get_cookie("gaephotos-searchword","")
-        photos = Photo.SearchPhotos(searchword)
-        if not checkAuthorization():
-            photos = [photo for photo in photos if photo.album.public]
+        public = not checkAuthorization();
+        photos = Photo.SearchPhotos(searchword, public)
         album = {'name':'search', 'id':0,}
 
     else:
@@ -229,6 +212,8 @@ def showimg(request, photoid, mode="thumb"):
         photo = Photo.GetPhotoByID(long(photoid))
         if not photo:
             return returnerror(translate("Photo does not exist"))
+        if not photo.isPublic and not checkAuthorization():
+                return returnerror(translate("You are not authorized"))
         
         #cachedata = memcache.get(key)
         cachedata = photo.GetCache(mode)
@@ -256,10 +241,6 @@ def showimg(request, photoid, mode="thumb"):
             return resp
         
         #no cache
-        if not photo.album.public and not checkAuthorization():
-                return returnerror(translate("You are not authorized"))
-            
-        
         resp = HttpResponse() 
         if mode == "thumb":
             binary = photo.binary_thumb
@@ -288,7 +269,7 @@ def showimg(request, photoid, mode="thumb"):
         resp.write(binary)
 
         cachedata = {'binary':binary,
-                     'public':photo.album.public,
+                     'public':photo.isPublic,
                      'etag': resp.headers['Etag'],}
         
         if mode == "thumb":
