@@ -62,6 +62,16 @@ class CCPhotoModel(db.Model):
     @property
     def id(self):
         return self.key().id()
+    
+    def put(self):
+        count = 0
+        while count < 3:
+            try:
+                return db.Model.put(self)
+            except db.Timeout:
+                count += 1
+        else:
+            raise db.Timeout()
 
 class Album(CCPhotoModel):
     name = db.StringProperty(multiline=False)
@@ -90,17 +100,21 @@ class Album(CCPhotoModel):
         return False
     
     @staticmethod
-    def GetPublicAlbums(public=True):
-        albums = Album.all().filter("public =", public)
+    def GetAllAlbumsQuery(public=True):
+        if public:
+            albums = Album.all().filter("public =", public)
+        else:
+            albums = Album.all()    
         return albums
     
     @staticmethod
-    def SearchAlbums(searchword):
+    def SearchAlbums(searchword, public=True):
         res = []
         if type(searchword) != unicode:
             searchword = unicode(searchword,'mbcs')
         searchword = searchword.lower()
-        for album in Album.all():
+        albums = Album.GetAllAlbumsQuery(public)
+        for album in albums:
             if album.name.lower().find(searchword) != -1:
                 res.append(album)
                 continue
@@ -125,8 +139,11 @@ class Album(CCPhotoModel):
         self.coverphotoid = photoid
         self.put()
     
-    def GetPhotos(self):
-        photos = Photo.all().filter("album =", self).order("-updatedate")
+    def GetPhotosQuery(self):
+        try:
+            photos = Photo.all().filter("album =", self).order("-updatedate")
+        except:
+            photos = Photo.all().filter("album =", self)
         return photos
         
     def GetPhotoByName(self, photoname):
@@ -141,7 +158,15 @@ class Album(CCPhotoModel):
             return None
         photo = Photo.GetPhotoByID(photoid)
         return photo
-
+    
+    def GetPhotoIndex(self, photo):
+        current = self.photoslist.index(photo.id)
+        return current
+        
+    def InsertPhoto2List(self, index, photo):
+        self.photoslist.insert(index, photo.id)
+        self.save()
+        return index
 
 class Photo(CCPhotoModel): 
     album = db.ReferenceProperty(Album)
@@ -174,29 +199,31 @@ class Photo(CCPhotoModel):
         return li and li[0]
     
     @staticmethod
-    def GetLatestPhotos(num=gallery_settings.latest_photos_count, showprivate=False):
+    def GetLatestPhotos(num=gallery_settings.latest_photos_count, public=True):
         try:
             allphotos = Photo.all().order("-updatedate")
         except:
             allphotos = Photo.all()
-        if showprivate:
-            return allphotos.fetch(num)
-        else:
-            latestphtos = []
+        if public:
+            latestphotos = []
             for photo in allphotos:
                 if photo.isPublic:
-                    latestphtos.append(photo)
-                if len(latestphtos)>= num:
-                    return latestphtos
-            return latestphtos
-    
+                    latestphotos.append(photo)
+                if len(latestphotos)>= num:
+                    return latestphotos
+            return latestphotos
+        else:
+            return allphotos.fetch(num)
+
     @staticmethod
-    def SearchPhotos(searchword):
+    def SearchPhotos(searchword, public=True):
         res = []
         if type(searchword) != unicode:
             searchword = unicode(searchword,'mbcs')
         searchword = searchword.lower()
         for photo in Photo.all():
+            if public and not photo.isPublic:
+                continue
             if photo.name.lower().find(searchword) != -1:
                 res.append(photo)
                 continue
@@ -360,8 +387,23 @@ class Comment(CCPhotoModel):
     content = db.StringProperty(required=True, multiline=True)    
 
     @staticmethod
-    def GetLatestComments(num=gallery_settings.latest_comments_count):
-        return Comment.all().order("-date").fetch(num)
+    def GetLatestComments(num=gallery_settings.latest_comments_count,
+                          public=True):    
+        try:
+            comments = Comment.all().order("-date")
+        except:
+            comments = Comment.all()
+        if public:
+            latestcomments = []
+            for comment in comments:
+                if comment.photo.isPublic:
+                    latestcomments.append(comment)
+                if len(latestcomments) >= num:
+                    return latestcomments
+            return latestcomments
+        else:
+            return comments.fetch(num)
+            
 
     def Save(self):
         self.put()

@@ -359,10 +359,10 @@ def clearAlbumPhotos(request, resp):
     id = long(request.GET.get('albumid',0))
     album = id and Album.GetAlbumByID(id)
     if album:
-        for photo in album.GetPhotos():
+        for photo in album.GetPhotosQuery():
             photo.Delete()
         album.photoslist = []
-        album.put()
+        album.save()
         album = Album.GetAlbumByID(id)
         return returnjson({"result":"ok",
                            "album":Album2Dict(album),
@@ -375,7 +375,7 @@ def deleteAlbum(request, resp):
     id = long(request.GET.get('albumid',0))
     album = id and Album.GetAlbumByID(id)
     if album:
-        for photo in album.GetPhotos():
+        for photo in album.GetPhotosQuery():
             photo.Delete()
         album = Album.GetAlbumByID(id)
         album.delete()
@@ -436,9 +436,7 @@ def movePhoto(request, resp):
     idlist = [id for id in idlist if id]
     albumid = long(request.GET.get('albumid',0))
     newalbumid = long(request.GET.get('newalbumid',0))
-    logging.info(albumid)
-    logging.info(newalbumid)
-    logging.info(idlist)
+    logging.info("move photos %s from album %s to %s"%(idlist,albumid,newalbumid))
 
     newalbum = newalbumid and Album.GetAlbumByID(newalbumid)
     if newalbum:

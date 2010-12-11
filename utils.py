@@ -221,16 +221,14 @@ def checkAuthorization():
     return False
         
 def get_all_albums(order="-updatedate"):
+    public = True
     if checkAuthorization():
-        try:
-            albums = Album.all().order(order)
-        except:
-            albums = Album.all()
-    else:
-        try:
-            albums = Album.GetPublicAlbums().order(order)
-        except:
-            albums = Album.GetPublicAlbums()
+        public = False
+    try:
+        albums = Album.GetAllAlbumsQuery(public).order(order)
+    except:
+        albums = Album.GetAllAlbumsQuery(public)
+
     return albums
 
 def returnerror(msg):
