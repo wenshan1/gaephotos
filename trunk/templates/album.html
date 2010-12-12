@@ -181,7 +181,7 @@ var TCNDDU = TCNDDU || {};
 	};   
 	
 	/* setup TCNDDU */
-	window.addEventListener("load", TCNDDU.setup, false);
+    if(window.addEventListener) window.addEventListener("load", TCNDDU.setup, false);
 })();
 
 var get_selected_photos  = function() {

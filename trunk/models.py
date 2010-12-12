@@ -384,7 +384,12 @@ class Comment(CCPhotoModel):
     author = db.StringProperty()
     date = db.DateTimeProperty(auto_now_add=True)
     photo = db.ReferenceProperty(Photo)
-    content = db.StringProperty(required=True, multiline=True)    
+    content = db.StringProperty(required=True, multiline=True)   
+    
+    @staticmethod
+    def GetCommentByID(id):
+        comment = Comment.get_by_id(id)
+        return comment 
 
     @staticmethod
     def GetLatestComments(num=gallery_settings.latest_comments_count,

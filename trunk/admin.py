@@ -279,11 +279,11 @@ def addComment(request, resp):
     author = ccEscape(request.GET.get('author',None))
     comment_content = ccEscape(request.GET.get('comment_content',None))
     if photoid and author and comment_content:
-        photo = Photo.get_by_id(photoid)
+        photo = Photo.GetPhotoByID(photoid)
         if not photo:
             return returnjson({"result":"error",
                    "msg":ccEscape(translate("Photo does not exist"))}, resp)
-        if not photo.album.public and not checkAuthorization():
+        if not photo.isPublic and not checkAuthorization():
             return returnjson({"result":"error",
                    "msg":ccEscape(translate("You are not authorized to access this photo"))}, resp)
         
@@ -298,7 +298,7 @@ def addComment(request, resp):
     
 def saveCoverPhoto(request, resp):
     albumid = long(request.GET.get('albumid',0))
-    album = albumid and Album.get_by_id(albumid)
+    album = albumid and Album.GetAlbumByID(albumid)
     if album:
         id = long(request.GET.get('photoid',0))
         photo = id and Photo.GetPhotoByID(id)
@@ -379,7 +379,7 @@ def deleteAlbum(request, resp):
             photo.Delete()
         album = Album.GetAlbumByID(id)
         album.delete()
-        album = Album.all().fetch(1)
+        album = Album.GetAllAlbumsQuery().fetch(1)
         album = album and album[0]
         return returnjson({"result":"ok",
                            "album":Album2Dict(album),
@@ -404,11 +404,11 @@ def savePhotoDescription(request, resp):
 
 def deleteComment(request, resp):
     id = long(request.GET.get('commentid',0))
-    comment = id and Comment.get_by_id(id)
+    comment = id and Comment.GetCommentByID(id)
     photoid = comment.photo.id
     if comment:
         comment.Delete()
-        photo = Photo.get_by_id(photoid)
+        photo = Photo.GetPhotoByID(photoid)
         return returnjson({"result":"ok",
                          "comments": buildComments(photo.GetComments())}, resp)
     else:
@@ -530,8 +530,8 @@ def albummanage(request):
             
         return HttpResponseRedirect("/admin/album/")
     
-    albums = Album.all()        
+    albums = Album.GetAllAlbumsQuery(False)        
     content = {"albums": albums,
-               "allalbums": get_all_albums(),
+               "allalbums": albums,
                }
     return render_to_response_with_users_and_settings('admin/album_manage.html',content)   
