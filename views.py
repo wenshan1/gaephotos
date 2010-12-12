@@ -41,7 +41,7 @@ def index(request):
     entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
      
     public = not checkAuthorization()
-    latestcomments = Comment.GetLatestComments(gallery_settings.latest_photos_count, public)
+    latestcomments = Comment.GetLatestComments(gallery_settings.latest_comments_count, public)
     latestphotos = Photo.GetLatestPhotos(gallery_settings.latest_photos_count, public)
         
     content = {"albums":entries,
@@ -134,15 +134,17 @@ def search(request):
                      "gaephotos-searchmode":searchmode})
         return HttpResponseRedirect('/search/?page=%d'%page_index)
     else:
-        searchword = get_cookie("gaephotos-searchword")
+        searchword = get_cookie("gaephotos-searchword").strip()
         searchmode = get_cookie("gaephotos-searchmode")
         searchmode = searchmode or "album"
     
     public = not checkAuthorization();
     if searchmode == "album":
-        albums = Album.SearchAlbums(searchword, public)
-            
-        entries,pager = CCPager(list=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
+        if searchword:  
+            albums = Album.SearchAlbums(searchword, public)
+            entries,pager = CCPager(list=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
+        else:
+            entries,pager = CCPager(query=get_all_albums(),items_per_page=gallery_settings.albums_per_page).fetch(page_index)
         content = {"albums":entries,
                    "pager": pager,
                    "allalbums":get_all_albums(),
@@ -162,11 +164,13 @@ def search(request):
 @pagecache("feed")
 def feed(request):
     latestphotos = Photo.GetLatestPhotos(num=gallery_settings.latest_photos_count,
-                                          showprivate= checkAuthorization())
+                                          public = True)
                                           
     if latestphotos:
         last_updated = latestphotos[0].updatedate
         last_updated = last_updated.strftime("%Y-%m-%dT%H:%M:%SZ")
+    else:
+        last_updated = "1900-01-01T00:00:00Z"
        
     content = {"last_updated": last_updated,
                "latestphotos": latestphotos,
@@ -179,10 +183,8 @@ def showslider(request, albumname):
     if album:
         if not album.public and not checkAuthorization():
                 return returnerror(translate("You are not authorized"))
-        try:    
-            photos = album.GetPhotosQuery()
-        except:
-            photos = Photo.get_by_id(album.photoslist)
+ 
+        photos = album.GetPhotosQuery()
     elif albumname == 'search':
         searchword = get_cookie("gaephotos-searchword","")
         public = not checkAuthorization();

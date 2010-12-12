@@ -13,15 +13,16 @@
 	<entry>
 		<link href="{{ gallery_settings.baseurl }}/{{photo.album.name}}/{{photo.name}}" />
 		<id>{{ gallery_settings.baseurl }}/{{photo.album.name}}/{{photo.name}}</id>
-		<title>{{photo.description}} -- {{photo.name}}</title>
+		<title>{{photo.album.name}} -- {{photo.name}} </title>
 		<content type="html"><![CDATA[
+		<p>{{photo.description}}</p>
       <a href="{{ gallery_settings.baseurl }}/{{photo.album.name}}/{{photo.name}}">
       <img src="{{ gallery_settings.baseurl }}/thumb/{{photo.id}}.png"/>
       </a>
       <div>
 		{% for comment in photo.GetComments %}
 		<div id="comment_entry" name="comment{{comment.id}}">
-		    {{comment.author}}: {{comment.content|linebreaks}}
+		    {{comment.author}}: {{comment.content}}
 		</div>
 		{% endfor %}
 	  </div>
