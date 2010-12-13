@@ -2,6 +2,47 @@
 {% load ccfilters %}
 {% load cctags %}
 
+{% block head_ex %}
+{% if users.is_admin %}
+<script type="text/javascript" src="/static/ddupload/ddupload.js"></script>
+<script type="text/javascript">
+var postdata_handler = function(file, container)
+{
+    console.log("start upload file: "+file.name);
+    return '{"albumid":"'+ container.id +'","filename":"'+file.name+'"}';
+};
+var loadedhandler = function(reader_event, container)
+{
+    data = reader_event.target.result;
+    console.log(reader_event.target.file.name + " loaded in local");
+};
+var progresshandler = function(file, percentage, container)
+{
+    console.log(percentage);
+};
+var onupload_success_handler = function(responseText, evt, container)
+{
+    console.log(responseText);
+    console.log("file "+evt.file.name+" done!");
+};
+
+window.onload = function(evt) {
+    var albums = document.getElementsByName("album");
+    for (var i=0; i< albums.length;i++)
+    {
+    	ddupload.setup(albums[i], {
+            posturl : "/admin/uploadv2/",
+            postdata_handler : postdata_handler,
+            loadedhandler : 0,
+            progresshandler : progresshandler,
+            onupload_success_handler : onupload_success_handler,
+            });
+    };
+};
+</script>
+{% endif %}  
+{% endblock %}
+
 {% block commandbar %}
 {% endblock %}
   
@@ -15,7 +56,8 @@
             &nbsp;&nbsp;<a href="/admin/album/">{% _ 'Create Album' %}</a>
         {% else %}
             {% for album in albums %}
-             <li><div id="album">
+             <li name="album" id="{{album.id}}">
+             <div id="album">
                 <div><a href="/{{album.name}}/">{{album.name|truncate_chinese_words:20}}({{album.photoCount}})</a>
                 {% if not album.public %} ({% _ "private" %}) {% endif %}
                 </div>
