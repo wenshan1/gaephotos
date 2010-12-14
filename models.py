@@ -294,8 +294,8 @@ class Photo(CCPhotoModel):
                 part = PhotoPart.get_by_id(id)
                 part.delete()
             
-        for comment in self.Comments:
-            comment.delete()
+         
+        db.delete(self.Comments)
         self.delete()
 
     def GetComments(self):
@@ -433,9 +433,8 @@ class PageCacheStat(CCPhotoModel):
         keylist = []
         for s in PageCacheStat.all():
             keylist.append(s.cachekey)
-            s.delete()
         memcache.delete_multi(list(set(keylist)))
-        
+        db.delete(PageCacheStat.all())
     @staticmethod
     def Add(key):
         s = PageCacheStat()
