@@ -19,7 +19,14 @@ def truncate_chinese_words(s, num):
             words += ('...')
     return words
 
-register.filter(truncate_chinese_words)        
+register.filter(truncate_chinese_words)   
+
+def main():
+    pass
+
+if __name__ == '__main__':
+  main()
+       
         
         
         

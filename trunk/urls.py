@@ -28,3 +28,10 @@ urlpatterns += patterns('views',
     (r'^(?P<albumname>[\S\s]+?)/(?P<photoname>[\S\s]+?)$', 'photo'),
     (r'^(?P<albumname>[\S\s]+?)/$', 'album'),
 )
+
+def main():
+    pass
+
+if __name__ == '__main__':
+  main()
+  

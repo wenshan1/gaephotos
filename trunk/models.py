@@ -442,4 +442,9 @@ class PageCacheStat(CCPhotoModel):
         s.cachekey = key
         s.put()
     
-    
+def main():
+    pass
+
+if __name__ == '__main__':
+  main()
+      

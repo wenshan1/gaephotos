@@ -15,3 +15,10 @@ TEMPLATE_DIRS = (
 INSTALLED_APPS = (
     'cc_addons',
 )
+
+def main():
+    pass
+
+if __name__ == '__main__':
+  main()
+  

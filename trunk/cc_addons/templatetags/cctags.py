@@ -92,3 +92,10 @@ def translate(parser, token):
 @register.tag
 def _(parser, token):
     return do_translate(parser, token)
+
+def main():
+    pass
+
+if __name__ == '__main__':
+  main()
+  
