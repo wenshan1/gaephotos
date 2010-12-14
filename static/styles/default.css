@@ -499,6 +499,11 @@ height: 400px;
     max-height: 30px;
 }
 
+#tips {
+	float: left;
+	margin: 5px 0 0 15px;
+	color: red;
+}
 /* Drag and Drop to upload */
 div.loaded .progressBar
 {

@@ -183,6 +183,7 @@ u"en-us":
 'Moving Selected Photos...',
 'Delete Selected',
 'Move Selected to:',
+'Tips: DragAndDrop photos into Album to Upload(Firefox/Chrome)',
 '##Error MSG##',
 ],
 
@@ -276,7 +277,7 @@ u"zh-cn":
 '正在上传照片到相册',
 '上传ing...',
 '上传错误',
-'张照片已经上传到相册',
+'照片已经上传到相册',
 # admin.py
 '404 查无此人,地址不存在',
 '没有文件',
@@ -306,7 +307,7 @@ u"zh-cn":
 '正在移动所选图片...',
 '删除选定图片',
 '移动选定到:',
-'##出错了##',
+'小提示: 拖拽图片到相册上可以直接上传(Firefox/Chrome)',
 '##出错了##',
 ],              
               

@@ -4,26 +4,108 @@
 
 {% block head_ex %}
 {% if users.is_admin %}
+<style type="text/css">
+img.upload
+{
+    max-width : 40px;
+    max-height: 30px;
+}
+div.uploading
+{
+    float: left;
+}
+li.uploading
+{
+    opacity: 0.7;
+}
+li.loaded
+{
+    opacity: 1;
+}
+</style>
+
 <script type="text/javascript" src="/static/ddupload/ddupload.js"></script>
 <script type="text/javascript">
+
+var uploadIndicator = "upload";
+
 var postdata_handler = function(file, container)
-{
-    console.log("start upload file: "+file.name);
+{  /* post data in 'Content-Disposition' */
     return '{"albumid":"'+ container.id +'","filename":"'+file.name+'"}';
 };
 var loadedhandler = function(reader_event, container)
-{
-    data = reader_event.target.result;
-    console.log(reader_event.target.file.name + " loaded in local");
-};
+{ /* handler on local file loaded */
+    photo = document.createElement('img');
+    photo.src = reader_event.target.result;
+    photo.className = "upload";
+
+    p = document.createElement('div');
+    p.textContent = "......";
+
+    div = document.createElement('div');
+    div.id = reader_event.target.file.name;
+    div.className = "uploading";
+    div.setAttribute('name',uploadIndicator);
+
+    div.appendChild(photo);
+    div.appendChild(p);
+
+    container.className = "uploading";
+    container.appendChild(div);
+ };
 var progresshandler = function(file, percentage, container)
-{
-    console.log(percentage);
+{ /* handler on upload progress */
+    indicator = document.getElementById(file.name);
+    if (indicator)
+    {
+        indicator.lastChild.textContent = percentage+'%';
+    }
 };
-var onupload_success_handler = function(responseText, evt, container)
+var onupload_success_handler = function(xhr, evt, container)
+{ /* handler on success upload(status = 200) */
+	if (xhr.status == 200)
+	{
+		var resp = window.JSON.parse(xhr.responseText);
+		indicator = document.getElementById(evt.file.name);
+
+		if (resp.result=='ok')
+        {
+            if (indicator)
+            {
+                indicator.parentNode.removeChild(indicator);
+            }
+        }
+        else
+        {
+        	 if (indicator)
+             {
+        		 indicator.lastChild.textContent = resp.result;
+             }
+        }
+	
+	    
+	}
+	check_all_uploaded(container);
+};
+var onupload_failed_handler = function(xhr, evt, container)
+{ /* handler on failed upload(status != 200) */
+	indicator = document.getElementById(evt.file.name);
+	if (indicator)
+    {
+		indicator.lastChild.textContent = '{% _ "Upload Failed" %}';
+    }
+    check_all_uploaded(container);
+};
+var check_all_uploaded = function(container)
 {
-    console.log(responseText);
-    console.log("file "+evt.file.name+" done!");
+	uploads = document.getElementsByName(uploadIndicator);
+    if(uploads.length == 0)
+    {
+        container.className = "loaded";
+        p = document.createElement('p');
+        p.textContent = '{% _ "Photos are uploaded to album" %}';
+        container.appendChild(p);
+    }
 };
 
 window.onload = function(evt) {
@@ -31,13 +113,15 @@ window.onload = function(evt) {
     for (var i=0; i< albums.length;i++)
     {
     	ddupload.setup(albums[i], {
-            posturl : "/admin/uploadv2/",
+    		filelimit: 8*1000*1000,
+            posturl : "{{gallery_settings.baseurl}}/admin/uploadv2/",
             postdata_handler : postdata_handler,
-            loadedhandler : 0,
+            loadedhandler : loadedhandler,
             progresshandler : progresshandler,
             onupload_success_handler : onupload_success_handler,
+            onupload_failed_handler: onupload_failed_handler,
             });
-    };
+    }
 };
 </script>
 {% endif %}  
@@ -50,19 +134,22 @@ window.onload = function(evt) {
 <div id="page">
         {% include 'pager.html' %}
         <!-- start content -->
+        {% if users.is_admin %}
+        <div id="tips">{% _ "Tips: DragAndDrop photos into Album to Upload(Firefox/Chrome)" %}</div>
+        {% endif %} 
         <div id="content">
         {% if not albums %}
             {% _ "no album found" %}  
-            &nbsp;&nbsp;<a href="/admin/album/">{% _ 'Create Album' %}</a>
+            &nbsp;&nbsp;<a href="{{gallery_settings.baseurl}}/admin/album/">{% _ 'Create Album' %}</a>
         {% else %}
             {% for album in albums %}
              <li name="album" id="{{album.id}}">
              <div id="album">
-                <div><a href="/{{album.name}}/">{{album.name|truncate_chinese_words:20}}({{album.photoCount}})</a>
+                <div><a href="{{gallery_settings.baseurl}}/{{album.name}}/">{{album.name|truncate_chinese_words:20}}({{album.photoCount}})</a>
                 {% if not album.public %} ({% _ "private" %}) {% endif %}
                 </div>
                 <div>{{album.updatedate|date:"Y-m-d"}}</div>
-                <div id="cover"><a href="/{{album.name}}/"><img src="/thumb/{{album.coverPhotoID}}.png"/></a></div>
+                <div id="cover"><a href="{{gallery_settings.baseurl}}/{{album.name}}/"><img src="{{gallery_settings.baseurl}}/thumb/{{album.coverPhotoID}}.png"/></a></div>
                 <div id="description">{{album.description|truncate_chinese_words:30}}</div>
              </div> </li>
              {% endfor %}
