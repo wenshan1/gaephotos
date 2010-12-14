@@ -283,6 +283,9 @@ $(document).ready(function() {
 <div id="page">
         {% include 'pager.html' %}
         <!-- start content -->
+        {% if users.is_admin %}
+        <div id="tips">{% _ "Tips: DragAndDrop photos into Album to Upload(Firefox/Chrome)" %}</div>
+        {% endif %} 
         <div id="content">
         {% if not photos %}
             {% _ "no photo found" %}

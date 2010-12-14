@@ -19,6 +19,7 @@ ddupload.setup = function (container/*Dom Element*/, settings) {
         ddupload.loadedhandler = settings.loadedhandler;
         ddupload.progresshandler = settings.progresshandler;
         ddupload.onupload_success_handler = settings.onupload_success_handler;
+        ddupload.onupload_failed_handler = settings.onupload_failed_handler;
                 
         container.addEventListener("dragenter", function(event){
 			event.stopPropagation();event.preventDefault();
@@ -41,42 +42,39 @@ ddupload.setup = function (container/*Dom Element*/, settings) {
 
 ddupload.processdroppedfile = function (event, container) {
     var files = event.dataTransfer.files;
-    
-    index = 0;
-    
+       
     for (var i = 0; i < files.length; i++) { 
         if(files[i].size < ddupload.filelimit) {
-            var file = files[i],
-                filename = file.name,
-                localreader = new FileReader();
-                
-            
+           var  file = files[i];
+                         
             /* check file ext */
-            filename = filename.split('.');
+            filename = file.name.split('.');
             ext = filename[filename.length-1];
 
             if ( ddupload.filetypes.indexOf(ext) >= 0 )
             {
-                index = index + 1;
-                file.index = index;
                 if(ddupload.loadedhandler) {
+                	localreader = new FileReader();
                     localreader.file = file;
                     localreader.onload = function(evt){ 
                         ddupload.loadedhandler(evt, container);
-                        var uploadreader = new FileReader();
-                        uploadreader.onload = function(evt){ 
-                            ddupload.processXHR(file, evt.target.result, container);
+                        
+                        uploadreader = new FileReader();
+                        uploadreader.file = evt.target.file;
+                        uploadreader.onload = function(event){ 
+                            ddupload.processXHR(event.target.file, event.target.result, container);
                         };
-                        uploadreader.readAsBinaryString(file);
+                        uploadreader.readAsBinaryString(evt.target.file);
                     };
                     localreader.readAsDataURL(file);
                 }
                 else
                 {
-                    var uploadreader = new FileReader();
+                    uploadreader = new FileReader();
+                    uploadreader.file = file;
                     uploadreader.onload = function(evt){ 
-                            ddupload.processXHR(file, evt.target.result, container);
-                        };
+                        ddupload.processXHR(evt.target.file, evt.target.result, container);
+                    };
                     uploadreader.readAsBinaryString(file);
                 }
             }
@@ -94,9 +92,9 @@ ddupload.processdroppedfile = function (event, container) {
 ddupload.on_XHR_state_change_handler = function(xhr, evt, container) {
     if (xhr.readyState == 4) {
         if(xhr.status == 200) {
-            ddupload.onupload_success_handler(xhr.responseText, evt, container);
+            ddupload.onupload_success_handler(xhr, evt, container);
         } else {
-            alert("ddu upload failed: " + xhr.status);
+        	ddupload.onupload_failed_handler(xhr, evt, container);
         }  
     }
 };
@@ -119,7 +117,7 @@ ddupload.processXHR = function (file, bin, container) {
     
     xhr.onreadystatechange = function (evt) {
         evt.file = file;
-        ddupload.on_XHR_state_change_handler(xhr,evt, container);
+        ddupload.on_XHR_state_change_handler(xhr, evt, container);
     };
     
     var postdata = ddupload.postdata_handler(file, container); 
