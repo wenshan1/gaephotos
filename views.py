@@ -298,3 +298,9 @@ def showimg(request, photoid, mode="thumb"):
             return resp
         return returnerror(translate("Get photo error"))
 
+def main():
+    pass
+
+if __name__ == '__main__':
+  main()
+  

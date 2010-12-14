@@ -36,7 +36,10 @@ def do_translate(parser, token):
     value, noop = TranslateParser(token.contents).top()
     return TranslateNode(value, noop)
 
+def main():
+    pass
 
-
-
+if __name__ == '__main__':
+  main()
+  
 

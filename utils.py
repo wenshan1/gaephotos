@@ -341,4 +341,9 @@ def pagecache(keyprefix, time=60*60):
         return _wrapper
     return _decorator
 
+def main():
+    pass
 
+if __name__ == '__main__':
+  main()
+  

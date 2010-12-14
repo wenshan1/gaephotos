@@ -535,3 +535,10 @@ def albummanage(request):
                "allalbums": albums,
                }
     return render_to_response_with_users_and_settings('admin/album_manage.html',content)   
+
+def main():
+    pass
+
+if __name__ == '__main__':
+  main()
+  

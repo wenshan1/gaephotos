@@ -313,5 +313,10 @@ u"zh-cn":
               
 }
 
+def main():
+    pass
 
+if __name__ == '__main__':
+  main()
+  
 
