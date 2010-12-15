@@ -1,20 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import time
 import logging
 
-from datetime import datetime
-import time
-
-from google.appengine.ext import db  
-from google.appengine.api import users
 from google.appengine.api import images
-from google.appengine.api import memcache
 from google.appengine.api import urlfetch
 
 from django.http import HttpResponse,HttpResponseRedirect
-from django.utils.html import escape
-from django.utils import text
-from django.shortcuts import render_to_response
 
 from cc_addons.language import * 
 from settings import *

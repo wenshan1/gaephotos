@@ -1,18 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
-import time
-import base64
-
-from google.appengine.ext import db  
 from google.appengine.api import users
 from google.appengine.api import images
 from google.appengine.api import memcache
 
 from django.http import HttpResponse,HttpResponseRedirect
-from django.utils.html import escape
-from django.utils import text,simplejson
-from django.shortcuts import render_to_response
+from django.utils import simplejson
 
 from cc_addons.language import translate 
 from settings import *

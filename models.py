@@ -5,9 +5,6 @@ from datetime import datetime
 from cStringIO import StringIO
 
 from google.appengine.ext import db
-from google.appengine.api import datastore
-from google.appengine.api import datastore_errors
-from google.appengine.api import users
 from google.appengine.api import memcache
 
 def PROPERTY( function ):
