@@ -2,6 +2,13 @@
 
 = Latest Version=
 
+V0.4:
+
+  # Support DragAndDrop upload.
+  # Optimize cache using, up to 80% performance improvement.
+  # Add cron task to maintain Instance in memory.
+  # Fixed some javascript bugs in Albums Manage.
+  
 V0.3:
 
   # Increase photo size limit from 1M to 8M.
