@@ -29,9 +29,12 @@ def index(request):
         save_current_lang(lang)
         return HttpResponseRedirect(request.META.get('HTTP_REFERER','/'))
     
-    albums = get_all_albums()
-    entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
-     
+    try:
+        albums = get_all_albums()
+        entries,pager = CCPager(query=albums,items_per_page=gallery_settings.albums_per_page).fetch(page_index)
+    except:
+        returnerror(translate('Index is building, pls wait a while, go to "GAE Dashboard" -> "Datastore Indexes" to check the status'))
+         
     public = not checkAuthorization()
     latestcomments = Comment.GetLatestComments(gallery_settings.latest_comments_count, public)
     latestphotos = Photo.GetLatestPhotos(gallery_settings.latest_photos_count, public)

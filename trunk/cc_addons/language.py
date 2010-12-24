@@ -184,6 +184,8 @@ u"en-us":
 'Delete Selected',
 'Move Selected to:',
 'Tips: DragAndDrop photos into Album to Upload(Firefox/Chrome)',
+'Index is building, pls wait a while, go to "GAE Dashboard" -> "Datastore Indexes" to check the status',
+'Pls input album name',
 '##Error MSG##',
 ],
 
@@ -308,6 +310,8 @@ u"zh-cn":
 '删除选定图片',
 '移动选定到:',
 '小提示: 拖拽图片到相册上可以直接上传(Firefox/Chrome)',
+'请等待Index建立,到GAE Dashboard->Datastore Indexes 查看状态',
+'请输入相册名',
 '##出错了##',
 ],              
               

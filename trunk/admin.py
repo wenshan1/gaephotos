@@ -503,12 +503,15 @@ def albummanage(request):
         
         new = request.POST.get("createalbum")
         if new:  #create album
-            new_name = ccEscape(request.POST.get("new_name"))
+            new_name = ccEscape(request.POST.get("new_name").strip())
             new_public = request.POST.get("new_public")
             if new_public == "true":
                 new_public = True
             else:
                 new_public = False
+                
+            if not new_name:
+                return returnerror(translate("Pls input album name"))
                 
             new_description = ccEscape(request.POST.get("new_description"))
             
