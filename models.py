@@ -142,8 +142,15 @@ class Album(CCPhotoModel):
         except:
             photos = Photo.all().filter("album =", self)
         return photos
+
+    def GetPhotos(self):
+        return Photo.get_by_id(self.photoslist)
         
     def GetPhotoByName(self, photoname):
+        #for photo in self.GetPhotos():
+            #if photo.name == photoname:
+                #return photo
+        #return None
         photo = Photo.all().filter("album =", self).filter("name =", photoname)
         photo = photo.fetch(1)
         if photo:

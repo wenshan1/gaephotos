@@ -60,8 +60,8 @@ def album(request, albumname):
     if not album.public and not checkAuthorization():
         return returnerror(translate("You are not authorized"))
     
-    photos = album.GetPhotosQuery()
-    entries,pager = CCPager(query=photos,items_per_page=gallery_settings.thumbs_per_page).fetch(page_index)
+    photos = album.GetPhotos()
+    entries,pager = CCPager(list=photos,items_per_page=gallery_settings.thumbs_per_page).fetch(page_index)
                  
     content = {"album":album,
                "photos":entries,
@@ -98,7 +98,7 @@ def photo(request, albumname, photoname):
     try:    
         current = album.GetPhotoIndex(photo)
     except ValueError:
-        current = album.InsertPhoto2List(photo)
+        current = album.InsertPhoto2List(0, photo)
         
     total = album.photoCount
     prevphoto = nextphoto = None
