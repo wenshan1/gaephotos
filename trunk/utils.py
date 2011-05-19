@@ -22,6 +22,7 @@ from django.utils.html import escape
 from django.template import loader
 from django.http import HttpResponse,HttpRequest,HttpResponseRedirect
 
+from settings import PAGE_CACHE_DISABLED
 from cc_addons.language import translate,get_current_lang,save_current_lang
 from models import *
 
@@ -302,12 +303,13 @@ def getImageType(binary):
                 #if not memcache.set(key, resp, 60):
                     #logging.error("Memcache set failed.")
             #return resp
-    #return _wrapper        
+    #return _wrapper
+        
 
 def pagecache(keyprefix, time=60*60):
     def _decorator(method):
         def _wrapper(*args, **kwargs):
-            if len(args) == 0:
+            if len(args) == 0 or PAGE_CACHE_DISABLED:
                 return method(*args, **kwargs)
             request = args[0]
             if not issubclass( type(request), HttpRequest):
@@ -340,6 +342,7 @@ def pagecache(keyprefix, time=60*60):
             return data
         return _wrapper
     return _decorator
+
 
 def main():
     pass
