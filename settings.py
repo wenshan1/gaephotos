@@ -6,6 +6,8 @@ ROOT_URLCONF = 'urls'
 
 DEFAULT_LANG = 'zh-cn'
 
+PAGE_CACHE_DISABLED = True
+
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates".
     # Always use forward slashes, even on Windows.
