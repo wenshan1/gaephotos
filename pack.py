@@ -9,7 +9,7 @@ import stat,fnmatch
 import zipfile
 import hashlib
 
-ReleaseVersion = "0.4"
+ReleaseVersion = "0.43"
 
 def getFileList(path, ext, excluded_exts, subdir = True ):
     if os.path.exists(path):
