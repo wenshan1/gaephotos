@@ -1,1 +1,1 @@
-appcfg.py update ./ --noisy
+appcfg.py update ./

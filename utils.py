@@ -1,38 +1,10 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-import os
+from __future__ import with_statement
 import logging
-import Cookie
-import time
-import math
-import hashlib
-
-from functools import wraps
-from time import gmtime,mktime
+from time import gmtime
 from datetime import datetime
-from zlib import adler32
 
-from google.appengine.api import users
-from google.appengine.api import memcache
-
-from django.shortcuts import render_to_response
-from django.utils import simplejson
-from django.utils.html import escape
-from django.template import loader
-from django.http import HttpResponse,HttpRequest,HttpResponseRedirect
-
-from settings import PAGE_CACHE_DISABLED
-from cc_addons.language import translate,get_current_lang,save_current_lang
-from models import *
-
-
-def generate_etag(mtime, file_size, real_filename):
-    return 'wzsdm-%d-%s-%s' % (
-        mktime(mtime.timetuple()),
-        file_size,
-        adler32(real_filename) & 0xffffffff
-    )
+from google.appengine.api import files
 
 def _dump_date(d, delim):
     """Used for `http_date` and `cookie_date`."""
@@ -48,7 +20,7 @@ def _dump_date(d, delim):
         ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
          'Oct', 'Nov', 'Dec')[d.tm_mon - 1],
         delim, str(d.tm_year), d.tm_hour, d.tm_min, d.tm_sec
-    )
+        )
 
 def http_date(timestamp=None):
     """Formats the time to match the RFC1123 date format.
@@ -62,201 +34,6 @@ def http_date(timestamp=None):
     :param timestamp: If provided that date is used, otherwise the current.
     """
     return _dump_date(timestamp, ' ')
-   
-def unescape(html):
-    return html.replace('&amp;','&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"').replace('&#39;', "'") 
-                                                                                                               
-def format_date(dt):
-    return dt.strftime('%Y-%m-%d %H:%MGMT')
-
-def ccEscape(str):
-    escaped = escape(str)
-    if not isinstance(escaped, unicode):
-        return unicode(escape(str),'utf-8').strip()
-    else:
-        return escaped
-
-def render_to_javasript(*args, **kwargs):
-    resp = HttpResponse()
-    resp.headers['Content-Type'] = "text/javascript"
-    resp.write(loader.render_to_string(*args, **kwargs))
-    return resp
-
-def render_to_atom(*args, **kwargs):
-    resp = HttpResponse()
-    resp.headers['Content-Type'] = "application/atom+xml"
-    resp.write(loader.render_to_string(*args, **kwargs))
-    return resp
-    
-# one request one save
-def save_cookie(cookie_dict,path="/"):
-    cookie = Cookie.SimpleCookie()
-    for key in cookie_dict.keys():        
-        cookie[key] = simplejson.dumps(cookie_dict[key])
-        now = time.asctime()
-        cookie[key]['expires'] = now[:-4] + str(int(now[-4:])+1) + ' GMT'
-        cookie[key]['path'] = path
-        
-    print cookie
-    
-def get_cookie(name,default=None):
-    browser_cookie = os.environ.get('HTTP_COOKIE', '')
-    cookie = Cookie.SimpleCookie()
-    cookie.load(browser_cookie)
-    try:
-        value = simplejson.loads(cookie[name].value)
-    except:
-        return default
-    
-    return value
-
-def Album2Dict(album):
-    if not album:
-        return {}
-    return {"id": album.id,
-            "name":album.name,
-            "description": unescape(album.description),
-            "public":album.public,
-            "createdate":format_date(album.createdate),
-            "updatedate":format_date(album.updatedate),
-            "photoslist":album.photoslist, 
-            "coverphotoid": album.coverPhotoID,}
-    
-def buildComments(comments):
-    li = []
-    for comment in comments:
-        li.append({'author':comment.author, 'content':comment.content,
-                   'date':format_date(comment.date), 'id':comment.id,
-                   'admin':users.is_current_user_admin(),})
-    return li
-    
-class CCPager(object):
-
-    def __init__(self, model=None,query=None,list=[], items_per_page=8, pages_follow = 5, pages_skip = 10):
-        if model:
-            self.query = model.all()
-        elif query:
-            self.query=query
-        elif list:
-            self.query = None
-            self.list = list
-        else:
-            self.query = None
-            self.list = []
-
-        self.items_per_page = items_per_page
-        self.pages_follow = pages_follow
-        self.pages_skip = pages_skip
-
-    def fetch(self, p):
-        if self.query:
-            max_offset = self.query.count()
-        else:
-            max_offset = len(self.list)
-            
-        n = max_offset / self.items_per_page
-        if max_offset % self.items_per_page != 0:
-            n += 1
-
-        if p < 0 or p > n:
-            p = 1
-        offset = (p - 1) * self.items_per_page
-        
-        if self.query:
-            results = self.query.fetch(self.items_per_page, offset)
-        else:
-            results = self.list[offset:offset+self.items_per_page]
-
-
-
-        links = {'count':max_offset,'page_index':p, 
-                 'page_count': int(math.ceil(((float)(max_offset))/self.items_per_page)),
-                 'prev': p - 1, 'next': p + 1, 'last': n,
-                 'follow':range(p+1,n+1),
-                 'lead':[],}
-        if p > self.pages_skip:
-            links['lead'].append(p-self.pages_skip)
-        start = 1
-        if p-self.pages_follow > start:
-            start = p-self.pages_follow
-        links['lead'] += range(start,p)
-        
-        
-        if len(links['follow']) > self.pages_follow:
-            links['follow'] = links['follow'][:self.pages_follow]
-        if links['page_count'] - p > self.pages_skip:
-            links['follow'].append(p+self.pages_skip)
-        
-        if links['next'] > n:
-            links['next'] = 0
-
-        return (results, links)
-
-def requires_site_admin(method):
-    @wraps(method)
-    def wrapper(self, *args, **kwargs):
-        if not checkAuthorization():
-            return returnerror(translate("You are not authorized"))
-        else:
-            return method(self, *args, **kwargs)
-    return wrapper        
-        
-def checkAuthorization():
-    if users.is_current_user_admin():
-        return True
-    user = users.get_current_user()
-    if not user:
-        return False
-    
-    email = user.email()
-    adminlist = gallery_settings.adminlist.split(";")
-    try:
-        adminlist.remove("")
-    except:
-        pass
-    
-    for admin in adminlist:
-        if admin == email:
-            return True
-    
-    return False
-        
-def get_all_albums(order="-updatedate"):
-    public = True
-    if checkAuthorization():
-        public = False
-    try:
-        albums = Album.GetAllAlbumsQuery(public).order(order)
-    except:
-        albums = Album.GetAllAlbumsQuery(public)
-
-    return albums
-
-def returnerror(msg):
-    content = {"error_msg":msg,
-               }
-    return render_to_response_with_users_and_settings("admin/error.html", content)        
-        
-def returnjson(dit,response):
-    #response.headers['Content-Type'] = "application/json"
-    response.write(simplejson.dumps(dit))
-    return response 
-
-def render_to_response_with_users_and_settings(templatefile, content):
-    global gallery_settings
-    if not gallery_settings:
-        InitGallery()
-    
-    gallery_settings.baseurl = "http://"+os.environ["HTTP_HOST"]
-    users.is_admin = checkAuthorization()    
-    content["users"] = users
-    content["gallery_settings"] = gallery_settings
-    
-    searchword = get_cookie("gaephotos-searchword","")
-    searchmode = get_cookie("gaephotos-searchmode")
-    content["searchword"] = searchword
-    content["searchmode"] = searchmode
-    return render_to_response(templatefile, content) 
 
 class ImageMime:
     GIF = "image/gif"
@@ -266,8 +43,8 @@ class ImageMime:
     BMP = "image/bmp"
     ICO = "image/x-icon"
     UNKNOWN = "application/octet-stream"
-    
-def getImageType(binary):
+
+def get_img_type(binary):
     size = len(binary)
     if size >= 6 and binary.startswith("GIF"):
         return ImageMime.GIF
@@ -283,70 +60,15 @@ def getImageType(binary):
     elif size >= 4 and binary.startswith("\x00\x00\x01\x00"):
         return ImageMime.ICO
     else:
-        return ImageMime.UNKNOWN        
-        
-#def pagecache(method):
-    #@wraps(method)
-    #def _wrapper(*args, **kwargs):
-        #request = args[0]
-        #if request.POST or request.FILES:
-            #resp = method(*args, **kwargs)
-            #return resp
-        
-        #key = "html:" + request.META["PATH_INFO"]+ request.META["QUERY_STRING"]  
-        #resp = memcache.get(key)
-        #if resp is not None:
-            #return resp
-        #else:
-            #resp = method(*args, **kwargs)
-            #if resp.status_code == 200:
-                #if not memcache.set(key, resp, 60):
-                    #logging.error("Memcache set failed.")
-            #return resp
-    #return _wrapper
-        
+        return ImageMime.UNKNOWN
 
-def pagecache(keyprefix, time=60*60):
-    def _decorator(method):
-        def _wrapper(*args, **kwargs):
-            if len(args) == 0 or PAGE_CACHE_DISABLED:
-                return method(*args, **kwargs)
-            request = args[0]
-            if not issubclass( type(request), HttpRequest):
-                return method(*args, **kwargs)
-            if request.method == "POST":
-                return method(*args, **kwargs)
-            lang = request.GET.get("lang",None)
-            if lang:
-                save_current_lang(lang)
-                return HttpResponseRedirect(request.META.get('HTTP_REFERER','/'))
-            
-            txtkey = u"%s_%s?%s_%s_%s"%(keyprefix, ccEscape(request.path), 
-                              request.META.get('QUERY_STRING',''),
-                              checkAuthorization(),
-                              get_current_lang())
-            txtkey = txtkey.replace(' ','_')
-            key = txtkey
-            if isinstance(key, unicode):
-                key = unicode.encode(key,'utf-8')
-            mySha1 = hashlib.sha1()
-            mySha1.update(key)
-            key = mySha1.hexdigest()
-            data = memcache.get(key)
-            if data is not None:
-                logging.info("get %s from cache"%txtkey)
-                return data
-            data = method(*args, **kwargs)
-            memcache.set(key, data, time)
-            PageCacheStat.Add(key)
-            return data
-        return _wrapper
-    return _decorator
-
-
-def main():
-    pass
+def create_blob_file(mime_type, binary):
+    blob_file_name = files.blobstore.create(mime_type=mime_type)
+    with files.open(blob_file_name, 'a') as f:
+        f.write(binary)
+    files.finalize(blob_file_name)
+    blob_key = files.blobstore.get_blob_key(blob_file_name)
+    return blob_key
 
 if __name__ == '__main__':
-  main()
-  
+    pass
