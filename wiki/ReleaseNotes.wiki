@@ -2,6 +2,16 @@
 
 = Latest Version=
 
+V1.01:
+
+  # Optimized for GAE new price policy.
+  # Blobstore instead of Datastore, free quota up to 5G.
+  # Python27 and HRD(High Replication Database) required.
+  # Support watermark.(default OFF)
+  # Support Hot-linking block. (default OFF)
+
+= History =
+
 V0.4:
 
   # Support DragAndDrop upload.
@@ -14,7 +24,6 @@ V0.3:
   # Increase photo size limit from 1M to 8M.
   # Support multi move/delete photos.
 
-= History =
 V0.21: Some bugs fixed.
 
 V0.2: Rss feed support.
