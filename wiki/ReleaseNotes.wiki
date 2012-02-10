@@ -9,6 +9,7 @@ V1.01:
   # Python27 and HRD(High Replication Database) required.
   # Support watermark.(default OFF)
   # Support Hot-linking block. (default OFF)
+  # Block all Search-engine, pls change robots.txt if you need.
 
 = History =
 
