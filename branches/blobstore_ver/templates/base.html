@@ -17,7 +17,7 @@ Released   : 20071001
 <meta content="" name="keywords"/>
 <meta content="" name="description"/>
 <link type="text/css" rel="stylesheet" href="/static/styles/default.css"/>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery-1.4.4.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery.blockUI.js"></script>
 <script type="text/javascript">
 String.prototype.format = function () {
@@ -111,6 +111,7 @@ $(document).ready(function() {
         {% else %}
             <a href="/login/">{{ _('Login') }}</a>
         {% endif %}
+        | <a href="/feed/"><img src="/static/images/rss.gif" alt="RSS" class="no_border"></a>
     </div>
     </div>
 </div>

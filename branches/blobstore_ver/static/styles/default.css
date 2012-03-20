@@ -86,6 +86,10 @@ a img {
     color: #FFFFFF;
 }
 
+.no_border {
+    border: none;
+    vertical-align: middle;
+}
 /* Menu */
 #menu {
     width: 98%;
@@ -379,6 +383,12 @@ a img {
     width: 100%;
     padding-top: 2px;
     text-align: left;
+}
+#comment_author {
+    border: 1px solid #cccccc;
+    float: left;
+    margin-left: 10px;
+    width: 160px;
 }
 #new_comment {
     border: 1px solid #cccccc;
