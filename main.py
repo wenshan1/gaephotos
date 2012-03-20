@@ -13,6 +13,13 @@ from google.appengine.ext import blobstore
 from google.appengine.api import memcache
 from google.appengine.ext.webapp import blobstore_handlers
 
+from google.appengine.api import conf
+APP_VERSION, CURRENT_CONFIG_VERSION, DEVELOPMENT = conf._inspect_environment()
+if DEVELOPMENT:
+    ENABLE_DEBUG = True
+else:
+    ENABLE_DEBUG = False
+
 import utils
 import model
 from lang import save_current_lang
@@ -381,14 +388,29 @@ def ajax_get_upload_url():
     return res
 
 
-@requires_site_login
-def ajax_create_comment(album_name, photo_name, comment):
+def ajax_create_comment(album_name, photo_name, comment, author):
     res = ERROR_RES.copy()
-    user = users.get_current_user()
+    if model.SITE_SETTINGS.enable_anonymous_comment:
+        email = "anonymous@unknown.com"
+        author = cgi.escape(author.strip())
+    else:
+        user = users.get_current_user()
+        if not user:
+            raise Exception(_("You are not login"))
+        email = user.email()
+        author = user.nickname()
+
     comment = cgi.escape(comment.strip())
     if len(comment) > MAX_COMMENT:
         raise Exception(__("comment too long, max %0 chars", MAX_COMMENT))
-    comment = model.DBComment.create(album_name, photo_name, comment, author=user.nickname(), email=user.email())
+
+    photo = model.DBPhoto.get_photo_by_name(album_name=album_name, photo_name=photo_name)
+    if not photo:
+        raise Exception(_("photo not exist"))
+    if not photo.is_public and not check_admin_auth():
+        raise Exception(_("You are not authorized"))
+
+    comment = model.DBComment.create(album_name, photo_name, comment, author=author, email=email)
 
     key = "comment_%s_%s"%(album_name, photo_name)
     memcache.delete(key)
@@ -518,7 +540,7 @@ class AdminUploadPage(ccRequestHandler):
             if photo:
                 raise Exception(_("photo already exists in this album"))
             photo = model.DBPhoto.create(album_name, file_name, binary, owner=users.get_current_user(),
-                                        public=album.public)
+                                        public=album.public, site=self.request.host_url)
             album.add_photo_to_album(photo)
 
             result["status"] = "ok"
@@ -556,6 +578,7 @@ class AdminSettingsPage(ccRequestHandler):
             settings = {}
             settings.update(self.request.POST)
             settings["enable_comment"] = bool(settings.get("enable_comment"))
+            settings["enable_anonymous_comment"] = bool(settings.get("enable_anonymous_comment"))
             settings["enable_watermark"] = bool(settings.get("enable_watermark"))
             settings["block_referrers"] = bool(settings.get("block_referrers"))
 
@@ -594,6 +617,21 @@ class LoginOutPage(ccRequestHandler):
     def get(self):
         self.redirect(users.create_logout_url(self.request.environ.get("HTTP_REFERER", "/")))
 
+class FeedPage(ccRequestHandler):
+    def get(self):
+        latestphotos = model.DBPhoto.get_latest_photos(model.SITE_SETTINGS.latest_photos_count)
+        if latestphotos:
+            last_updated = latestphotos[0].updatedate
+            last_updated = last_updated.strftime("%Y-%m-%dT%H:%M:%SZ")
+        else:
+            last_updated = "1900-01-01T00:00:00Z"
+        context = {"host_url": self.request.host_url,
+                   "latestphotos": latestphotos,
+                   "last_updated": last_updated,
+        }
+        self.response.headers['Content-Type'] = "application/atom+xml"
+        self.response.out.write(render_with_user_and_settings('atom.xml', context))
+    
 #photos pages
 class MainPage(ccRequestHandler):
     def get(self):
@@ -657,11 +695,12 @@ class ThumbPage(ccPhotoRequestHandler):
     def get(self, albumname, photoname):
         self.send_photo(force_unicode(albumname), force_unicode(photoname), "thumb")
 
-RESERVED_ALBUM_NAME = [u'login', u'logout', u'admin', u'slider']
+RESERVED_ALBUM_NAME = [u'login', u'logout', u'admin', u'slider', u'feed']
 app = webapp2.WSGIApplication([
     (r'/', MainPage),
     (r'/login/', LoginPage),
     (r'/logout/', LoginOutPage),
+    (r'/feed/{0,1}', FeedPage),
     (r'/admin/ajax/', AdminAjaxPage),
     (r'/admin/settings/', AdminSettingsPage),
     (r'/admin/blobupload/.*', UploadHandler),
@@ -670,7 +709,7 @@ app = webapp2.WSGIApplication([
     (r'/([^/]*?)/{0,1}', AlbumPage),
     (r'/([^/]*?)/([^/]*?)/thumb/{0,1}', ThumbPage),
     (r'/([^/]*?)/([^/]*?)', PhotoPage),
-], debug=True)
+], debug=ENABLE_DEBUG)
 
 def main():
     logging.info("call main()")

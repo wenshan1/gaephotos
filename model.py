@@ -49,6 +49,10 @@ class BaseModel(db.Model):
     def id(self):
         return self.key().id()
 
+    @property
+    def keyname(self):
+        return self.key().name()
+
     def save_settings(self, **kwds):
         props = self.properties()
         for p in props.keys():
@@ -148,6 +152,7 @@ class DBSiteSettings(BaseModel):
     latest_comments_count = db.IntegerProperty(default=8)
     max_upload_size = db.FloatProperty(default=2.0)  #max size(M)
     enable_comment = db.BooleanProperty(default=True)
+    enable_anonymous_comment = db.BooleanProperty(default=False)
     enable_watermark = db.BooleanProperty(default=False)
     watermark = db.StringProperty(default="@GAEPhotos")
     watermark_size = db.IntegerProperty(default=20)
@@ -356,6 +361,7 @@ class DBPhoto(BaseModel):
     mime = db.StringProperty()
     size = db.IntegerProperty()
     createdate = db.DateTimeProperty(auto_now_add=True)
+    updatedate = db.DateTimeProperty(auto_now=True)
     description = db.StringProperty(multiline=True, default="")
     blob_key = db.StringProperty()
     thumb_blob_key = db.StringProperty()
@@ -370,8 +376,15 @@ class DBPhoto(BaseModel):
         return "%s/%s/%s/thumb/" % (self.site, self.album_name, self.photo_name)
 
     @property
-    def isPublic(self):
+    def is_public(self):
         return self.public
+
+    @property
+    def Comments(self):
+        try:
+            return DBComment.get_comments(self.album_name, self.photo_name).order("-date")
+        except:
+            return DBComment.get_comments(self.album_name, self.photo_name)
 
     def remove(self):
         blobstore.delete(self.blod_key)
@@ -387,9 +400,13 @@ class DBPhoto(BaseModel):
     @classmethod
     def get_latest_photos(cls, count, is_admin=False):
         if is_admin:
-            return cls.all().order("-createdate").fetch(count)
+            query = cls.all()
         else:
-            return cls.all().order("-createdate").filter("public =", True).fetch(count)
+            query = cls.all().filter("public =", True)
+        try:
+            return query.order("-updatedate").fetch(count)
+        except:
+            return query.order("-createdate").fetch(count)
 
     @classmethod
     def get_names_from_key_name(cls, key_name):
@@ -435,6 +452,7 @@ class DBPhoto(BaseModel):
             "album_name": self.album_name,
             "owner": (self.owner and self.owner.nickname()) or "",
             "createdate": self.createdate.isoformat(),
+            "updatedate": self.updatedate.isoformat(),
             "description": self.description,
             "mime": self.mime,
             "size": self.size,
@@ -461,10 +479,11 @@ class DBComment(BaseModel):
         comment = cls(parent=cls.db_parent, photo_key_name=key_name, content=content,
             public=photo.public, **kwds)
         comment.save()
+        photo.save()
         return comment
 
     @classmethod
-    def get_comments(cls, album_name, photo_name, public=None):
+    def get_comments(cls, album_name, photo_name, public=True):
         photo_key_name = DBPhoto.gen_key_name(album_name=album_name, photo_name=photo_name)
         if public:
             return cls.all().filter("photo_key_name =", photo_key_name).filter("public =", True)
@@ -488,11 +507,15 @@ class DBComment(BaseModel):
         return None
 
     @classmethod
-    def get_latest_comments(cls, count, public=None):
+    def get_latest_comments(cls, count, public=True):
         if public:
-            return cls.all().filter("public =", True).order("-date").fetch(count)
+            query = cls.all().filter("public =", True)
         else:
-            return cls.all().order("-date").fetch(count)
+            query = cls.all()
+        try:
+            return query.order("-date").fetch(count)
+        except:
+            return query.fetch(count)
 
     @property
     def avatar_url(self):

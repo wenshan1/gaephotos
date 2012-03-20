@@ -4,7 +4,7 @@ import logging
 from time import gmtime
 from datetime import datetime
 
-VERSION = "1.01"
+VERSION = "1.02"
 
 def _dump_date(d, delim):
     """Used for `http_date` and `cookie_date`."""
