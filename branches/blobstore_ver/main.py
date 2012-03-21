@@ -31,12 +31,31 @@ __ = ungettext
 def dateformat(value, format='%Y-%m-%d'):
     return value.strftime(format)
 
+def filesizeformat(bytes):
+    """
+    Format the value like a 'human-readable' file size (i.e. 13 KB, 4.1 MB, 102
+    bytes, etc).
+    """
+    try:
+        bytes = float(bytes)
+    except TypeError:
+        return "0 bytes"
+
+    if bytes < 1024:
+        return "%d byte%s" % (bytes, bytes != 1 and 's' or '')
+    if bytes < 1024 * 1024:
+        return "%.1f KB" % (bytes / 1024)
+    if bytes < 1024 * 1024 * 1024:
+        return "%.1f MB" % (bytes / (1024 * 1024))
+    return "%.1f GB" % (bytes / (1024 * 1024 * 1024))
+
 jinja_env = jinja2.Environment(autoescape=True,
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")),
     extensions=['jinja2.ext.i18n'])
 
 jinja_env.install_gettext_translations(ccTranslations())
 jinja_env.filters['date'] = dateformat
+jinja_env.filters['filesizeformat'] = filesizeformat
 
 logging.info("init jinja2")
 
@@ -390,11 +409,11 @@ def ajax_get_upload_url():
 
 def ajax_create_comment(album_name, photo_name, comment, author):
     res = ERROR_RES.copy()
+    user = users.get_current_user()
     if model.SITE_SETTINGS.enable_anonymous_comment:
-        email = "anonymous@unknown.com"
+        email = user and user.email() or "anonymous@unknown.com"
         author = cgi.escape(author.strip())
     else:
-        user = users.get_current_user()
         if not user:
             raise Exception(_("You are not login"))
         email = user.email()
@@ -538,6 +557,7 @@ class AdminUploadPage(ccRequestHandler):
 
             photo = model.DBPhoto.get_photo_by_name(album_name, file_name)
             if photo:
+                album.add_photo_to_album(photo)
                 raise Exception(_("photo already exists in this album"))
             photo = model.DBPhoto.create(album_name, file_name, binary, owner=users.get_current_user(),
                                         public=album.public, site=self.request.host_url)

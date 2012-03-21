@@ -360,6 +360,8 @@ class DBPhoto(BaseModel):
     owner = db.UserProperty()
     mime = db.StringProperty()
     size = db.IntegerProperty()
+    width = db.IntegerProperty(default=0)
+    height = db.IntegerProperty(default=0)
     createdate = db.DateTimeProperty(auto_now_add=True)
     updatedate = db.DateTimeProperty(auto_now=True)
     description = db.StringProperty(multiline=True, default="")
@@ -438,9 +440,12 @@ class DBPhoto(BaseModel):
         photo.size = len(binary)
         mime_type = utils.get_img_type(binary)
         photo.mime = mime_type
-        blob_key = utils.create_blob_file(mime_type, binary)
+        img = images.Image(binary)
+        photo.width = img.width
+        photo.height = img.height
         thumb = images.resize(binary, 280, 210, images.JPEG)
-        thumb_blob_key = utils.create_blob_file(utils.ImageMime.JPEG, thumb)
+        blob_key = utils.create_blob_file(mime_type, binary, u"%s_%s"%(album_name,file_name))
+        thumb_blob_key = utils.create_blob_file(utils.ImageMime.JPEG, thumb, u"thumb_%s_%s"%(album_name,file_name))
         photo.blob_key = str(blob_key)
         photo.thumb_blob_key = str(thumb_blob_key)
         photo.save()
@@ -456,6 +461,8 @@ class DBPhoto(BaseModel):
             "description": self.description,
             "mime": self.mime,
             "size": self.size,
+            "width": self.width,
+            "height": self.height,
             "url": self.url,
             "thumb_url": self.thumb_url,
             "public": self.public,

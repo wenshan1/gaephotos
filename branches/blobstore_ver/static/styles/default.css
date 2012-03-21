@@ -283,6 +283,18 @@ a img {
 .selectedphotos {
     float: left;
 }
+.details {
+    display: none;
+    position: absolute;
+    font-size: 0.8em;
+    background-color:#eeeeee;
+    border: solid 1px #cccccc;
+    border-radius: 6px;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    z-index: 999;
+    padding: 4px;
+}
 /* Photo */
 #photo {
     width: 700px;
@@ -301,6 +313,9 @@ a img {
 #slider {
     float: right;
     width: 240px;
+}
+.image-details {
+    color: #888;
 }
 
 /* Photo Nav */

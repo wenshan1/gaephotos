@@ -53,8 +53,6 @@
                 syncTransitions:           true,
                 defaultTransitionDuration: 900,
                 onSlideChange:             function(prevIndex, nextIndex) {
-                    $("#original_photo").attr('href', this.data[nextIndex].slideUrl);
-
                     $('#thumbs ul.thumbs').children()
                             .eq(prevIndex).fadeTo('fast', onMouseOutOpacity).end()
                             .eq(nextIndex).fadeTo('fast', 1.0);
@@ -266,8 +264,6 @@
 
 {% block commandbar %}
     <li>|</li>
-    <li><a id="original_photo" target="_blank" href="#">{{ _('Original Photo') }}</a></li>
-    <li>|</li>
     <li><a id="copylink" href="javascript:;">{{ _('Copy Photo Link') }}</a></li>
 {% endblock %}
 
@@ -286,7 +282,17 @@
                             <img src="/{{ photo.album_name }}/{{photo.photo_name}}/thumb/" alt="{{photo.description}}" />
                         </a>
                         <div class="caption">
-                            <div class="image-desc">{{photo.description}}</div>
+                            <div class="image-desc">{{photo.description}}
+                                <a id="original_photo" target="_blank" href="/{{ photo.album_name }}/{{photo.photo_name}}">
+                                    {{ _('Original Photo') }}
+                                </a>
+                            </div>
+                            <div class="image-details">
+                            {{ _("Owner") }}: {{ photo.owner }} |
+                            {{ _("Dimensions") }}: {{photo.width}}x{{photo.height}} |
+                            {{ _("Size") }}: {{ photo.size|filesizeformat }} |
+                            {{ _("Date uploaded") }}: {{ photo.createdate|date }}
+                            </div>
                         </div>
                     </li>
                 {% endfor %}
