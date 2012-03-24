@@ -46,6 +46,10 @@ class BaseModel(db.Model):
     db_parent = BASEMODEL_PARENT
 
     @property
+    def str_key(self):
+        return str(self.key())
+
+    @property
     def id(self):
         return self.key().id()
 
@@ -371,11 +375,11 @@ class DBPhoto(BaseModel):
 
     @property
     def url(self):
-        return "%s/%s/%s" % (self.site, self.album_name, self.photo_name)
+        return "/%s/%s" % (self.album_name, self.photo_name)
 
     @property
     def thumb_url(self):
-        return "%s/%s/%s/thumb/" % (self.site, self.album_name, self.photo_name)
+        return "/%s/%s/thumb/" % (self.album_name, self.photo_name)
 
     @property
     def is_public(self):

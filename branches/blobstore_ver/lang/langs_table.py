@@ -113,6 +113,8 @@ u"Type",
 u"Dimensions",
 u"Size",
 u"Date uploaded",
+u"Download Album",
+u"Download album partially due to GAE limitation",
 ],
 
 u"zh-cn":
@@ -228,6 +230,8 @@ u"类型",
 u"尺寸",
 u"大小",
 u"上传时间",
+u"下载相册",
+u"由于GAE的限制,相册分成几部分下载",
 ],
 }
 
