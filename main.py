@@ -580,6 +580,69 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
         upload_files = self.get_uploads()
 
 
+GAE_RESPONSE_LIMIT = 30*1024*1024 # 30 M
+
+def create_zipfile_from_photos(photos):
+    import zipfile
+    from cStringIO import StringIO
+    buf = StringIO()
+    zfile = zipfile.ZipFile(buf, "w")
+    for photo in photos:
+        zfile.writestr(photo.photo_name, blobstore.BlobReader(photo.blob_key).read(), zipfile.ZIP_DEFLATED)
+    zfile.close()
+    return buf.getvalue()
+
+class AdminDownloadAlbum(ccRequestHandler):
+    @requires_site_admin
+    def get(self, albumname):
+        albumname = force_unicode(albumname)
+        album = model.DBAlbum.get_album_by_name(albumname)
+        if not album:
+            raise Exception(_("album not exist"))
+        photos = model.DBPhoto.get_by_key_name(album.photoslist)
+
+        totalsize = sum([photo.size for photo in photos])
+        if totalsize < GAE_RESPONSE_LIMIT:
+            self.response.headers["Content-Type"] = "application/zip"
+            self.response.headers["Content-Disposition"]= "attachment;filename=%s.zip"%album.name.encode("utf-8")
+            self.response.out.write(create_zipfile_from_photos(photos))
+        else:
+            photo_keyname_list = []
+            part = []
+            totalsize = 0
+            for photo in photos:
+                totalsize += photo.size
+                if totalsize < GAE_RESPONSE_LIMIT:
+                    part.append(photo.keyname)
+                else:
+                    photo_keyname_list.append(",".join(part))
+                    totalsize = photo.size
+                    part = [photo.keyname]
+            else:
+                photo_keyname_list.append(",".join(part))
+                
+            context = {"album": album,
+                       "photo_keyname_list": photo_keyname_list,
+            }
+            self.response.out.write(render_with_user_and_settings('download_album.html', context))
+
+class AdminDownloadPhotos(ccRequestHandler):
+    @requires_site_admin
+    def get(self):
+        photo_keyname = self.request.get("photos", "").split(",")
+        name = self.request.get("name", "photos")
+
+        photos = model.DBPhoto.get_by_key_name(photo_keyname)
+        totalsize = sum([photo.size for photo in photos])
+        if totalsize < GAE_RESPONSE_LIMIT:
+            self.response.headers["Content-Type"] = "application/zip"
+            self.response.headers["Content-Disposition"]= "attachment;filename=%s.zip"%name.encode("utf-8")
+            self.response.out.write(create_zipfile_from_photos(photos))
+        else:
+            raise Exception("Response too large: %s, max is %s"%(totalsize,GAE_RESPONSE_LIMIT))
+
+    post = get
+
 class AdminSettingsPage(ccRequestHandler):
     @requires_site_owner
     def get(self):
@@ -722,6 +785,8 @@ app = webapp2.WSGIApplication([
     (r'/logout/', LoginOutPage),
     (r'/feed/{0,1}', FeedPage),
     (r'/admin/ajax/', AdminAjaxPage),
+    (r'/admin/download/([^/]*?)/{0,1}', AdminDownloadAlbum),
+    (r'/admin/zipphotos/', AdminDownloadPhotos),
     (r'/admin/settings/', AdminSettingsPage),
     (r'/admin/blobupload/.*', UploadHandler),
     (r'/admin/upload/', AdminUploadPage),
