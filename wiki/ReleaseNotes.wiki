@@ -2,6 +2,16 @@
 
 = Latest Version=
 
+V1.02:
+
+  # Add ATOM feed support.
+  # Support anonymous comment.(default OFF)
+  # Add photo details info.
+  # Add album backup support, u can download all photos in album now.
+  # Fixed some bugs.
+
+= History =
+
 V1.01:
 
   # Optimized for GAE new price policy.
@@ -10,9 +20,7 @@ V1.01:
   # Support watermark.(default OFF)
   # Support Hot-linking block. (default OFF)
   # Block all Search-engine, pls change robots.txt if you need.
-
-= History =
-
+  
 V0.4:
 
   # Support DragAndDrop upload.

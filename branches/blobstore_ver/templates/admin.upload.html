@@ -87,12 +87,13 @@
         progress_bar.offset({top: file_uploader.offset().top,
             left: file_uploader.offset().left});
         file_uploader.parent().append(progress_bar);
+        progress_bar.css({position: 'absolute'});
         progress_bar.show();
 
         var xhr = new XMLHttpRequest();
         xhr.upload.addEventListener("progress", function(event) {
             if (event.lengthComputable) {
-                var percentage = Math.round((event.loaded * 100) / event.total);
+                var percentage = Math.round((event.loaded * 100) / event.total) - 1;
                 progress_bar.width(file_uploader.outerWidth() * percentage/100);
                 progress_bar.text(percentage+'%');
                 if (percentage >= 100) {
@@ -115,6 +116,8 @@
                     if (resp.status=='ok'){
                         file_uploader.html("{0}, {1} M, {2}".format(resp.file_name,
                                 (file.size/1000/1000).toFixed(2), "{{ _('Done') }}"));
+                        progress_bar.width(file_uploader.outerWidth());
+                        progress_bar.text("{{ _('Done') }}");
                     } else {
                         progress_bar.text('{{ _("Error") }} ' + resp.error);
                         progress_bar.addClass("error");

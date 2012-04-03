@@ -240,9 +240,11 @@ a img {
     font-weight: normal;
     font-style: italic;
     cursor: text;
+    width: 90%;
 }
 .edit_description {
     border: 1px solid #ffa500;
+    width: 85%;
 }
 .description2 {
     font-weight: normal;
