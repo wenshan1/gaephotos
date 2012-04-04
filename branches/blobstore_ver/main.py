@@ -500,18 +500,18 @@ AJAX_METHODS = {
 
 def dispatch(parameters):
     result = ERROR_RES.copy()
-    action = parameters.pop("action")
-    logging.info("ajax action: %s" % (action))
-    if action not in AJAX_METHODS:
-        result["status"] = "error"
-        result["error"] = _("unsupported method")
-    else:
-        try:
-            result = AJAX_METHODS[action](**parameters)
-        except Exception, e:
-            logging.exception("error in dispatch")
-            result["error"] = force_unicode(e)
+    try:
+        action = parameters.pop("action", None)
+        if action not in AJAX_METHODS:
             result["status"] = "error"
+            result["error"] = _("unsupported method")
+        else:
+            logging.info("ajax action: %s" % (action))
+            result = AJAX_METHODS[action](**parameters)
+    except Exception,e:
+        logging.exception("error in dispatch")
+        result["error"] = force_unicode(e)
+        result["status"] = "error"
     return json.encode(result)
 
 #admin pages

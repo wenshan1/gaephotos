@@ -56,7 +56,7 @@ def package():
     
 def writefiletozipwithrule(filepath, zfile):
     print('packing file %s'%filepath)
-    shortname = filepath.replace(Base_Path+'\\','')
+    shortname = os.path.split(filepath)[1]
     if shortname not in excluded_files:
         shortname = filepath.replace(Base_Path,'')
         zfile.write(filepath, shortname, zipfile.ZIP_DEFLATED)        
