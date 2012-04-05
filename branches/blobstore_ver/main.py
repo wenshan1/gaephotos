@@ -22,6 +22,7 @@ else:
 
 import utils
 import model
+from lib.cc_cookies import CCCookiesWSGIMiddleware
 from lang import save_current_lang
 from lang import ugettext, ungettext, ccTranslations
 
@@ -720,7 +721,7 @@ class MainPage(ccRequestHandler):
     def get(self):
         lang = self.request.get("lang")
         if lang:
-            cookie = save_current_lang(lang, self.response)
+            save_current_lang(lang)
             self.redirect(self.request.environ.get("HTTP_REFERER", "/"))
         albums, albums_cursor = get_all_albums(pagesize=model.SITE_SETTINGS.albums_per_page)
 
@@ -795,6 +796,8 @@ app = webapp2.WSGIApplication([
     (r'/([^/]*?)/([^/]*?)/thumb/{0,1}', ThumbPage),
     (r'/([^/]*?)/([^/]*?)', PhotoPage),
 ], debug=ENABLE_DEBUG)
+
+app = CCCookiesWSGIMiddleware(app)
 
 def main():
     logging.info("call main()")
