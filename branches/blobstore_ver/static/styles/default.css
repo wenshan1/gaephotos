@@ -107,7 +107,7 @@ a img {
 #menu li {
     display: block;
     float: left;
-    padding: 8px 0px 0 0px;
+    padding: 8px 0px 0px 0px;
 }
 
 #menu a {
@@ -125,10 +125,6 @@ a img {
 #dropmenu ul {
     display: none;
     min-width: 60px;
-}
-
-#dropmenu:hover ul {
-    display: block;
     position: absolute;
     float: none;
     border: 1px solid black;
@@ -138,9 +134,18 @@ a img {
     z-index: 200;
 }
 
+#dropmenu:hover ul {
+    display: block;
+}
+
 #dropmenu li {
     float: none;
-    width: 90%;
+    width: 95%;
+    border-left: 1px solid #dddddd;
+    padding-left: 4px;
+}
+
+#dropmenu a {
     white-space: nowrap;
 }
 
@@ -593,8 +598,8 @@ fieldset {
 }
 
 #albumlist ul {
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
     list-style: none;
     text-align: left;
 }
@@ -628,7 +633,7 @@ fieldset {
 #admin_table img {
     max-width: 80px;
     max-height: 60px;
-    flaot: left;
+    float: left;
 }
 
 #coverphoto_select {
