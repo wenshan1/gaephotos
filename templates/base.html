@@ -99,9 +99,21 @@ $(document).ready(function() {
                 }, "json");
     });
 {% endif %}
+    var ul = $('#dropmenu ul');
+    var ul_width = ul.width();
+    var ul_height = ul.height();
     $('#dropmenu').hover(
-            function() { $('ul', this).show(); },
-            function() { $('ul', this).hide(); }
+            function() {
+                var window_height = $(window).height();
+                var height_ratio = Math.ceil(ul_height/window_height);
+
+                ul.width(ul_width * height_ratio).height(ul_height / height_ratio + 8);
+                $('li', ul).each(function() {
+                    $(this).width(ul.width() * 0.95 / height_ratio);
+                    $(this).css({float:"left"});
+                });
+            },
+            function() { ul.width(ul_width).height(ul_height); }
     );
 });
 </script>
@@ -135,9 +147,7 @@ $(document).ready(function() {
             {% if allalbums %}
                 <ul>
                     {% for ab in allalbums %}
-                        <li><a href="/{{ab.name}}/">{{ab.name|truncate(20,True)}}
-                            {% if not ab.public %} ({{ _("private") }}) {% endif %}
-                        </a></li>
+                        <li><a href="/{{ab.name}}/">{{ab.name|truncate(20,True)}}{% if not ab.public %} ({{ _("private") }}) {% endif %}</a></li>
                     {% endfor %}
                 </ul>
             {% endif %}
@@ -187,8 +197,8 @@ $(document).ready(function() {
             <th scope="row" style="width: 120px;">{{ _('Album Name') }}:</th>
             <td style="text-align: left;">
                 <input id="new_name" name="new_name" type="text" size="18" value=""/>
-                <input id="new_public" type="radio" name="new_public" value="true" checked>{{ _("public") }}</input>
-                <input type="radio" name="new_public" value="false">{{ _("private") }}</input>
+                <input id="new_public" type="radio" name="new_public" value="true" checked>{{ _("public") }}/>
+                <input type="radio" name="new_public" value="false">{{ _("private") }}/>
             </td>
         </tr>
         <tr>
