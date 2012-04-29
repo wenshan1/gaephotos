@@ -11,6 +11,7 @@ from django.utils.encoding import force_unicode
 from google.appengine.api import users
 from google.appengine.ext import blobstore
 from google.appengine.api import memcache
+from google.appengine.api import urlfetch
 from google.appengine.ext.webapp import blobstore_handlers
 
 from google.appengine.api import conf
@@ -463,7 +464,6 @@ def ajax_delete_comment_by_id(comment_id):
         res["error"] = _("comment not exist")
     return res
 
-
 def ajax_get_comments(album_name, photo_name):
     res = ERROR_RES.copy()
     key = "comment_%s_%s"%(album_name, photo_name)
@@ -482,6 +482,65 @@ def ajax_get_comments(album_name, photo_name):
     res["comments"] = comments
     return res
 
+@requires_site_admin
+def ajax_add_web_photos(album_name, web_links):
+    from urlparse import urlparse
+    
+    def is_valid_link(url):
+        if not url:
+            return False
+        scheme = urlparse(url.strip())[0]
+        if scheme not in ("http", "https"):
+            return False
+        return True
+        
+    res = ERROR_RES.copy()
+    album = model.DBAlbum.get_album_by_name(album_name)
+    if not album:
+        res["error"] = _("album not exist")
+        return res
+
+    links = [url.split("==") for url in web_links.split('\n') if url and url.strip()]
+    if not links:
+        raise Exception(_("invalid url"))
+
+    photos = []
+    errors = []
+    for link in links:
+        url = link[0]
+        try:
+            if not is_valid_link(url):
+                raise Exception(_("invalid url"))
+            if len(link) > 1:
+                file_name = link[1].strip()
+            else:
+                file_name = "".join(urlparse(url)[1:3]).replace("/", "_")
+            photo = model.DBPhoto.get_photo_by_name(album_name, file_name)
+            if photo:
+                album.add_photo_to_album(photo)
+                raise Exception(_("photo already exists in this album"))
+
+            result = urlfetch.fetch(url)
+            if result.status_code != 200:
+                raise Exception(_("get file content error"))
+            if len(result.content) > model.SITE_SETTINGS.max_upload_size * 1024 * 1024:
+                raise Exception(_("file size exceeds"))
+            if utils.get_img_type(result.content) == utils.ImageMime.UNKNOWN:
+                raise Exception(_("unsupported file type"))
+            photo = model.DBPhoto.create(album_name, file_name, result.content, owner=users.get_current_user(),
+                                    public=album.public)
+            album.add_photo_to_album(photo)
+            photos.append(photo)
+        except Exception,e:
+            errors.append((url, force_unicode(e)))
+
+    res["status"] = "ok"
+    res["album"] = album.to_dict()
+    res["photos"] =  [p.to_dict() for p in photos]
+    res["errors"] = errors
+
+    return res
+
 AJAX_METHODS = {
     "create_album": ajax_create_album,
     "get_all_albums": ajax_get_all_albums,
@@ -497,6 +556,7 @@ AJAX_METHODS = {
     "delete_comments": ajax_delete_comments,
     "delete_comment_by_id": ajax_delete_comment_by_id,
     "create_comment": ajax_create_comment,
+    "add_web_photos": ajax_add_web_photos,
     }
 
 def dispatch(parameters):

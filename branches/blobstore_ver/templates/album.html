@@ -146,7 +146,7 @@
                 $.growlUI("{{ _('Please select photo') }}", "");
                 return;
             }
-            $("#page").block({ message: $('#deletequestion'), css: { padding: '15px' } });
+            $("#page").block({ message: $('#deletequestion'), css: { padding: '15px', width: '600px' } });
         });
         $('#deleteno').click( function() {$("#page").unblock(); });
         $('#deleteyes').click(function() {
