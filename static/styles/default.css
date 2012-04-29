@@ -656,6 +656,16 @@ fieldset {
     font-size: 1em;
 }
 
+.tips {
+    overflow: hidden;
+    font: message-box;
+    background-color: InfoBackground;
+    border: 1px solid #C5B270;
+    position: relative;
+    padding: 3px;
+    font-size: 1em;
+}
+
 /* upload page */
 
 #albumsSelect{
