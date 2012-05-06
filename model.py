@@ -15,7 +15,7 @@ logging.info("init db cache")
 def get(keys, **kwargs):
     keys, multiple = datastore.NormalizeAndTypeCheckKeys(keys)
     ret = db.get([key for key in keys if key not in _db_get_cache], **kwargs)
-    if (len(ret) == 1) and (ret[0] == None):
+    if (len(ret) == 1) and (ret[0] == None) and (not multiple):
         return
     _db_get_cache.update(dict([(x.key(), x) for x in ret if x is not None]))
     ret = [_db_get_cache.get(k, None) for k in keys]
