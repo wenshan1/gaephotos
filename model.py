@@ -260,10 +260,14 @@ class DBAlbum(BaseModel):
 
     def add_photo_to_album(self, photo):
         photo_key_name = photo.key().name()
-        if photo_key_name not in self.photoslist:
-            self.photoslist.insert(0, photo_key_name)
-            self.save()
-        return self
+        def txn():
+            album = DBAlbum.get_album_by_name(self.name)
+            if photo_key_name not in album.photoslist:
+                album.photoslist.insert(0, photo_key_name)
+                album.save()
+            return album
+
+        return db.run_in_transaction(txn)
 
     def remove(self):
         photos = DBPhoto.get_by_key_name(self.photoslist)
