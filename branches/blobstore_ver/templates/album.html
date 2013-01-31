@@ -227,7 +227,9 @@
     <li>|</li>
     <li><a id="setcover"> {{ _('Set CoverPhoto') }} </a></li>
     <li>|</li>
-    <li><a href="/admin/download/{{album.name}}/" target="_blank"> {{ _('Download Album') }} </a></li>
+    <li><a id="backup" title="{{ _('Last Backup') }}:{{ album.lastbackupdate|date }}" href="/admin/download/{{album.name}}/" target="_blank">
+        {{ _('Backup Album') }}
+    </a></li>
     {% endif %}
 {% endblock %}
    
