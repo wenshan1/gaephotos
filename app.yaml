@@ -1,7 +1,10 @@
-﻿application: gaephotos
+﻿application: gullygallery
 version: 1
 runtime: python
 api_version: 1
+
+builtins:
+- datastore_admin: on
 
 handlers:
 - url: /favicon.ico
