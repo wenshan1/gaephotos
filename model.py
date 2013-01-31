@@ -209,6 +209,7 @@ class DBAlbum(BaseModel):
     public = db.BooleanProperty(default=True)
     createdate = db.DateTimeProperty(auto_now_add=True)
     updatedate = db.DateTimeProperty(auto_now=True)
+    lastbackupdate = db.DateTimeProperty()
     photoslist = db.ListProperty(str)
     coverphoto = db.StringProperty(default="")
 
@@ -245,6 +246,13 @@ class DBAlbum(BaseModel):
     def get_album_by_name(cls, name):
         key_name = cls.gen_key_name(albumname=name)
         return cls.get_by_key_name(key_name, parent=cls.db_parent)
+
+    @classmethod
+    def set_last_backup_time(cls, name, time):
+        album = cls.get_album_by_name(name)
+        if album:
+            album.lastbackupdate = time
+            album.save()
 
     @property
     def photocount(self):
@@ -354,6 +362,7 @@ class DBAlbum(BaseModel):
             "public": self.public,
             "createdate": self.createdate.isoformat(),
             "updatedate": self.updatedate.isoformat(),
+            "lastbackupdate": self.lastbackupdate and self.lastbackupdate.isoformat() or "",
             "photoslist": self.photoslist,
             "cover_url": self.cover_url,
             "photocount": self.photocount,

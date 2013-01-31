@@ -5,6 +5,7 @@ import time
 import logging
 import jinja2
 import webapp2
+from datetime import datetime
 from webapp2_extras import json
 from functools import wraps
 from django.utils.encoding import force_unicode
@@ -31,7 +32,7 @@ _ = ugettext
 __ = ungettext
 
 def dateformat(value, format='%Y-%m-%d'):
-    return value.strftime(format)
+    return value and value.strftime(format) or "N/A"
 
 def filesizeformat(bytes):
     """
@@ -144,6 +145,15 @@ class ccPhotoRequestHandler(blobstore_handlers.BlobstoreDownloadHandler):
     CACHE_TIME = 3600 * 24 * 30
     URL_PHOTO_NOT_FOUND = "/static/images/image_not_found.jpg"
     URL_BLOCKED_REFERRER = "/static/images/no_hotlinking.gif"
+
+    @staticmethod
+    def delete_photos_cache(albumname, photonames, types=["photo","thumb"]):
+        cache_keys = []
+        for t in types:
+            for name in photonames:
+                key = "photo_cache_%s_%s_%s" % (t, albumname, name)
+                cache_keys.append(key)
+        memcache.delete_multi(cache_keys)
 
     @staticmethod
     def get_blob_info_from_cache_or_db(albumname, photoname, type="photo"):
@@ -380,6 +390,7 @@ def ajax_delete_photos(album_name, photos):
     album = model.DBAlbum.get_album_by_name(album_name)
     if album:
         count = album.delete_photos_by_name(photo_names)
+        ccPhotoRequestHandler.delete_photos_cache(album_name, photo_names)
         res["status"] = "ok"
         res["count"] = count
     else:
@@ -663,10 +674,13 @@ class AdminDownloadAlbum(ccRequestHandler):
         photos = model.DBPhoto.get_by_key_name(album.photoslist)
 
         totalsize = sum([photo.size for photo in photos])
+        if totalsize <= 0:
+            raise Exception(_("photo not exist"))
         if totalsize < GAE_RESPONSE_LIMIT:
             self.response.headers["Content-Type"] = "application/zip"
             self.response.headers["Content-Disposition"]= "attachment;filename=%s.zip"%album.name.encode("utf-8")
             self.response.out.write(create_zipfile_from_photos(photos))
+            model.DBAlbum.set_last_backup_time(albumname, datetime.now())
         else:
             photo_keyname_list = []
             part = []
@@ -695,10 +709,14 @@ class AdminDownloadPhotos(ccRequestHandler):
 
         photos = model.DBPhoto.get_by_key_name(photo_keyname)
         totalsize = sum([photo.size for photo in photos])
+        if totalsize <= 0:
+            raise Exception(_("photo not exist"))
         if totalsize < GAE_RESPONSE_LIMIT:
             self.response.headers["Content-Type"] = "application/zip"
             self.response.headers["Content-Disposition"]= "attachment;filename=%s.zip"%name.encode("utf-8")
             self.response.out.write(create_zipfile_from_photos(photos))
+
+            model.DBAlbum.set_last_backup_time(photos[0].album_name, datetime.now())
         else:
             raise Exception("Response too large: %s, max is %s"%(totalsize,GAE_RESPONSE_LIMIT))
 
